@@ -1,0 +1,11 @@
+Domain\Entity\Season:
+    type: entity
+    repositoryClass: DomainBundle\Repository\SeasonRepository
+    id:
+        id:
+            type: integer
+            generator: { strategy: NONE }
+    fields:
+        year:
+            type: integer
+            unique: true

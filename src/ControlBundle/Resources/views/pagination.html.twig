@@ -1,0 +1,20 @@
+{% if pageCount > 1 %}
+    <ul class="pagination pagination-sm">
+        {# `«` arrow  #}
+        <li {{ currentPage == 1 ? 'class="disabled"' }}>
+            <a href="{{ (currentPage == 1 ? currentPage : currentPage - 1)|pager(app.request) }}">«</a>
+        </li>
+
+        {# Render each page number #}
+        {% for i in 1..pageCount %}
+            <li {{ currentPage == i ? 'class="active"' }}>
+                <a href="{{ i|pager(app.request) }}">{{ i }}</a>
+            </li>
+        {% endfor %}
+
+        {# `»` arrow #}
+        <li {{ currentPage == pageCount ? 'class="disabled"' }}>
+            <a href="{{(currentPage + 1 <= pageCount ? currentPage + 1 : currentPage)|pager(app.request) }}">»</a>
+        </li>
+    </ul>
+{% endif %}

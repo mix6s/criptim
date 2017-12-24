@@ -1,0 +1,29 @@
+# To get started with security, check out the documentation:
+# http://symfony.com/doc/current/security.html
+security:
+    encoders:
+        FOS\UserBundle\Model\UserInterface: bcrypt
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_CONTROL
+    providers:
+        fos_userbundle:
+            id: fos_user.user_provider.username
+
+    firewalls:
+        main:
+            entry_point: entry_point.user_login #or whatever you name your service
+            pattern: ^/
+            form_login:
+                provider: fos_userbundle
+                csrf_token_generator: security.csrf.token_manager
+                    # if you are using Symfony < 2.8, use the following config instead:
+                    # csrf_provider: form.csrf_provider
+
+            logout:       true
+            anonymous:    true
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+    access_control:
+        - { path: ^/control, roles: ROLE_CONTROL }

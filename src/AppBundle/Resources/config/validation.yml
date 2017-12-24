@@ -1,0 +1,25 @@
+AppBundle\Entity\User:
+    properties:
+        username:
+            - Length:
+                min: 2
+                max: 50
+                maxMessage: fos_user.email.long
+                minMessage: fos_user.email.short
+                groups: [ "AppRegistration" ]
+            - NotBlank:
+                message: fos_user.email.blank
+                groups: [ "AppRegistration"]
+            - Email:
+                message: fos_user.email.invalid
+                groups: [ "AppRegistration"]
+        plainPassword:
+            - Length:
+                min: 2
+                max: 30
+                minMessage: fos_user.password.short
+                maxMessage: fos_user.password.long
+                groups: [ "AppRegistration"]
+            - NotBlank:
+                message: fos_user.password.blank
+                groups: [ "AppRegistration"]

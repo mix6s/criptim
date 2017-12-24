@@ -1,0 +1,28 @@
+Domain\Entity\SeasonTeam:
+    type: entity
+    repositoryClass: DomainBundle\Repository\SeasonTeamRepository
+    id:
+        id:
+            type: integer
+            generator: { strategy: NONE }
+    manyToOne:
+        team:
+            targetEntity: Domain\Entity\Team
+            joinColumn:
+                name: team_id
+                referencedColumnName: id
+        season:
+            targetEntity: Domain\Entity\Season
+            joinColumn:
+                name: season_id
+                referencedColumnName: id
+        coach:
+            targetEntity: Domain\Entity\Player
+            joinColumn:
+                name: coach_id
+                referencedColumnName: id
+        league:
+            targetEntity: Domain\Entity\League
+            joinColumn:
+                name: league_id
+                referencedColumnName: id

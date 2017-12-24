@@ -1,0 +1,25 @@
+# Learn more about services, parameters and containers at
+# https://symfony.com/doc/current/service_container.html
+parameters:
+    #parameter_name: value
+    web_dir:  '%kernel.project_dir%/web/'
+services:
+    entry_point.user_login:
+        class: AppBundle\LoginEntryPoint
+        arguments:
+            - '@router'
+
+    app.event_listner.after_registration_listner:
+        class: AppBundle\EventListener\AfterRegistrationListner
+        arguments: ['@router']
+        tags:
+            - { name: kernel.event_subscriber }
+
+    twig.extension.intl:
+        class: Twig_Extensions_Extension_Intl
+        tags:
+            - { name: twig.extension }
+
+    app.cache:
+        class: Symfony\Component\Cache\Adapter\TagAwareAdapter
+        arguments: [ '@app.cache.data.adapter', '@app.cache.tags.adapter' ]

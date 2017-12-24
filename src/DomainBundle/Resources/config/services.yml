@@ -1,0 +1,71 @@
+services:
+    domain.container:
+        class: DomainBundle\Container
+        arguments:
+            - '@service_container'
+
+    domain.repository.game:
+        class: DomainBundle\Repository\GameRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        calls:
+            - method: setCache
+              arguments:
+                  - '@app.cache'
+        arguments:
+            - Domain\Entity\Game
+
+    #usecases
+    domain.use_case.create_season_use_case:
+       class: Domain\UseCase\CreateSeasonUseCase
+       arguments: ['@domain.container']
+
+    domain.use_case.create_team_use_case:
+        class: Domain\UseCase\CreateTeamUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.create_season_team_use_case:
+        class: Domain\UseCase\CreateSeasonTeamUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.create_league_use_case:
+        class: Domain\UseCase\CreateLeagueUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.remove_season_team_members_use_case:
+        class: Domain\UseCase\RemoveSeasonTeamMembersUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.set_season_team_members_use_case:
+        class: Domain\UseCase\SetSeasonTeamMembersUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.remove_season_team_use_case:
+        class: Domain\UseCase\RemoveSeasonTeamUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.remove_season_use_case:
+        class: Domain\UseCase\RemoveSeasonUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.copy_season_use_case:
+        class: Domain\UseCase\CopySeasonUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.remove_team_use_case:
+        class: Domain\UseCase\RemoveTeamUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.remove_league_use_case:
+        class: Domain\UseCase\RemoveLeagueUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.save_game_use_case:
+        class: Domain\UseCase\SaveGameUseCase
+        arguments: ['@domain.container']
+    domain.use_case.save_game_events_use_case:
+        class: Domain\UseCase\SaveGameEventsUseCase
+        arguments: ['@domain.container']
+
+    domain.use_case.remove_game_use_case:
+        class: Domain\UseCase\RemoveGameUseCase
+        arguments: ['@domain.container']

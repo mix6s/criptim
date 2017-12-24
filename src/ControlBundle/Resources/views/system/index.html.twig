@@ -1,0 +1,8 @@
+{% extends 'ControlBundle::layout.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <a class="btn btn-danger" href="{{ path('control.system.clear_cache') }}">Очистить кэш</a>
+
+    </div>
+{% endblock %}
