@@ -17,18 +17,5 @@ use PHPUnit\Framework\TestCase;
  */
 class UseCaseTestCase extends TestCase
 {
-	private $container;
 
-	public function setUp()
-	{
-		$this->container = new Container();
-	}
-
-	/**
-	 * @return Container
-	 */
-	public function getContainer()
-	{
-		return $this->container;
-	}
 }

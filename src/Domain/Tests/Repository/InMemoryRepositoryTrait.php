@@ -8,24 +8,16 @@
 
 namespace Domain\Tests\Repository;
 
+use Domain\Exception\EntityNotFoundException;
+
 
 /**
- * Class MemoryRepository
+ * Class InMemoryRepository
  * @package Domain\Tests\Repository
  */
 trait InMemoryRepositoryTrait
 {
 	private $store = [];
-
-	private $id = 0;
-
-	/**
-	 * @return int
-	 */
-	public function getNextId(): int
-	{
-		return $this->id++;
-	}
 
 	/**
 	 * @param $entity
@@ -33,12 +25,28 @@ trait InMemoryRepositoryTrait
 	 */
 	public function storeEntity($entity, $entityId)
 	{
-		$this->store[$entityId] = $entity;
+		$this->store[(string)$entityId] = $entity;
+	}
+
+	/**
+	 * @param $entityId
+	 * @return bool
+	 */
+	public function entityExist($entityId): bool
+	{
+		return isset($this->store[(string)$entityId]);
+	}
+
+	public function getEntity($entityId)
+	{
+		if (!$this->entityExist($entityId)) {
+			throw new EntityNotFoundException(sprintf('Entity with id %s not found in %s', $entityId, self::class));
+		}
+		return $this->store[(string)$entityId];
 	}
 
 	public function clear()
 	{
 		$this->store = [];
-		$this->id = 0;
 	}
 }

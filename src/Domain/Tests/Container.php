@@ -1,93 +1,87 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Mix6s
- * Date: 26.07.2017
- * Time: 8:10
+ * User: mix6s
+ * Date: 06.01.2018
+ * Time: 21:25
  */
 
 namespace Domain\Tests;
 
 
-use Domain\ContainerInterface;
-use Domain\Repository\GameRepositoryInterface;
-use Domain\Repository\LeagueRepositoryInterface;
-use Domain\Repository\PlayerRepositoryInterface;
-use Domain\Repository\SeasonRepositoryInterface;
-use Domain\Repository\SeasonTeamMemberRepositoryInterface;
-use Domain\Repository\SeasonTeamRepositoryInterface;
-use Domain\Repository\TeamRepositoryInterface;
-use Domain\Tests\Repository\SeasonRepository;
-use Domain\Tests\Repository\TeamRepository;
+use Domain\Tests\Factory\DepositInvoiceIdentityFactory;
+use Domain\Tests\Factory\InvestorIdentityFactory;
+use Domain\Tests\Policy\SimpleDepositToBitMoneyPolicy;
+use Domain\Tests\Repository\DepositInvoiceRepository;
+use Domain\Tests\Repository\InvestorRepository;
+use Domain\UseCase;
 
-/**
- * Class Container
- * @package Domain\Tests
- */
-class Container implements ContainerInterface
+class Container
 {
-	private $teamRepository;
-	private $seasonRepository;
+	private $investorRepository;
+	private $investorIdentityFactory;
+	private $depositInvoiceRepository;
+	private $depositInvoiceIdentityFactory;
 
-	/**
-	 * @return SeasonRepositoryInterface
-	 */
-	public function getSeasonRepository(): SeasonRepositoryInterface
+	public function __construct()
 	{
-		if (!$this->seasonRepository) {
-			$this->seasonRepository = new SeasonRepository();
-		}
-		return $this->seasonRepository;
+		$this->investorRepository = new InvestorRepository();
+		$this->investorIdentityFactory = new InvestorIdentityFactory();
+		$this->depositInvoiceRepository = new DepositInvoiceRepository();
+		$this->depositInvoiceIdentityFactory = new DepositInvoiceIdentityFactory();
 	}
 
 	/**
-	 * @return TeamRepositoryInterface
+	 * @return InvestorRepository
 	 */
-	public function getTeamRepository(): TeamRepositoryInterface
+	public function getInvestorRepository(): InvestorRepository
 	{
-		if (!$this->teamRepository) {
-			$this->teamRepository = new TeamRepository();
-		}
-		return $this->teamRepository;
+		return $this->investorRepository;
 	}
 
 	/**
-	 * @return SeasonTeamRepositoryInterface
+	 * @return InvestorIdentityFactory
 	 */
-	public function getSeasonTeamRepository(): SeasonTeamRepositoryInterface
+	public function getInvestorIdentityFactory(): InvestorIdentityFactory
 	{
-
+		return $this->investorIdentityFactory;
 	}
 
 	/**
-	 * @return PlayerRepositoryInterface
+	 * @return DepositInvoiceRepository
 	 */
-	public function getPlayerRepository(): PlayerRepositoryInterface
+	public function getDepositInvoiceRepository(): DepositInvoiceRepository
 	{
-		// TODO: Implement getPlayerRepository() method.
+		return $this->depositInvoiceRepository;
 	}
 
 	/**
-	 * @return LeagueRepositoryInterface
+	 * @return DepositInvoiceIdentityFactory
 	 */
-	public function getLeagueRepository(): LeagueRepositoryInterface
+	public function getDepositInvoiceIdentityFactory(): DepositInvoiceIdentityFactory
 	{
-		// TODO: Implement getLeagueRepository() method.
+		return $this->depositInvoiceIdentityFactory;
 	}
 
-	/**
-	 * @return SeasonTeamMemberRepositoryInterface
-	 */
-	public function getSeasonTeamMemberRepository(): SeasonTeamMemberRepositoryInterface
+	public function getCreateInvestorUseCaseHandler(): UseCase\CreateInvestor\Handler
 	{
-		// TODO: Implement getSeasonTeamMemberRepository() method.
+		return new UseCase\CreateInvestor\Handler(
+			$this->investorRepository,
+			$this->investorIdentityFactory
+		);
 	}
 
-	/**
-	 * @return GameRepositoryInterface
-	 */
-	public function getGameRepository(): GameRepositoryInterface
+	public function getCreateDepositInvoiceUseCaseHandler(): UseCase\CreateDepositInvoice\Handler
 	{
-		// TODO: Implement getGameRepository() method.
+		return new UseCase\CreateDepositInvoice\Handler(
+			$this->investorRepository,
+			$this->depositInvoiceIdentityFactory,
+			$this->depositInvoiceRepository
+		);
+	}
+
+	public function getPayDepositInvoiceUseCaseHandler(): UseCase\PayDepositInvoice\Handler
+	{
+		return new UseCase\PayDepositInvoice\Handler($this->depositInvoiceRepository, new SimpleDepositToBitMoneyPolicy());
 	}
 }
