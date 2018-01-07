@@ -9,6 +9,8 @@
 namespace Domain\UseCase\PayDepositInvoice;
 
 
+use Domain\Entity\DepositInvoice;
+use Domain\Exception\DepositInvoiceNotAvailableForPay;
 use Domain\Policy\DepositMoneyToBitMoneyConvertPolicy;
 use Domain\Repository\DepositInvoiceRepositoryInterface;
 use Money\Money;
@@ -34,6 +36,9 @@ class Handler
 	{
 		$billingInvoice = $request->getBillingInvoice();
 		$depositInvoice = $this->depositInvoiceRepository->findById($billingInvoice->getDepositInvoiceIdentity());
+		if ($depositInvoice->getStatus() !== DepositInvoice::STATUS_OPEN) {
+			throw new DepositInvoiceNotAvailableForPay();
+		}
 		$bitMoneyToAdd = $this->depositToBitMoneyConvertPolicy->convert($billingInvoice->getDepositMoney());
 		$depositInvoice->markAsPayed($billingInvoice, $bitMoneyToAdd);
 		$this->depositInvoiceRepository->save($depositInvoice);

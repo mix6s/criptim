@@ -10,11 +10,14 @@ namespace Domain\Tests\UseCase\PayDepositInvoice;
 
 
 use Domain\Entity\DepositInvoice;
+use Domain\Exception\DepositInvoiceNotAvailableForPay;
+use Domain\Exception\EntityNotFoundException;
 use Domain\Tests\Container;
 use Domain\Tests\UseCaseTestCase;
 use Domain\UseCase;
 use Domain\ValueObject\BillingIdentity;
 use Domain\ValueObject\BillingInvoice;
+use Domain\ValueObject\DepositInvoiceIdentity;
 use Domain\ValueObject\DepositMoney;
 use Domain\ValueObject\DepositPayMethod;
 use Money\Money;
@@ -55,5 +58,19 @@ class HandlerTest extends UseCaseTestCase
 		$this->assertInstanceOf(DepositInvoice::class, $response->getDepositInvoice());
 		$this->assertEquals($invoice->getId(), $response->getDepositInvoice()->getId());
 		$this->assertEquals(DepositInvoice::STATUS_PAYED, $response->getDepositInvoice()->getStatus());
+
+		$this->expectException(DepositInvoiceNotAvailableForPay::class);
+		$response = $this->container->getPayDepositInvoiceUseCaseHandler()->handle(
+			new UseCase\PayDepositInvoice\Request(
+				new BillingInvoice($billingIdentity, $invoice->getId(), $sum, Money::RUB(10))
+			)
+		);
+
+		$this->expectException(EntityNotFoundException::class);
+		$response = $this->container->getPayDepositInvoiceUseCaseHandler()->handle(
+			new UseCase\PayDepositInvoice\Request(
+				new BillingInvoice($billingIdentity, new DepositInvoiceIdentity('0'), $sum, Money::RUB(10))
+			)
+		);
 	}
 }
