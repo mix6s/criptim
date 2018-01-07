@@ -10,10 +10,11 @@ namespace Domain\UseCase\PayDepositInvoice;
 
 
 use Domain\Entity\DepositInvoice;
+use Domain\Entity\InvestorAccountTransaction;
 use Domain\Exception\DepositInvoiceNotAvailableForPay;
 use Domain\Policy\DepositMoneyToBitMoneyConvertPolicy;
 use Domain\Repository\DepositInvoiceRepositoryInterface;
-use Money\Money;
+use Domain\UseCase;
 
 class Handler
 {
@@ -25,11 +26,27 @@ class Handler
 	 * @var DepositMoneyToBitMoneyConvertPolicy
 	 */
 	private $depositToBitMoneyConvertPolicy;
+	/**
+	 * @var UseCase\ChangeInvestorAccountBalance\Handler
+	 */
+	private $changeInvestorAccountBalanceHandler;
 
-	public function __construct(DepositInvoiceRepositoryInterface $depositInvoiceRepository, DepositMoneyToBitMoneyConvertPolicy $moneyConvertPolicy)
+	/**
+	 * @var UseCase\CreateInvestorAccountTransaction\Handler
+	 */
+	private $createInvestorAccountTransactionHandler;
+
+	public function __construct(
+		DepositInvoiceRepositoryInterface $depositInvoiceRepository,
+		DepositMoneyToBitMoneyConvertPolicy $moneyConvertPolicy,
+		UseCase\ChangeInvestorAccountBalance\Handler $changeInvestorAccountBalanceHandler,
+		UseCase\CreateInvestorAccountTransaction\Handler $createInvestorAccountTransactionHandler
+	)
 	{
 		$this->depositInvoiceRepository = $depositInvoiceRepository;
 		$this->depositToBitMoneyConvertPolicy = $moneyConvertPolicy;
+		$this->changeInvestorAccountBalanceHandler = $changeInvestorAccountBalanceHandler;
+		$this->createInvestorAccountTransactionHandler = $createInvestorAccountTransactionHandler;
 	}
 
 	public function handle(Request $request): Response
@@ -42,6 +59,18 @@ class Handler
 		$bitMoneyToAdd = $this->depositToBitMoneyConvertPolicy->convert($billingInvoice->getDepositMoney());
 		$depositInvoice->markAsPayed($billingInvoice, $bitMoneyToAdd);
 		$this->depositInvoiceRepository->save($depositInvoice);
+
+
+		$transaction = $this->createInvestorAccountTransactionHandler->handle(new UseCase\CreateInvestorAccountTransaction\Request(
+			$depositInvoice->getInvestorId(),
+			InvestorAccountTransaction::TYPE_DEPOSIT,
+			$bitMoneyToAdd
+		))->getTransaction();
+
+
+		$this->changeInvestorAccountBalanceHandler->handle(new UseCase\ChangeInvestorAccountBalance\Request(
+			$transaction->getId()
+		));
 		return new Response($depositInvoice);
 	}
 }

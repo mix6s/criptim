@@ -21,6 +21,7 @@ class DepositInvoiceIdentityFactory implements DepositInvoiceIdentityFactoryInte
 	 */
 	public function getNextId(): DepositInvoiceIdentity
 	{
-		return new DepositInvoiceIdentity((string)$this->id++);
+		$this->id++;
+		return new DepositInvoiceIdentity((string)$this->id);
 	}
 }

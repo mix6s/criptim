@@ -11,6 +11,7 @@ namespace Domain\ValueObject;
 
 use Domain\Exception\DomainException;
 use Domain\Policy\CryptoCurrenciesPolicy;
+use Money\Currency;
 use Money\Money;
 
 class BitMoney
@@ -36,5 +37,10 @@ class BitMoney
 	public function getMoney(): Money
 	{
 		return $this->money;
+	}
+
+	public function getCurrency(): Currency
+	{
+		return $this->getMoney()->getCurrency();
 	}
 }

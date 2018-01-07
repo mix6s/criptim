@@ -116,4 +116,12 @@ class DepositInvoice
 		$this->status = self::STATUS_PAYED;
 		$this->billingInvoice = $billingInvoice;
 	}
+
+	/**
+	 * @return BitMoney|null
+	 */
+	public function getAddedBitMoney()
+	{
+		return $this->addedBitMoney;
+	}
 }

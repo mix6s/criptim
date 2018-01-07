@@ -10,9 +10,13 @@ namespace Domain\Tests;
 
 
 use Domain\Tests\Factory\DepositInvoiceIdentityFactory;
+use Domain\Tests\Factory\InvestorAccountIdentityFactory;
+use Domain\Tests\Factory\InvestorAccountTransactionIdentityFactory;
 use Domain\Tests\Factory\InvestorIdentityFactory;
 use Domain\Tests\Policy\SimpleDepositToBitMoneyPolicy;
 use Domain\Tests\Repository\DepositInvoiceRepository;
+use Domain\Tests\Repository\InvestorAccountRepository;
+use Domain\Tests\Repository\InvestorAccountTransactionRepository;
 use Domain\Tests\Repository\InvestorRepository;
 use Domain\UseCase;
 
@@ -22,13 +26,21 @@ class Container
 	private $investorIdentityFactory;
 	private $depositInvoiceRepository;
 	private $depositInvoiceIdentityFactory;
+	private $investorAccountRepository;
+	private $investorAccountTransactionRepository;
+	private $investorAccountIdentityFactory;
+	private $investorAccountIdentityTransactionFactory;
 
 	public function __construct()
 	{
 		$this->investorRepository = new InvestorRepository();
 		$this->investorIdentityFactory = new InvestorIdentityFactory();
+		$this->investorAccountIdentityFactory = new InvestorAccountIdentityFactory();
+		$this->investorAccountIdentityTransactionFactory = new InvestorAccountTransactionIdentityFactory();
 		$this->depositInvoiceRepository = new DepositInvoiceRepository();
 		$this->depositInvoiceIdentityFactory = new DepositInvoiceIdentityFactory();
+		$this->investorAccountRepository = new InvestorAccountRepository();
+		$this->investorAccountTransactionRepository = new InvestorAccountTransactionRepository();
 	}
 
 	/**
@@ -82,6 +94,68 @@ class Container
 
 	public function getPayDepositInvoiceUseCaseHandler(): UseCase\PayDepositInvoice\Handler
 	{
-		return new UseCase\PayDepositInvoice\Handler($this->depositInvoiceRepository, new SimpleDepositToBitMoneyPolicy());
+		return new UseCase\PayDepositInvoice\Handler(
+			$this->depositInvoiceRepository,
+			new SimpleDepositToBitMoneyPolicy(),
+			$this->getChangeInvestorAccountBalanceUseCaseHandler(),
+			$this->getCreateInvestorAccountTransactionUseCaseHandler()
+		);
+	}
+
+	public function getChangeInvestorAccountBalanceUseCaseHandler(): UseCase\ChangeInvestorAccountBalance\Handler
+	{
+		return new UseCase\ChangeInvestorAccountBalance\Handler(
+			$this->getInvestorAccountTransactionRepository(),
+			$this->getInvestorAccountRepository()
+		);
+	}
+
+	public function getCreateInvestorAccountTransactionUseCaseHandler(): UseCase\CreateInvestorAccountTransaction\Handler
+	{
+		return new UseCase\CreateInvestorAccountTransaction\Handler(
+			$this->getInvestorAccountTransactionIdentityFactory(),
+			$this->getFindInvestorAccountUseCaseHandler(),
+			$this->getInvestorAccountTransactionRepository()
+		);
+	}
+
+	public function getFindInvestorAccountUseCaseHandler(): UseCase\FindInvestorAccount\Handler
+	{
+		return new UseCase\FindInvestorAccount\Handler(
+			$this->getInvestorAccountRepository(),
+			$this->getInvestorAccountIdentityFactory()
+		);
+	}
+
+	/**
+	 * @return InvestorAccountRepository
+	 */
+	public function getInvestorAccountRepository(): InvestorAccountRepository
+	{
+		return $this->investorAccountRepository;
+	}
+
+	/**
+	 * @return InvestorAccountTransactionRepository
+	 */
+	public function getInvestorAccountTransactionRepository(): InvestorAccountTransactionRepository
+	{
+		return $this->investorAccountTransactionRepository;
+	}
+
+	/**
+	 * @return InvestorAccountIdentityFactory
+	 */
+	public function getInvestorAccountIdentityFactory(): InvestorAccountIdentityFactory
+	{
+		return $this->investorAccountIdentityFactory;
+	}
+
+	/**
+	 * @return InvestorAccountTransactionIdentityFactory
+	 */
+	public function getInvestorAccountTransactionIdentityFactory(): InvestorAccountTransactionIdentityFactory
+	{
+		return $this->investorAccountIdentityTransactionFactory;
 	}
 }

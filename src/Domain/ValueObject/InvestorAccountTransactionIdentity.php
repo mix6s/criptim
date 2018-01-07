@@ -2,14 +2,14 @@
 /**
  * Created by PhpStorm.
  * User: mix6s
- * Date: 05.01.2018
- * Time: 21:44
+ * Date: 07.01.2018
+ * Time: 18:22
  */
 
 namespace Domain\ValueObject;
 
 
-class InvestorIdentity
+class InvestorAccountTransactionIdentity
 {
 	private $id;
 
@@ -21,10 +21,5 @@ class InvestorIdentity
 	public function __toString(): string
 	{
 		return $this->id;
-	}
-
-	public function equals(InvestorIdentity $id): bool
-	{
-		return (string)$this == (string)$id;
 	}
 }
