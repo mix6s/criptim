@@ -1,0 +1,42 @@
+{% extends '@App/layout.html.twig' %}
+
+{% form_theme form _self %}
+{% block form_errors %}
+    {% if errors|length > 0 %}
+        {% for error in errors %}
+            <div class="form-message form-message--error">
+                {{ error.message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock form_errors %}
+
+
+{% block content %}
+    <div class="container">
+    <section class="registration page wrapper">
+        <h1 class="title">Регистрация</h1>
+        <form action="{{ path('registration') }}" method="post"  class="registration__form">
+            <div class="registration__item">
+                {{ form_widget(form._token) }}
+                {{ form_label(form.email, 'Ваш E-mail', {label_attr : {class: 'label'}}) }}
+                {{ form_widget(form.email, {attr: {placeholder: 'example@gmail.com',class: not form.email.vars.valid ? 'input input--error' : 'input'}}) }}
+                {{ form_errors(form.email) }}
+            </div>
+            <div class="registration__item">
+                {{ form_label(form.plainPassword.first, 'Пароль', {label_attr : {class: 'label'}}) }}
+                {{ form_widget(form.plainPassword.first, {attr: {class: not form.plainPassword.first.vars.valid ? 'input input--error' : 'input'}}) }}
+                {{ form_errors(form.plainPassword.first) }}
+            </div>
+            <div class="registration__item">
+                {{ form_label(form.plainPassword.second, 'Подтведите пароль', {label_attr : {class: 'label'}}) }}
+                {{ form_widget(form.plainPassword.second, {attr: {class: not form.plainPassword.second.vars.valid ? 'input input--error' : 'input'}}) }}
+                {{ form_errors(form.plainPassword.second) }}
+            </div>
+            <div class="registration__button">
+                <button class="btn btn--action">Зарегистрироваться</button>
+            </div>
+        </form>
+    </section>
+    </div>
+{% endblock %}

@@ -58,7 +58,7 @@ class SecurityController extends Controller
 		$csrfToken = $this->has('security.csrf.token_manager')
 			? $this->get('security.csrf.token_manager')->getToken('authenticate')->getValue()
 			: null;
-		return $this->render('signin.twig', [
+		return $this->render('@App/Security/signin.html.twig', [
 			'last_username' => $lastUsername,
 			'error' => $error,
 			'csrf_token' => $csrfToken
@@ -99,7 +99,6 @@ class SecurityController extends Controller
 				$plainPassword = $user->getPlainPassword();
 				$event = new FormEvent($form, $request);
 				$dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
-				/** @var PlayerRepositoryInterface $playerRepository */
 				$userManager->updateUser($user);
 				$response = $event->getResponse();
 				if (null === $response) {
@@ -120,7 +119,7 @@ class SecurityController extends Controller
 		}
 
 		return $this->render(
-			'registration.twig',
+			'@App/Security/registration.html.twig',
 			[
 				'form' => $form->createView(),
 			]

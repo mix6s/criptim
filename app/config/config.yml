@@ -76,11 +76,11 @@ doctrine:
             AppBundle:
                 type: annotation
                 prefix: AppBundle\Entity
-            Domain:
-                type: yml
-                dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine'
-                prefix: Domain\Entity
-                is_bundle: false
+            #Domain:
+            #    type: yml
+            #    dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine'
+            #    prefix: Domain\Entity
+            #    is_bundle: false
 
 
 # Swiftmailer Configuration

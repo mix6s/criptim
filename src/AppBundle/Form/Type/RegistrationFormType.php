@@ -33,19 +33,6 @@ class RegistrationFormType extends AbstractType
 				]
 			)
 			->add(
-				'reg_role',
-				ChoiceType::class,
-				[
-					'choices' => [
-						'player' => User::ROLE_PLAYER,
-						'fan' => User::ROLE_FAN
-					],
-					'multiple' => false,
-					'expanded' => true,
-					'required' => true,
-				]
-			)
-			->add(
 				'plainPassword',
 				RepeatedType::class,
 				[

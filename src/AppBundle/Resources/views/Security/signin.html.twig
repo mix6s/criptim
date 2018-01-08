@@ -1,0 +1,32 @@
+{% extends '@App/layout.html.twig' %}
+
+{% block content %}
+    <div class="container">
+        <section class="signin page wrapper">
+            <h1 class="title">Вход на сайт</h1>
+            <form action="{{ path("fos_user_security_check") }}" method="post" class="signin__form">
+                {% if csrf_token %}
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+                {% endif %}
+                <div class="signin__item">
+                    <label for="email" class="label">Ваш e-mail</label>
+                    <input id="email" type="email" name="_username" class="input {{ error ? 'input--error' : '' }}" placeholder="example@gmail.com" value="{{ last_username }}" required>
+                    {% if error %}
+                        <div class="form-message form-message--error">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+                    {% endif %}
+
+                </div>
+                <div class="signin__item">
+                    <label for="pass-1" class="label">Пароль</label>
+                    <input id="pass-1"  name="_password" type="password" class="input" required>
+                </div>
+                <div class="signin__button">
+                    <button class="btn btn--action">Войти</button>
+                    <a href="{{ path('fos_user_resetting_request') }}" class="signin__link">Забыли пароль?</a>
+                </div>
+            </form>
+        </section>
+    </div>
+{% endblock %}
