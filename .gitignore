@@ -6,3 +6,4 @@
 /vendor/
 ###< symfony/framework-bundle ###
 /app/config/parameters.yml
+/bin/symfony_requirements

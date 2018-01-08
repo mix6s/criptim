@@ -22,6 +22,8 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN usermod -u 1000 www-data
+
 ADD php-fpm.conf /etc/php/7.1/fpm/php-fpm.conf
 ADD www.conf /etc/php/7.1/fpm/pool.d/www.conf
 

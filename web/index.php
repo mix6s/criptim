@@ -12,7 +12,7 @@ $env = $_SERVER['SERVER_DEV_TYPE'] ?? 'prod';
 if ($env == 'dev') {
 	Debug::enable();
 }
-$kernel = new AppKernel('prod', $env == 'dev');
+$kernel = new AppKernel($env, $env == 'dev');
 if (PHP_VERSION_ID < 70000) {
 	$kernel->loadClassCache();
 }

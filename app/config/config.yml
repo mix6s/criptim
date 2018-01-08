@@ -76,14 +76,6 @@ doctrine:
             AppBundle:
                 type: annotation
                 prefix: AppBundle\Entity
-            DomainBundle:
-                type: annotation
-                prefix: DomainBundle\Entity
-
-            DomainIdentity:
-                type: annotation
-                dir: '%kernel.project_dir%/src/DomainBundle/Identity'
-                prefix: DomainBundle\Identity
             Domain:
                 type: yml
                 dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine'
