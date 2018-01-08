@@ -68,6 +68,10 @@ doctrine:
         #   2. Uncomment database_path in parameters.yml.dist
         #   3. Uncomment next line:
         #path: '%database_path%'
+        types:
+            investorId:
+                class:                DomainBundle\Type\InvestorIdentityType
+                commented:            true
     orm:
         auto_generate_proxy_classes: '%kernel.debug%'
         naming_strategy: doctrine.orm.naming_strategy.underscore
@@ -76,11 +80,11 @@ doctrine:
             AppBundle:
                 type: annotation
                 prefix: AppBundle\Entity
-            #Domain:
-            #    type: yml
-            #    dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine'
-            #    prefix: Domain\Entity
-            #    is_bundle: false
+            Domain:
+                type: yml
+                dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine'
+                prefix: Domain\Entity
+                is_bundle: false
 
 
 # Swiftmailer Configuration
