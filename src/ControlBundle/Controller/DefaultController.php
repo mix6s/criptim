@@ -11,20 +11,18 @@ namespace ControlBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class ControlController
+ * Class DefaultController
  * @package ControlBundle\Controller
  */
-class ControlController extends Controller
+class DefaultController extends Controller
 {
 	/**
 	 * @Route("", name="control.index")
 	 */
 	public function indexAction()
 	{
-		return;
+		return $this->render('@Control/Default/index.html.twig');
 	}
 }
