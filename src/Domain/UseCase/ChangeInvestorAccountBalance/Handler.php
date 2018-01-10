@@ -12,9 +12,9 @@ namespace Domain\UseCase\ChangeInvestorAccountBalance;
 
 use Domain\Entity\InvestorAccountTransaction;
 use Domain\Exception\DomainException;
+use Domain\Exception\EntityNotFoundException;
 use Domain\Repository\InvestorAccountRepositoryInterface;
 use Domain\Repository\InvestorAccountTransactionRepositoryInterface;
-use Domain\ValueObject\BitMoney;
 
 class Handler
 {
@@ -36,6 +36,12 @@ class Handler
 		$this->investorAccountRepository = $investorAccountRepository;
 	}
 
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws DomainException
+     * @throws EntityNotFoundException
+     */
 	public function handle(Request $request): Response
 	{
 		$transaction = $this->investorAccountTransactionRepository->findById($request->getAccountTransactionId());
@@ -52,13 +58,13 @@ class Handler
 		}
 		switch ($transaction->getType()) {
 			case InvestorAccountTransaction::TYPE_DEPOSIT:
-				$account->add($transaction->getBitMoney());
+				$account->addToMain($transaction->getBitMoney());
 				break;
 			default:
 				throw new DomainException(sprintf('Unknown transaction type %s', $transaction->getType()));
 				break;
 		}
-		$transaction->markAsExecuted($account->getBalance());
+		$transaction->markAsExecuted($account->getMainBalance(),$account->getTradingBalance());
 		return new Response();
 	}
 }

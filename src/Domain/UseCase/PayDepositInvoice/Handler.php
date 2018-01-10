@@ -49,6 +49,13 @@ class Handler
 		$this->createInvestorAccountTransactionHandler = $createInvestorAccountTransactionHandler;
 	}
 
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws DepositInvoiceNotAvailableForPay
+     * @throws \Domain\Exception\DomainException
+     * @throws \Domain\Exception\EntityNotFoundException
+     */
 	public function handle(Request $request): Response
 	{
 		$billingInvoice = $request->getBillingInvoice();

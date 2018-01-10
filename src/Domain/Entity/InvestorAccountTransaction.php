@@ -35,7 +35,7 @@ class InvestorAccountTransaction
 	/**
 	 * @var BitMoney
 	 */
-	private $balance;
+	private $mainBalance;
 	/**
 	 * @var string
 	 */
@@ -52,33 +52,40 @@ class InvestorAccountTransaction
 	 * @var \DateTimeImmutable|null
 	 */
 	private $executedAt;
+    /**
+     * @var BitMoney
+     */
+    private $tradingBalance;
 
-	public function __construct(
+    public function __construct(
 		InvestorAccountTransactionIdentity $id,
 		InvestorAccountIdentity $accountId,
 		string $type,
 		BitMoney $bitMoney,
-		BitMoney $balance
+		BitMoney $mainBalance,
+		BitMoney $tradingBalance
 	)
 	{
 		$this->id = $id;
 		$this->type = $type;
 		$this->createdAt = new \DateTimeImmutable();
 		$this->bitMoney = $bitMoney;
-		$this->balance = $balance;
 		$this->status = self::STATUS_NEW;
 		$this->accountId = $accountId;
-	}
+        $this->mainBalance = $mainBalance;
+        $this->tradingBalance = $tradingBalance;
+    }
 
 	public function isExecuted(): bool
 	{
 		return $this->status === self::STATUS_EXEC;
 	}
 
-	public function markAsExecuted(BitMoney $balance)
+	public function markAsExecuted(BitMoney $mainBalance, BitMoney $tradingBalance)
 	{
 		$this->status = self::STATUS_EXEC;
-		$this->balance = $balance;
+		$this->mainBalance = $mainBalance;
+		$this->tradingBalance = $tradingBalance;
 		$this->executedAt = new \DateTimeImmutable();
 	}
 

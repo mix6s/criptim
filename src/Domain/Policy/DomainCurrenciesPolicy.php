@@ -13,15 +13,8 @@ use Domain\Exception\DomainException;
 use Money\Currencies;
 use Money\Currency;
 
-class CryptoCurrenciesPolicy implements Currencies
+class DomainCurrenciesPolicy implements Currencies
 {
-	const BTC = 'BTC';
-	const ETH = 'ETH';
-
-	const SUPPORT_CURRENCIES = [
-		self::BTC => 8,
-        self::ETH => 3
-	];
 
 	private static $currencies = null;
 
@@ -29,7 +22,8 @@ class CryptoCurrenciesPolicy implements Currencies
 	{
 		if (self::$currencies === null) {
 			self::$currencies = [];
-			foreach (self::SUPPORT_CURRENCIES as $code => $subunit) {
+			$supportedCurrencies = array_merge(DepositCurrenciesPolicy::SUPPORT_CURRENCIES, CryptoCurrenciesPolicy::SUPPORT_CURRENCIES);
+			foreach ($supportedCurrencies as $code => $subunit) {
 				self::$currencies[$code] = new Currency($code);
 			}
 		}
@@ -50,10 +44,11 @@ class CryptoCurrenciesPolicy implements Currencies
 	{
 		if (!$this->contains($currency)) {
 			throw new DomainException(
-				'Unknown crypto currency: ' . $currency->getCode()
+				'Unknown domain currency: ' . $currency->getCode()
 			);
 		}
-		return self::SUPPORT_CURRENCIES[$currency->getCode()];
+        $supportedCurrencies = array_merge(DepositCurrenciesPolicy::SUPPORT_CURRENCIES, CryptoCurrenciesPolicy::SUPPORT_CURRENCIES);
+		return $supportedCurrencies[$currency->getCode()];
 	}
 
 	/**

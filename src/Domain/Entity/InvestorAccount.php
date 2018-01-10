@@ -27,41 +27,47 @@ class InvestorAccount
 	/**
 	 * @var BitMoney
 	 */
-	private $balance;
+	private $mainBalance;
+    /**
+     * @var BitMoney
+     */
+    private $tradingBalance;
 
-	public function __construct(InvestorAccountIdentity $accountId, InvestorIdentity $investorId, BitMoney $balance)
+    /**
+     * InvestorAccount constructor.
+     * @param InvestorAccountIdentity $accountId
+     * @param InvestorIdentity $investorId
+     * @param BitMoney $mainBalance
+     * @param BitMoney $tradingBalance
+     * @throws DomainException
+     */
+    public function __construct(
+	    InvestorAccountIdentity $accountId,
+        InvestorIdentity $investorId,
+        BitMoney $mainBalance,
+        BitMoney $tradingBalance
+    )
 	{
 		$this->id = $accountId;
 		$this->investorId = $investorId;
-		$this->balance = $balance;
-	}
-
-	public function change(InvestorAccountTransaction $accountTransaction)
-	{
-		if ($accountTransaction->isExecuted()) {
-			throw new DomainException('Transaction already executed');
-		}
-		if (!$accountTransaction->getBitMoney()->getCurrency()->equals($this->balance->getCurrency())) {
-			throw new DomainException(sprintf(
-				'Transaction currency %s does not equals account currency %s',
-				$accountTransaction->getBitMoney()->getCurrency(),
-				$this->balance->getCurrency()
-			));
-		}
-
-	}
+		if (!$tradingBalance->getCurrency()->equals($mainBalance->getCurrency())) {
+		    throw new DomainException('Main balance and trading balance must be the same currency');
+        }
+		$this->mainBalance = $mainBalance;
+        $this->tradingBalance = $tradingBalance;
+    }
 
 	/**
 	 * @return BitMoney
 	 */
 	public function getBalance(): BitMoney
 	{
-		return $this->balance;
+		return new BitMoney($this->mainBalance->getMoney()->add($this->tradingBalance->getMoney()));
 	}
 
-	public function add(BitMoney $bitMoney)
+	public function addToMain(BitMoney $bitMoney)
 	{
-		$this->balance = new BitMoney($this->balance->getMoney()->add($bitMoney->getMoney()));
+		$this->mainBalance = new BitMoney($this->mainBalance->getMoney()->add($bitMoney->getMoney()));
 	}
 
 	/**
@@ -79,4 +85,20 @@ class InvestorAccount
 	{
 		return $this->investorId;
 	}
+
+    /**
+     * @return BitMoney
+     */
+    public function getMainBalance(): BitMoney
+    {
+        return $this->mainBalance;
+    }
+
+    /**
+     * @return BitMoney
+     */
+    public function getTradingBalance(): BitMoney
+    {
+        return $this->tradingBalance;
+    }
 }

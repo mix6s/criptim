@@ -13,14 +13,11 @@ use Domain\Exception\DomainException;
 use Money\Currencies;
 use Money\Currency;
 
-class CryptoCurrenciesPolicy implements Currencies
+class DepositCurrenciesPolicy implements Currencies
 {
-	const BTC = 'BTC';
-	const ETH = 'ETH';
-
+	const RUR = 'RUR';
 	const SUPPORT_CURRENCIES = [
-		self::BTC => 8,
-        self::ETH => 3
+		self::RUR => 2
 	];
 
 	private static $currencies = null;
@@ -50,7 +47,7 @@ class CryptoCurrenciesPolicy implements Currencies
 	{
 		if (!$this->contains($currency)) {
 			throw new DomainException(
-				'Unknown crypto currency: ' . $currency->getCode()
+				'Unknown deposit currency: ' . $currency->getCode()
 			);
 		}
 		return self::SUPPORT_CURRENCIES[$currency->getCode()];

@@ -9,17 +9,29 @@
 namespace Domain\Tests\Policy;
 
 
+use Domain\Policy\CryptoCurrenciesPolicy;
 use Domain\Policy\DepositMoneyToBitMoneyConvertPolicy;
+use Domain\Policy\DomainCurrenciesPolicy;
 use Domain\ValueObject\BitMoney;
 use Domain\ValueObject\DepositMoney;
+use Money\Converter;
+use Money\Currency;
 use Money\Money;
 
 class SimpleDepositToBitMoneyPolicy implements DepositMoneyToBitMoneyConvertPolicy
 {
+    /**
+     * @var Converter
+     */
+    private $converter;
 
-	public function convert(DepositMoney $depositMoney): BitMoney
+    public function __construct()
+    {
+        $this->converter = new Converter(new DomainCurrenciesPolicy(), new SimpleExchangePolicy());
+    }
+
+    public function convert(DepositMoney $depositMoney): BitMoney
 	{
-		$btc = Money::BTC($depositMoney->getMoney()->divide(1000000)->getAmount());
-		return new BitMoney($btc);
+		return new BitMoney($this->converter->convert($depositMoney->getMoney(), new Currency(CryptoCurrenciesPolicy::BTC)));
 	}
 }

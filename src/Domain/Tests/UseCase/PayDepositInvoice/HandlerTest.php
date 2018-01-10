@@ -13,10 +13,12 @@ use Domain\Entity\DepositInvoice;
 use Domain\Exception\DepositInvoiceNotAvailableForPay;
 use Domain\Exception\EntityNotFoundException;
 use Domain\Tests\Container;
+use Domain\Tests\Policy\SimpleDepositToBitMoneyPolicy;
 use Domain\Tests\UseCaseTestCase;
 use Domain\UseCase;
 use Domain\ValueObject\BillingIdentity;
 use Domain\ValueObject\BillingInvoice;
+use Domain\ValueObject\BitMoney;
 use Domain\ValueObject\DepositInvoiceIdentity;
 use Domain\ValueObject\DepositMoney;
 use Domain\ValueObject\DepositPayMethod;
@@ -37,7 +39,7 @@ class HandlerTest extends UseCaseTestCase
 	{
 		$investor = $this->container->getCreateInvestorUseCaseHandler()->handle()->getInvestor();
 		$method = DepositPayMethod::cc();
-		$sum = new DepositMoney(Money::RUB(500));
+		$sum = new DepositMoney(Money::RUR('100000000'));
 
 		$invoice = $this->container->getCreateDepositInvoiceUseCaseHandler()->handle(
 			new UseCase\CreateDepositInvoice\Request(
@@ -51,25 +53,40 @@ class HandlerTest extends UseCaseTestCase
 
 		$response = $this->container->getPayDepositInvoiceUseCaseHandler()->handle(
 			new UseCase\PayDepositInvoice\Request(
-				new BillingInvoice($billingIdentity, $invoice->getId(), $sum, Money::RUB(10))
+				new BillingInvoice($billingIdentity, $invoice->getId(), $sum, Money::RUR(10))
 			)
 		);
+
+        $depositPolicy = new SimpleDepositToBitMoneyPolicy();
+        $bitMoney = $depositPolicy->convert($sum);
+        $account = $this->container->getFindInvestorAccountUseCaseHandler()->handle(new UseCase\FindInvestorAccount\Request(
+            $investor->getId(),
+            $bitMoney->getCurrency()
+        ))->getInvestorAccount();
+
 		$this->assertInstanceOf(UseCase\PayDepositInvoice\Response::class, $response);
 		$this->assertInstanceOf(DepositInvoice::class, $response->getDepositInvoice());
 		$this->assertEquals($invoice->getId(), $response->getDepositInvoice()->getId());
 		$this->assertEquals(DepositInvoice::STATUS_PAYED, $response->getDepositInvoice()->getStatus());
+		$this->assertNotEquals(new BitMoney(Money::BTC(0)), $account->getMainBalance());
+		$this->assertEquals($bitMoney, $account->getMainBalance());
+		$this->assertEquals(new BitMoney(Money::BTC('100000000')), $account->getMainBalance());
+		$this->assertEquals(new BitMoney(Money::BTC('100000000')), $account->getBalance());
+		$this->assertNotEquals(new BitMoney(Money::ETH('100000000')), $account->getMainBalance());
+		$this->assertEquals(new BitMoney(Money::BTC('0')), $account->getTradingBalance());
+
 
 		$this->expectException(DepositInvoiceNotAvailableForPay::class);
 		$response = $this->container->getPayDepositInvoiceUseCaseHandler()->handle(
 			new UseCase\PayDepositInvoice\Request(
-				new BillingInvoice($billingIdentity, $invoice->getId(), $sum, Money::RUB(10))
+				new BillingInvoice($billingIdentity, $invoice->getId(), $sum, Money::RUR(10))
 			)
 		);
 
 		$this->expectException(EntityNotFoundException::class);
 		$response = $this->container->getPayDepositInvoiceUseCaseHandler()->handle(
 			new UseCase\PayDepositInvoice\Request(
-				new BillingInvoice($billingIdentity, new DepositInvoiceIdentity('0'), $sum, Money::RUB(10))
+				new BillingInvoice($billingIdentity, new DepositInvoiceIdentity('0'), $sum, Money::RUR(10))
 			)
 		);
 	}

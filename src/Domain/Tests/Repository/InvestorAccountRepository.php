@@ -49,6 +49,6 @@ class InvestorAccountRepository implements InvestorAccountRepositoryInterface
 		if (count($items) === 0) {
 			throw new EntityNotFoundException();
 		}
-		return $items[0];
+		return array_shift($items);
 	}
 }

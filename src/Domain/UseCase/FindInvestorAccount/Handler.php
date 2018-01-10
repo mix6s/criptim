@@ -49,6 +49,7 @@ class Handler
 			$account = new InvestorAccount(
 				$this->accountIdentityFactory->getNextId(),
 				$request->getInvestorId(),
+				new BitMoney(new Money(0, $request->getCurrency())),
 				new BitMoney(new Money(0, $request->getCurrency()))
 			);
 			$this->accountRepository->save($account);

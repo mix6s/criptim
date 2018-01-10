@@ -54,7 +54,8 @@ class Handler
 			$account->getId(),
 			InvestorAccountTransaction::TYPE_DEPOSIT,
 			$request->getBitMoney(),
-			$account->getBalance()
+			$account->getMainBalance(),
+            $account->getTradingBalance()
 		);
 		$this->accountTransactionRepository->save($transaction);
 		return new Response($transaction);
