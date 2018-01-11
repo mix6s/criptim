@@ -68,7 +68,7 @@ class Handler
 		$this->depositInvoiceRepository->save($depositInvoice);
 
 
-		$transaction = $this->createInvestorAccountTransactionHandler->handle(new UseCase\CreateInvestorAccountTransaction\Request(
+		$depositTransaction = $this->createInvestorAccountTransactionHandler->handle(new UseCase\CreateInvestorAccountTransaction\Request(
 			$depositInvoice->getInvestorId(),
 			InvestorAccountTransaction::TYPE_DEPOSIT,
 			$bitMoneyToAdd
@@ -76,8 +76,14 @@ class Handler
 
 
 		$this->changeInvestorAccountBalanceHandler->handle(new UseCase\ChangeInvestorAccountBalance\Request(
-			$transaction->getId()
+			$depositTransaction->getId()
 		));
+
+		$transferTransaction = $this->createInvestorAccountTransactionHandler->handle(new UseCase\CreateInvestorAccountTransaction\Request(
+			$depositInvoice->getInvestorId(),
+			InvestorAccountTransaction::TYPE_TO_TRADING,
+			$bitMoneyToAdd
+		))->getTransaction();
 		return new Response($depositInvoice);
 	}
 }

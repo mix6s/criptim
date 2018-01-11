@@ -19,6 +19,10 @@ class InvestorAccountTransaction
 	const STATUS_EXEC = 'executed';
 
 	const TYPE_DEPOSIT = 'deposit';
+	const TYPE_WITHDRAWAL = 'withdrawal';
+	const TYPE_TO_TRADING = 'to_trading';
+	const TYPE_TO_MAIN = 'to_main';
+	const TYPE_TRADE_DIFF = 'trade_diff';
 
 	/**
 	 * @var InvestorAccountTransactionIdentity

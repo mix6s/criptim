@@ -127,6 +127,13 @@ class Container
 		);
 	}
 
+	public function getTransferToTradingAccountUseCase(): UseCase\TransferInvestorBitMoneyFromMainToTradingAccount\Handler
+	{
+		return new UseCase\TransferInvestorBitMoneyFromMainToTradingAccount\Handler(
+
+		);
+	}
+
 	/**
 	 * @return InvestorAccountRepository
 	 */

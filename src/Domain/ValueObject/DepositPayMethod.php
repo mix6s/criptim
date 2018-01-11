@@ -12,6 +12,8 @@ namespace Domain\ValueObject;
 class DepositPayMethod
 {
 	const METHOD_CC = 'cc';
+	const METHOD_MANUAL = 'manual';
+
 	/**
 	 * @var string
 	 */
@@ -25,6 +27,11 @@ class DepositPayMethod
 	public static function cc(): DepositPayMethod
 	{
 		return new self(self::METHOD_CC);
+	}
+
+	public static function manual(): DepositPayMethod
+	{
+		return new self(self::METHOD_MANUAL);
 	}
 
 	public function __toString()
