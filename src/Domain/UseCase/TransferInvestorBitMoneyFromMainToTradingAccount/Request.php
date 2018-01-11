@@ -9,25 +9,25 @@
 namespace Domain\UseCase\TransferInvestorBitMoneyFromMainToTradingAccount;
 
 
-use Domain\ValueObject\InvestorAccountIdentity;
+use Domain\ValueObject\InvestorAccountTransactionIdentity;
 
 class Request
 {
 	/**
-	 * @var InvestorAccountIdentity
+	 * @var InvestorAccountTransactionIdentity
 	 */
-	private $investorAccountId;
+	private $investorAccountTransactionId;
 
-	public function __construct(InvestorAccountIdentity $investorAccountId)
+	public function __construct(InvestorAccountTransactionIdentity $investorAccountTransactionId)
 	{
-		$this->investorAccountId = $investorAccountId;
+		$this->investorAccountTransactionId = $investorAccountTransactionId;
 	}
 
 	/**
-	 * @return InvestorAccountIdentity
+	 * @return InvestorAccountTransactionIdentity
 	 */
-	public function getInvestorAccountId(): InvestorAccountIdentity
+	public function getInvestorAccountTransactionId(): InvestorAccountTransactionIdentity
 	{
-		return $this->investorAccountId;
+		return $this->investorAccountTransactionId;
 	}
 }

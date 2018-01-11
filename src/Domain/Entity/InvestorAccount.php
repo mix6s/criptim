@@ -70,6 +70,15 @@ class InvestorAccount
 		$this->mainBalance = new BitMoney($this->mainBalance->getMoney()->add($bitMoney->getMoney()));
 	}
 
+	public function transferFromMainToTrading(BitMoney $bitMoney)
+	{
+		if ($this->mainBalance->getMoney()->lessThan($bitMoney->getMoney())) {
+			throw new DomainException('Not enough bit money on main account to transfer');
+		}
+		$this->mainBalance = new BitMoney($this->mainBalance->getMoney()->subtract($bitMoney->getMoney()));
+		$this->tradingBalance = new BitMoney($this->tradingBalance->getMoney()->add($bitMoney->getMoney()));
+	}
+
 	/**
 	 * @return InvestorAccountIdentity
 	 */

@@ -60,6 +60,9 @@ class Handler
 			case InvestorAccountTransaction::TYPE_DEPOSIT:
 				$account->addToMain($transaction->getBitMoney());
 				break;
+			case InvestorAccountTransaction::TYPE_TO_TRADING:
+				$account->transferFromMainToTrading($transaction->getBitMoney());
+				break;
 			default:
 				throw new DomainException(sprintf('Unknown transaction type %s', $transaction->getType()));
 				break;
