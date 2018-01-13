@@ -76,6 +76,7 @@ class HandlerTest extends UseCaseTestCase
 		$this->assertEquals(new BitMoney(Money::BTC('0')), $account->getTradingBalance());
 
 
+
 		$this->expectException(DepositInvoiceNotAvailableForPay::class);
 		$response = $this->container->getPayDepositInvoiceUseCaseHandler()->handle(
 			new UseCase\PayDepositInvoice\Request(
