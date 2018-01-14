@@ -16,21 +16,16 @@ use Money\Money;
 abstract class Account
 {
 	/**
-	 * @var AccountId
-	 */
-	private $accountId;
-	/**
 	 * @var Currency
 	 */
-	private $currency;
+	protected $currency;
 	/**
 	 * @var Money
 	 */
-	private $balance;
+	protected $balance;
 
-	public function __construct(AccountId $accountId, Currency $currency)
+	public function __construct(Currency $currency)
 	{
-		$this->accountId = $accountId;
 		$this->currency = $currency;
 		$this->balance = new Money(0, $currency);
 	}
@@ -42,10 +37,25 @@ abstract class Account
 				$money->getCurrency()));
 		}
 		if ($money->isPositive()) {
-			$this->balance->add($money->absolute());
+			$this->balance = $this->balance->add($money->absolute());
 		} elseif ($money->isNegative()) {
-			$this->balance->subtract($money->absolute());
+			$this->balance = $this->balance->subtract($money->absolute());
 		}
 	}
 
+	/**
+	 * @return Currency
+	 */
+	public function getCurrency(): Currency
+	{
+		return $this->currency;
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getBalance(): Money
+	{
+		return $this->balance;
+	}
 }
