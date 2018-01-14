@@ -11,23 +11,10 @@ namespace Domain\Exchange\Entity;
 
 use Domain\Exchange\ValueObject\ExchangeId;
 
-class Exchange
+interface ExchangeInterface
 {
-	/**
-	 * @var ExchangeId
-	 */
-	private $id;
-
-	public function __construct(ExchangeId $id)
-	{
-		$this->id = $id;
-	}
-
 	/**
 	 * @return ExchangeId
 	 */
-	public function getId(): ExchangeId
-	{
-		return $this->id;
-	}
+	public function getId(): ExchangeId;
 }

@@ -10,17 +10,17 @@ namespace Domain\Exchange\Repository;
 
 
 use Domain\Exception\EntityNotFoundException;
-use Domain\Exchange\Entity\Exchange;
+use Domain\Exchange\Entity\ExchangeInterface;
 use Domain\Exchange\ValueObject\ExchangeId;
 
 interface ExchangeRepositoryInterface
 {
-	public function save(Exchange $exchange);
+	public function save(ExchangeInterface $exchange);
 
 	/**
 	 * @param ExchangeId $exchangeId
-	 * @return Exchange
+	 * @return ExchangeInterface
 	 * @throws EntityNotFoundException
 	 */
-	public function findById(ExchangeId $exchangeId): Exchange;
+	public function findById(ExchangeId $exchangeId): ExchangeInterface;
 }
