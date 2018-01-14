@@ -10,8 +10,18 @@ namespace Domain\Exchange\Repository;
 
 
 use Domain\Exchange\Entity\UserExchangeAccountTransaction;
+use Domain\Exchange\ValueObject\ExchangeId;
+use Money\Currency;
 
 interface UserExchangeAccountTransactionRepositoryInterface
 {
 	public function save(UserExchangeAccountTransaction $transaction);
+
+	/**
+	 * @param ExchangeId $exchangeId
+	 * @param Currency $currency
+	 * @param \DateTimeImmutable $dt
+	 * @return UserExchangeAccountTransaction[]
+	 */
+	public function findByExchangeIdCurrencyDate(ExchangeId $exchangeId, Currency $currency, \DateTimeImmutable $dt): array ;
 }

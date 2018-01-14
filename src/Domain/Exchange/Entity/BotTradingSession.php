@@ -115,4 +115,20 @@ class BotTradingSession
 	{
 		return $this->id;
 	}
+
+	/**
+	 * @return \DateTimeImmutable
+	 */
+	public function getCreatedAt(): \DateTimeImmutable
+	{
+		return $this->createdAt;
+	}
+
+	/**
+	 * @return BotId
+	 */
+	public function getBotId(): BotId
+	{
+		return $this->botId;
+	}
 }

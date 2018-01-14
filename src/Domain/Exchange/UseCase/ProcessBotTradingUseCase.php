@@ -11,10 +11,12 @@ namespace Domain\Exchange\UseCase;
 
 use Domain\Exception\DomainException;
 use Domain\Exception\EntityNotFoundException;
+use Domain\Exchange\Entity\BotExchangeAccount;
 use Domain\Exchange\Entity\BotExchangeAccountTransaction;
 use Domain\Exchange\Entity\BotTradingSession;
 use Domain\Exchange\Entity\BotTradingSessionAccount;
 use Domain\Exchange\Entity\BotTradingSessionAccountTransaction;
+use Domain\Exchange\Entity\UserExchangeAccountTransaction;
 use Domain\Exchange\Factory\IdFactoryInterface;
 use Domain\Exchange\Repository\BotExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\BotExchangeAccountTransactionRepositoryInterface;
@@ -23,7 +25,10 @@ use Domain\Exchange\Repository\BotTradingSessionAccountRepositoryInterface;
 use Domain\Exchange\Repository\BotTradingSessionAccountTransactionRepositoryInterface;
 use Domain\Exchange\Repository\BotTradingSessionRepositoryInterface;
 use Domain\Exchange\Repository\TradingStrategyRepositoryInterface;
+use Domain\Exchange\Repository\UserExchangeAccountRepositoryInterface;
+use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
 use Domain\Exchange\UseCase\Request\ProcessBotTradingRequest;
+use Money\Money;
 
 class ProcessBotTradingUseCase
 {
@@ -59,6 +64,14 @@ class ProcessBotTradingUseCase
 	 * @var BotTradingSessionAccountTransactionRepositoryInterface
 	 */
 	private $botTradingSessionAccountTransactionRepository;
+	/**
+	 * @var UserExchangeAccountRepositoryInterface
+	 */
+	private $userExchangeAccountRepository;
+	/**
+	 * @var UserExchangeAccountTransactionRepositoryInterface
+	 */
+	private $userExchangeAccountTransactionRepository;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
@@ -68,7 +81,9 @@ class ProcessBotTradingUseCase
 		BotExchangeAccountTransactionRepositoryInterface $botExchangeAccountTransactionRepository,
 		BotTradingSessionAccountRepositoryInterface $botTradingSessionAccountRepository,
 		BotTradingSessionAccountTransactionRepositoryInterface $botTradingSessionAccountTransactionRepository,
-		BotRepositoryInterface $botRepository
+		BotRepositoryInterface $botRepository,
+	 	UserExchangeAccountRepositoryInterface $userExchangeAccountRepository,
+		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository
 	) {
 		$this->botTradingSessionRepository = $botTradingSessionRepository;
 		$this->idFactory = $idFactory;
@@ -78,6 +93,8 @@ class ProcessBotTradingUseCase
 		$this->botRepository = $botRepository;
 		$this->botExchangeAccountTransactionRepository = $botExchangeAccountTransactionRepository;
 		$this->botTradingSessionAccountTransactionRepository = $botTradingSessionAccountTransactionRepository;
+		$this->userExchangeAccountRepository = $userExchangeAccountRepository;
+		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
 	}
 
 	public function execute(ProcessBotTradingRequest $request)
@@ -108,6 +125,86 @@ class ProcessBotTradingUseCase
 
 	private function closeSession(BotTradingSession $session)
 	{
+		$bot = $this->botRepository->findById($session->getBotId());
+		$sessionAccounts = $this->botTradingSessionAccountRepository->findByBotTradingSessionId($session->getId());
+		foreach ($sessionAccounts as $sessionAccount) {
+			$transaction = $this->botTradingSessionAccountTransactionRepository->findLastBySessionIdCurrencyDate(
+				$session->getId(),
+				$sessionAccount->getCurrency(),
+				$session->getCreatedAt()
+			);
+			$diff = $sessionAccount->getBalance()->subtract($transaction->getBalance());
+
+			$outMoney = $sessionAccount->getBalance()->multiply(-1);
+			$inMoney = $sessionAccount->getBalance();
+
+			$sessionAccount->change($outMoney);
+			$sessionAccountTransaction = new BotTradingSessionAccountTransaction(
+				$this->idFactory->getBotTradingSessionAccountTransactionId(),
+				$session->getId(),
+				$outMoney->getCurrency(),
+				$outMoney,
+				$sessionAccount->getBalance(),
+				BotTradingSessionAccountTransaction::TYPE_BOT_TRANSFER
+			);
+			$this->botTradingSessionAccountTransactionRepository->save($sessionAccountTransaction);
+			$this->botTradingSessionAccountRepository->save($sessionAccount);
+
+			try {
+				$botAccount = $this->botExchangeAccountRepository->findByBotIdExchangeIdCurrency($bot->getId(), $bot->getExchangeId(), $sessionAccount->getCurrency());
+			} catch (EntityNotFoundException $exception) {
+				$botAccount = new BotExchangeAccount($bot->getId(), $bot->getExchangeId(), $inMoney->getCurrency());
+			}
+			$botAccount->change($inMoney);
+			$botAccTransactionId = $this->idFactory->getBotExchangeAccountTransactionId();
+			$botAccTransaction = new BotExchangeAccountTransaction(
+				$botAccTransactionId,
+				$bot->getId(),
+				$bot->getExchangeId(),
+				$inMoney->getCurrency(),
+				$inMoney,
+				$botAccount->getBalance(),
+				BotExchangeAccountTransaction::TYPE_SESSION_TRANSFER
+			);
+			$this->botExchangeAccountTransactionRepository->save($botAccTransaction);
+			$this->botExchangeAccountRepository->save($botAccount);
+			if ($diff->isZero()) {
+				continue;
+			}
+			$transactions = $this->userExchangeAccountTransactionRepository->findByExchangeIdCurrencyDate(
+				$bot->getExchangeId(),
+				$diff->getCurrency(),
+				$session->getCreatedAt()
+			);
+			$sum = new Money(0, $diff->getCurrency());
+			foreach ($transactions as $transaction) {
+				$sum = $sum->add($transaction->getBalance());
+			}
+
+			foreach ($transactions as $transaction) {
+				$multiplier = $transaction->getBalance()->divide($sum->getAmount(), Money::ROUND_DOWN);
+				$userDiff = $diff->multiply($multiplier, Money::ROUND_DOWN);
+
+				$userAccount = $this->userExchangeAccountRepository->findByUserIdExchangeIdCurrency(
+					$transaction->getUserId(),
+					$transaction->getExchangeId(),
+					$userDiff->getCurrency()
+				);
+				$transactionId = $this->idFactory->getUserExchangeAccountTransactionId();
+				$userAccount->change($userDiff);
+				$userAccountTransaction = new UserExchangeAccountTransaction(
+					$transactionId,
+					$transaction->getUserId(),
+					$transaction->getExchangeId(),
+					$userDiff->getCurrency(),
+					$userDiff,
+					$userAccount->getBalance(),
+					UserExchangeAccountTransaction::TYPE_TRADING_DIFF
+				);
+				$this->userExchangeAccountTransactionRepository->save($userAccountTransaction);
+				$this->userExchangeAccountRepository->save($userAccount);
+			}
+		}
 		$session->close();
 		$this->botTradingSessionRepository->save($session);
 	}
@@ -116,6 +213,7 @@ class ProcessBotTradingUseCase
 	{
 		$tradingStrategy = $this->tradingStrategyRepository->findById($session->getTradingStrategyId());
 		$tradingStrategy->processTrading($session);
+		$session->process();
 		$this->botTradingSessionRepository->save($session);
 	}
 
@@ -130,15 +228,18 @@ class ProcessBotTradingUseCase
 			if ($botAccount->getBalance()->isZero()) {
 				continue;
 			}
-			$transferMoney = $botAccount->getBalance()->absolute()->multiply(-1);
-			$botAccount->change($transferMoney);
+			$outMoney = $botAccount->getBalance()->multiply(-1);
+			$inMoney = $botAccount->getBalance();
+
+
+			$botAccount->change($outMoney);
 			$botAccTransactionId = $this->idFactory->getBotExchangeAccountTransactionId();
 			$botAccTransaction = new BotExchangeAccountTransaction(
 				$botAccTransactionId,
 				$bot->getId(),
 				$bot->getExchangeId(),
-				$transferMoney->getCurrency(),
-				$transferMoney,
+				$outMoney->getCurrency(),
+				$outMoney,
 				$botAccount->getBalance(),
 				BotExchangeAccountTransaction::TYPE_SESSION_TRANSFER
 			);
@@ -148,17 +249,18 @@ class ProcessBotTradingUseCase
 			try {
 				$sessionAccount = $this->botTradingSessionAccountRepository->findByBotTradingSessionIdCurrency(
 					$session->getId(),
-					$transferMoney->getCurrency()
+					$inMoney->getCurrency()
 				);
 			} catch (EntityNotFoundException $exception) {
-				$sessionAccount = new BotTradingSessionAccount($session->getId(), $transferMoney->getCurrency());
+				$sessionAccount = new BotTradingSessionAccount($session->getId(), $inMoney->getCurrency());
 			}
-			$sessionAccount->change($transferMoney->absolute());
+			$sessionAccount->change($inMoney->absolute());
 			$sessionAccountTransaction = new BotTradingSessionAccountTransaction(
 				$this->idFactory->getBotTradingSessionAccountTransactionId(),
-				$transferMoney->getCurrency(),
-				$transferMoney->absolute(),
-				$botAccount->getBalance(),
+				$session->getId(),
+				$inMoney->getCurrency(),
+				$inMoney->absolute(),
+				$sessionAccount->getBalance(),
 				BotTradingSessionAccountTransaction::TYPE_BOT_TRANSFER
 			);
 			$this->botTradingSessionAccountTransactionRepository->save($sessionAccountTransaction);

@@ -25,6 +25,11 @@ interface BotTradingSessionAccountRepositoryInterface
 	public function findByBotTradingSessionIdCurrency(BotTradingSessionId $botTradingSessionId, Currency $currency): BotTradingSessionAccount;
 
 	/**
+	 * @param BotTradingSessionId $botTradingSessionId
+	 * @return BotTradingSessionAccount[]
+	 */
+	public function findByBotTradingSessionId(BotTradingSessionId $botTradingSessionId): array;
+	/**
 	 * @param BotTradingSessionAccount $account
 	 */
 	public function save(BotTradingSessionAccount $account);

@@ -18,6 +18,7 @@ use Money\Money;
 class UserExchangeAccountTransaction
 {
 	const TYPE_DEPOSIT = 'deposit';
+	const TYPE_TRADING_DIFF = 'trading_diff';
 
 	/**
 	 * @var UserExchangeAccountTransactionId
@@ -69,5 +70,29 @@ class UserExchangeAccountTransaction
 		$this->userId = $userId;
 		$this->type = $type;
 		$this->dt = new \DateTimeImmutable();
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getBalance(): Money
+	{
+		return $this->balance;
+	}
+
+	/**
+	 * @return ExchangeId
+	 */
+	public function getExchangeId(): ExchangeId
+	{
+		return $this->exchangeId;
+	}
+
+	/**
+	 * @return UserId
+	 */
+	public function getUserId(): UserId
+	{
+		return $this->userId;
 	}
 }

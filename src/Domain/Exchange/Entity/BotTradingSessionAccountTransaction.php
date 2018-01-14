@@ -10,6 +10,7 @@ namespace Domain\Exchange\Entity;
 
 
 use Domain\Exchange\ValueObject\BotTradingSessionAccountTransactionId;
+use Domain\Exchange\ValueObject\BotTradingSessionId;
 use Money\Currency;
 use Money\Money;
 
@@ -40,9 +41,14 @@ class BotTradingSessionAccountTransaction
 	 * @var Money
 	 */
 	private $balance;
+	/**
+	 * @var BotTradingSessionId
+	 */
+	private $botTradingSessionId;
 
 	public function __construct(
 		BotTradingSessionAccountTransactionId $id,
+		BotTradingSessionId $botTradingSessionId,
 		Currency $currency,
 		Money $money,
 		Money $balance,
@@ -55,5 +61,14 @@ class BotTradingSessionAccountTransaction
 		$this->balance = $balance;
 		$this->type = $type;
 		$this->dt = new \DateTimeImmutable();
+		$this->botTradingSessionId = $botTradingSessionId;
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getBalance(): Money
+	{
+		return $this->balance;
 	}
 }
