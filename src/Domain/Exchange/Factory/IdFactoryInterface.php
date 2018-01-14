@@ -9,13 +9,11 @@
 namespace Domain\Exchange\Factory;
 
 
-use Domain\Exchange\ValueObject\BotExchangeAccountId;
 use Domain\Exchange\ValueObject\BotExchangeAccountTransactionId;
 use Domain\Exchange\ValueObject\BotId;
+use Domain\Exchange\ValueObject\BotTradingSessionAccountTransactionId;
 use Domain\Exchange\ValueObject\BotTradingSessionId;
-use Domain\Exchange\ValueObject\ExchangeAccountTransactionId;
 use Domain\Exchange\ValueObject\ExchangeId;
-use Domain\Exchange\ValueObject\UserExchangeAccountId;
 use Domain\Exchange\ValueObject\UserExchangeAccountTransactionId;
 
 interface IdFactoryInterface
@@ -25,4 +23,5 @@ interface IdFactoryInterface
 	public function getBotTradingSessionId(): BotTradingSessionId;
 	public function getUserExchangeAccountTransactionId(): UserExchangeAccountTransactionId;
 	public function getBotExchangeAccountTransactionId(): BotExchangeAccountTransactionId;
+	public function getBotTradingSessionAccountTransactionId(): BotTradingSessionAccountTransactionId;
 }

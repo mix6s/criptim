@@ -24,7 +24,7 @@ interface BotExchangeAccountRepositoryInterface
 	 * @return UserExchangeAccount
 	 * @throws EntityNotFoundException
 	 */
-	public function findMainByBotIdExchangeIdCurrency(
+	public function findByBotIdExchangeIdCurrency(
 		BotId $botId,
 		ExchangeId $exchangeId,
 		Currency $currency

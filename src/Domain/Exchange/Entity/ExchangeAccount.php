@@ -18,7 +18,7 @@ class ExchangeAccount extends Account
 	/**
 	 * @var ExchangeId
 	 */
-	private $exchangeId;
+	protected $exchangeId;
 
 	public function __construct(ExchangeId $exchangeId, Currency $currency)
 	{

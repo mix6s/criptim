@@ -15,22 +15,15 @@ use Money\Currency;
 
 class BotExchangeAccount extends ExchangeAccount
 {
-	const TYPE_MAIN = 'main';
-	const TYPE_TRADING = 'trading';
 	/**
 	 * @var BotId
 	 */
-	private $botId;
-	/**
-	 * @var string
-	 */
-	private $type;
+	protected $botId;
 
-	public function __construct(BotId $botId, ExchangeId $exchangeId, Currency $currency, string $type)
+	public function __construct(BotId $botId, ExchangeId $exchangeId, Currency $currency)
 	{
 		parent::__construct($exchangeId, $currency);
 		$this->botId = $botId;
-		$this->type = $type;
 	}
 
 
@@ -40,13 +33,5 @@ class BotExchangeAccount extends ExchangeAccount
 	public function getBotId(): BotId
 	{
 		return $this->botId;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getType(): string
-	{
-		return $this->type;
 	}
 }

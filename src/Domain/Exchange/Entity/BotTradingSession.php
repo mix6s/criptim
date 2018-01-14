@@ -86,4 +86,20 @@ class BotTradingSession
 	{
 		return $this->status;
 	}
+
+	/**
+	 * @return TradingStrategyId
+	 */
+	public function getTradingStrategyId(): TradingStrategyId
+	{
+		return $this->tradingStrategyId;
+	}
+
+	/**
+	 * @return TradingStrategySettings
+	 */
+	public function getTradingStrategySettings(): TradingStrategySettings
+	{
+		return $this->tradingStrategySettings;
+	}
 }

@@ -47,6 +47,10 @@ class UserExchangeAccountTransaction
 	 * @var string
 	 */
 	private $type;
+	/**
+	 * @var \DateTimeImmutable
+	 */
+	private $dt;
 
 	public function __construct(
 		UserExchangeAccountTransactionId $id,
@@ -64,5 +68,6 @@ class UserExchangeAccountTransaction
 		$this->balance = $balance;
 		$this->userId = $userId;
 		$this->type = $type;
+		$this->dt = new \DateTimeImmutable();
 	}
 }

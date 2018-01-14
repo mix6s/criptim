@@ -118,9 +118,9 @@ class UserDepositMoneyUseCase
 		$botMoney = $money->divide(count($bots));
 		foreach ($bots as $bot) {
 			try {
-				$botAccount = $this->botExchangeAccountRepository->findMainByBotIdExchangeIdCurrency($bot->getId(), $exchange->getId(), $money->getCurrency());
+				$botAccount = $this->botExchangeAccountRepository->findByBotIdExchangeIdCurrency($bot->getId(), $exchange->getId(), $money->getCurrency());
 			} catch (DomainException $exception) {
-				$botAccount = new BotExchangeAccount($bot->getId(), $exchange->getId(), $money->getCurrency(), BotExchangeAccount::TYPE_MAIN);
+				$botAccount = new BotExchangeAccount($bot->getId(), $exchange->getId(), $money->getCurrency());
 			}
 			$botTransactionId = $this->idFactory->getBotExchangeAccountTransactionId();
 			$botAccount->change($money);
