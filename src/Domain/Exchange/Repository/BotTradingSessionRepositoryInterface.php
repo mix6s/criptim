@@ -21,4 +21,9 @@ interface BotTradingSessionRepositoryInterface
 	 * @throws EntityNotFoundException
 	 */
 	public function findLastByBotId(BotId $botId): BotTradingSession;
+
+	/**
+	 * @param BotTradingSession $session
+	 */
+	public function save(BotTradingSession $session);
 }

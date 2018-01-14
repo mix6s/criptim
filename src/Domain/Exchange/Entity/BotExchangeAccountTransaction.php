@@ -18,6 +18,7 @@ use Money\Money;
 class BotExchangeAccountTransaction
 {
 	const TYPE_DEPOSIT = 'deposit';
+	const TYPE_SESSION_TRANSFER = 'session_transfer';
 
 	/**
 	 * @var BotExchangeAccountTransactionId

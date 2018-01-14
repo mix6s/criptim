@@ -65,4 +65,28 @@ class Bot
 	{
 		return $this->id;
 	}
+
+	/**
+	 * @return ExchangeId
+	 */
+	public function getExchangeId(): ExchangeId
+	{
+		return $this->exchangeId;
+	}
+
+	/**
+	 * @return TradingStrategyId
+	 */
+	public function getTradingStrategyId(): TradingStrategyId
+	{
+		return $this->tradingStrategyId;
+	}
+
+	/**
+	 * @return TradingStrategySettings
+	 */
+	public function getTradingStrategySettings(): TradingStrategySettings
+	{
+		return $this->tradingStrategySettings;
+	}
 }

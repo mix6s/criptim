@@ -19,23 +19,11 @@ class ProcessBotTradingRequest
 	 * @var BotId
 	 */
 	private $botId;
-	/**
-	 * @var TradingStrategyId
-	 */
-	private $tradingStrategyId;
-	/**
-	 * @var TradingStrategySettings
-	 */
-	private $tradingStrategySettings;
 
 	public function __construct(
-		BotId $botId,
-		TradingStrategyId $tradingStrategyId,
-		TradingStrategySettings $tradingStrategySettings
+		BotId $botId
 	) {
 		$this->botId = $botId;
-		$this->tradingStrategyId = $tradingStrategyId;
-		$this->tradingStrategySettings = $tradingStrategySettings;
 	}
 
 	/**
@@ -44,21 +32,5 @@ class ProcessBotTradingRequest
 	public function getBotId(): BotId
 	{
 		return $this->botId;
-	}
-
-	/**
-	 * @return TradingStrategyId
-	 */
-	public function getTradingStrategyId(): TradingStrategyId
-	{
-		return $this->tradingStrategyId;
-	}
-
-	/**
-	 * @return TradingStrategySettings
-	 */
-	public function getTradingStrategySettings(): TradingStrategySettings
-	{
-		return $this->tradingStrategySettings;
 	}
 }

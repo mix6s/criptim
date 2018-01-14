@@ -10,6 +10,7 @@ namespace Domain\Exchange\Repository;
 
 
 use Domain\Exchange\Entity\Bot;
+use Domain\Exchange\ValueObject\BotId;
 use Domain\Exchange\ValueObject\ExchangeId;
 
 interface BotRepositoryInterface
@@ -19,4 +20,6 @@ interface BotRepositoryInterface
 	 * @return Bot[]
 	 */
 	public function findByExchangeId(ExchangeId $exchangeId): array;
+
+	public function findById(BotId $botId): Bot;
 }

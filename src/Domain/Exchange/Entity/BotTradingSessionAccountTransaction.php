@@ -15,7 +15,7 @@ use Money\Money;
 
 class BotTradingSessionAccountTransaction
 {
-	const TYPE_DEPOSIT = 'deposit';
+	const TYPE_BOT_TRANSFER = 'bot_transfer';
 	/**
 	 * @var BotTradingSessionAccountTransactionId
 	 */
@@ -32,6 +32,14 @@ class BotTradingSessionAccountTransaction
 	 * @var \DateTimeImmutable
 	 */
 	private $dt;
+	/**
+	 * @var Currency
+	 */
+	private $currency;
+	/**
+	 * @var Money
+	 */
+	private $balance;
 
 	public function __construct(
 		BotTradingSessionAccountTransactionId $id,

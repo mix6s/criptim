@@ -30,5 +30,15 @@ interface BotExchangeAccountRepositoryInterface
 		Currency $currency
 	): UserExchangeAccount;
 
+	/**
+	 * @param BotId $botId
+	 * @param ExchangeId $exchangeId
+	 * @return UserExchangeAccount[]
+	 */
+	public function findByBotIdExchangeId(
+		BotId $botId,
+		ExchangeId $exchangeId
+	): array ;
+
 	public function save(UserExchangeAccount $account);
 }

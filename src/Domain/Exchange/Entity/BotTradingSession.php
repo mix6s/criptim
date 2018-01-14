@@ -73,6 +73,11 @@ class BotTradingSession
 		$this->status = self::STATUS_ENDED;
 	}
 
+	public function close()
+	{
+		$this->status = self::STATUS_CLOSED;
+	}
+
 	public function process()
 	{
 		$this->updatedAt = new \DateTimeImmutable();
@@ -101,5 +106,13 @@ class BotTradingSession
 	public function getTradingStrategySettings(): TradingStrategySettings
 	{
 		return $this->tradingStrategySettings;
+	}
+
+	/**
+	 * @return BotTradingSessionId
+	 */
+	public function getId(): BotTradingSessionId
+	{
+		return $this->id;
 	}
 }
