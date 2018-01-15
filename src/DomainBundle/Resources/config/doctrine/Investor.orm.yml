@@ -1,7 +1,0 @@
-Domain\Entity\Investor:
-    type: entity
-    repositoryClass: DomainBundle\Repository\GameRepository
-    id:
-        id:
-            type: investorId
-            generator: { strategy: NONE }

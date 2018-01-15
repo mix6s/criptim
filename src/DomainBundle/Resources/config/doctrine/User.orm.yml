@@ -1,0 +1,7 @@
+Domain\Entity\User:
+    type: entity
+    repositoryClass: DomainBundle\Repository\User
+    id:
+        id:
+            type: userId
+            generator: { strategy: NONE }

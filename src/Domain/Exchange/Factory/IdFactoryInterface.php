@@ -19,7 +19,6 @@ use Domain\Exchange\ValueObject\UserExchangeAccountTransactionId;
 
 interface IdFactoryInterface
 {
-	public function getExchangeId(): ExchangeId;
 	public function getBotId(): BotId;
 	public function getBotTradingSessionId(): BotTradingSessionId;
 	public function getUserExchangeAccountTransactionId(): UserExchangeAccountTransactionId;

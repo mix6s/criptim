@@ -69,8 +69,26 @@ doctrine:
         #   3. Uncomment next line:
         #path: '%database_path%'
         types:
-            investorId:
-                class:                DomainBundle\Type\InvestorIdentityType
+            userId:
+                class:                DomainBundle\Type\UserIdType
+                commented:            true
+            botId:
+                class:                DomainBundle\Type\BotIdType
+                commented:            true
+            orderId:
+                class:                DomainBundle\Type\OrderIdType
+                commented:            true
+            userExchangeAccountTransactionId:
+                class:                DomainBundle\Type\UserExchangeAccountTransactionIdType
+                commented:            true
+            botExchangeAccountTransactionId:
+                class:                DomainBundle\Type\BotExchangeAccountTransactionIdType
+                commented:            true
+            botTradingSessionAccountTransactionId:
+                class:                DomainBundle\Type\BotTradingSessionAccountTransactionIdType
+                commented:            true
+            botTradingSessionId:
+                class:                DomainBundle\Type\BotTradingSessionIdType
                 commented:            true
     orm:
         auto_generate_proxy_classes: '%kernel.debug%'

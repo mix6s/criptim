@@ -39,3 +39,9 @@ services:
     image: memcached
     ports:
       - "11211:11211"
+
+  node:
+    container_name: criptim.node
+    image: node:6.12.0
+    volumes:
+      - .:/criptim

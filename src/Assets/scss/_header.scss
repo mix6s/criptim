@@ -1,0 +1,46 @@
+.header {
+  position: relative;
+  margin: 0 1px 0 -8px;
+  padding: 10px 0 7px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header__block {
+  display: flex;
+  align-items: center;
+
+  &--left {
+    justify-content: flex-start;
+  }
+
+  &--right {
+    justify-content: flex-end;
+  }
+}
+
+.header__wallet {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  span {
+    margin-left: 3px;
+  }
+}
+
+.header__user {
+  margin-left: 12px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  &:before {
+    content: '';
+    width: 1px;
+    height: 30px;
+    margin-right: 9px;
+    background-color: rgba(173, 176, 186, 0.3);
+  }
+}

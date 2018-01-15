@@ -1,0 +1,30 @@
+.rules {
+  margin: 3px 5px 0 8px;
+}
+
+.rules-title {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.71;
+  color: #ffffff;
+}
+
+.rules-paragraph {
+  margin-bottom: 23px;
+}
+
+.rules-title__number {
+  margin-right: 22px;
+}
+
+.rules-subparagraph {
+  margin-bottom: 25px;
+  padding-left: 25px;
+  font-size: 14px;
+  line-height: 1.74;
+  color: #ffffff;
+}
