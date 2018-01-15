@@ -10,6 +10,7 @@ namespace Domain\Exchange\Entity;
 
 
 use Domain\Exchange\ValueObject\ExchangeId;
+use Domain\Exchange\ValueObject\OrderId;
 
 interface ExchangeInterface
 {
@@ -17,4 +18,10 @@ interface ExchangeInterface
 	 * @return ExchangeId
 	 */
 	public function getId(): ExchangeId;
+
+	public function createOrder(OrderId $orderId);
+
+	public function cancelOrder(OrderId $orderId);
+
+	public function getSymbol(string $symbol);
 }

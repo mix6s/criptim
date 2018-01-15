@@ -10,12 +10,13 @@ namespace Domain\Exchange\Entity;
 
 
 use Domain\Exchange\ValueObject\TradingStrategyId;
+use Domain\Exchange\ValueObject\TradingStrategySettings;
 
 interface TradingStrategyInterface
 {
 	public function getId(): TradingStrategyId;
 
-	public function isNeedToStartTrading(): bool;
+	public function isNeedToStartTrading(TradingStrategySettings $settings): bool;
 
 	public function processTrading(BotTradingSession $session);
 }

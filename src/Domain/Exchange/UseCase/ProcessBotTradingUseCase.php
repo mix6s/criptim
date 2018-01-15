@@ -9,7 +9,6 @@
 namespace Domain\Exchange\UseCase;
 
 
-use Domain\Exception\DomainException;
 use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\BotExchangeAccount;
 use Domain\Exchange\Entity\BotExchangeAccountTransaction;
@@ -274,6 +273,6 @@ class ProcessBotTradingUseCase
 	{
 		$bot = $this->botRepository->findById($request->getBotId());
 		$tradingStrategy = $this->tradingStrategyRepository->findById($bot->getTradingStrategyId());
-		return $tradingStrategy->isNeedToStartTrading();
+		return $tradingStrategy->isNeedToStartTrading($bot->getTradingStrategySettings());
 	}
 }
