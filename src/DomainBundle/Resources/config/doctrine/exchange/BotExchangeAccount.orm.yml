@@ -1,0 +1,12 @@
+Domain\Exchange\Entity\BotExchangeAccount:
+    type: entity
+    id:
+        botId:
+            type: botId
+        exchangeId:
+            type: exchangeId
+        currency:
+            type: currency
+    fields:
+        balance:
+            type: money

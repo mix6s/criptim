@@ -1,0 +1,19 @@
+Domain\Exchange\Entity\BotTradingSessionAccountTransaction:
+    type: entity
+    id:
+        id:
+            type: botTradingSessionAccountTransactionId
+            generator: { strategy: NONE }
+    fields:
+        botTradingSessionId:
+            type: botTradingSessionId
+        currency:
+            type: currency
+        money:
+            type: money
+        balance:
+            type: money
+        type:
+            type: string
+        dt:
+            type: dateTimeImmutable

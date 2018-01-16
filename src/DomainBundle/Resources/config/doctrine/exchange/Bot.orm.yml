@@ -1,0 +1,15 @@
+Domain\Exchange\Entity\Bot:
+    type: entity
+    id:
+        id:
+            type: botId
+            generator: { strategy: NONE }
+    fields:
+        exchangeId:
+            type: exchangeId
+        tradingStrategyId:
+            type: tradingStrategyId
+        tradingStrategySettings:
+            type: tradingStrategySettings
+        status:
+            type: string

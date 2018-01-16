@@ -20,7 +20,6 @@ class BotTradingSession
 	const STATUS_ENDED = 'ended';
 	const STATUS_CLOSED = 'closed';
 
-
 	/**
 	 * @var BotTradingSessionId
 	 */
@@ -44,7 +43,7 @@ class BotTradingSession
 	/**
 	 * @var \DateTimeImmutable|null
 	 */
-	private $endedEt;
+	private $endedAt;
 	/**
 	 * @var \DateTimeImmutable
 	 */
@@ -63,13 +62,13 @@ class BotTradingSession
 		$this->status = self::STATUS_ACTIVE;
 		$this->createdAt = new \DateTimeImmutable();
 		$this->updatedAt = new \DateTimeImmutable();
-		$this->endedEt = null;
+		$this->endedAt = null;
 	}
 
 
 	public function end()
 	{
-		$this->endedEt = new \DateTimeImmutable();
+		$this->endedAt = new \DateTimeImmutable();
 		$this->status = self::STATUS_ENDED;
 	}
 
@@ -130,5 +129,21 @@ class BotTradingSession
 	public function getBotId(): BotId
 	{
 		return $this->botId;
+	}
+
+	/**
+	 * @return \DateTimeImmutable
+	 */
+	public function getUpdatedAt(): \DateTimeImmutable
+	{
+		return $this->updatedAt;
+	}
+
+	/**
+	 * @return \DateTimeImmutable|null
+	 */
+	public function getEndedAt()
+	{
+		return $this->endedAt;
 	}
 }

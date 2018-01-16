@@ -12,9 +12,9 @@
         "files": [ "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php" ]
     },
     "require": {
-        "php": ">=7.0",
+        "php": "^7.1",
         "doctrine/doctrine-bundle": "^1.6",
-        "doctrine/orm": "^2.5",
+        "doctrine/orm": "2.6",
         "friendsofsymfony/user-bundle": "~2.0",
         "incenteev/composer-parameter-handler": "^2.0",
         "moneyphp/money": "^3.0",
@@ -50,7 +50,7 @@
     },
     "config": {
         "platform": {
-            "php": "7.0"
+            "php": "7.1"
         },
         "sort-packages": true
     },

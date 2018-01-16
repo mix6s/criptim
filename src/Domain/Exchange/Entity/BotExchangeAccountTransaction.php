@@ -71,4 +71,68 @@ class BotExchangeAccountTransaction
 		$this->type = $type;
 		$this->dt = new \DateTimeImmutable();
 	}
+
+	/**
+	 * @return BotExchangeAccountTransactionId
+	 */
+	public function getId(): BotExchangeAccountTransactionId
+	{
+		return $this->id;
+	}
+
+	/**
+	 * @return BotId
+	 */
+	public function getBotId(): BotId
+	{
+		return $this->botId;
+	}
+
+	/**
+	 * @return ExchangeId
+	 */
+	public function getExchangeId(): ExchangeId
+	{
+		return $this->exchangeId;
+	}
+
+	/**
+	 * @return Currency
+	 */
+	public function getCurrency(): Currency
+	{
+		return $this->currency;
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getMoney(): Money
+	{
+		return $this->money;
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getBalance(): Money
+	{
+		return $this->balance;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType(): string
+	{
+		return $this->type;
+	}
+
+	/**
+	 * @return \DateTimeImmutable
+	 */
+	public function getDt(): \DateTimeImmutable
+	{
+		return $this->dt;
+	}
 }

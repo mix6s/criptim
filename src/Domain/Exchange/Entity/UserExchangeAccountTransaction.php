@@ -95,4 +95,44 @@ class UserExchangeAccountTransaction
 	{
 		return $this->userId;
 	}
+
+	/**
+	 * @return UserExchangeAccountTransactionId
+	 */
+	public function getId(): UserExchangeAccountTransactionId
+	{
+		return $this->id;
+	}
+
+	/**
+	 * @return Currency
+	 */
+	public function getCurrency(): Currency
+	{
+		return $this->currency;
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getMoney(): Money
+	{
+		return $this->money;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType(): string
+	{
+		return $this->type;
+	}
+
+	/**
+	 * @return \DateTimeImmutable
+	 */
+	public function getDt(): \DateTimeImmutable
+	{
+		return $this->dt;
+	}
 }

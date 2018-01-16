@@ -71,4 +71,52 @@ class BotTradingSessionAccountTransaction
 	{
 		return $this->balance;
 	}
+
+	/**
+	 * @return BotTradingSessionAccountTransactionId
+	 */
+	public function getId(): BotTradingSessionAccountTransactionId
+	{
+		return $this->id;
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getMoney(): Money
+	{
+		return $this->money;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType(): string
+	{
+		return $this->type;
+	}
+
+	/**
+	 * @return \DateTimeImmutable
+	 */
+	public function getDt(): \DateTimeImmutable
+	{
+		return $this->dt;
+	}
+
+	/**
+	 * @return Currency
+	 */
+	public function getCurrency(): Currency
+	{
+		return $this->currency;
+	}
+
+	/**
+	 * @return BotTradingSessionId
+	 */
+	public function getBotTradingSessionId(): BotTradingSessionId
+	{
+		return $this->botTradingSessionId;
+	}
 }

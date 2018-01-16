@@ -25,4 +25,12 @@ class BotTradingSessionAccount extends Account
 		parent::__construct($currency);
 		$this->botTradingSessionId = $botTradingSessionId;
 	}
+
+	/**
+	 * @return BotTradingSessionId
+	 */
+	public function getBotTradingSessionId(): BotTradingSessionId
+	{
+		return $this->botTradingSessionId;
+	}
 }

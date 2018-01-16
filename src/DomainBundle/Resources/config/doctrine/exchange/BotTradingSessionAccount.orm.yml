@@ -1,0 +1,10 @@
+Domain\Exchange\Entity\BotTradingSessionAccount:
+    type: entity
+    id:
+        botTradingSessionId:
+            type: botTradingSessionId
+        currency:
+            type: currency
+    fields:
+        balance:
+            type: money

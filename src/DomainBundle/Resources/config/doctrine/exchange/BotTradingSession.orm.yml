@@ -1,0 +1,22 @@
+Domain\Exchange\Entity\BotTradingSession:
+    type: entity
+    id:
+        id:
+            type: botTradingSessionId
+            generator: { strategy: NONE }
+    fields:
+        botId:
+            type: botId
+        tradingStrategyId:
+            type: tradingStrategyId
+        tradingStrategySettings:
+            type: tradingStrategySettings
+        status:
+            type: string
+        createdAt:
+            type: dateTimeImmutable
+        updatedAt:
+            type: dateTimeImmutable
+        endedAt:
+            type: dateTimeImmutable
+            nullable: true

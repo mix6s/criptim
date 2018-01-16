@@ -1,0 +1,21 @@
+Domain\Exchange\Entity\UserExchangeAccountTransaction:
+    type: entity
+    id:
+        id:
+            type: userExchangeAccountTransactionId
+            generator: { strategy: NONE }
+    fields:
+        userId:
+            type: userId
+        exchangeId:
+            type: exchangeId
+        currency:
+            type: currency
+        money:
+            type: money
+        balance:
+            type: money
+        type:
+            type: string
+        dt:
+            type: dateTimeImmutable
