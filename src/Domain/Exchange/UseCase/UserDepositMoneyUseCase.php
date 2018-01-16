@@ -16,6 +16,7 @@ use Domain\Exchange\Entity\BotExchangeAccountTransaction;
 use Domain\Exchange\Entity\UserExchangeAccount;
 use Domain\Exchange\Entity\UserExchangeAccountTransaction;
 use Domain\Exchange\Factory\IdFactoryInterface;
+use Domain\Exchange\Policy\MoneyFromFloatPolicy;
 use Domain\Exchange\Policy\MoneyFromFloatPolicyInterface;
 use Domain\Exchange\Repository\BotExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\BotExchangeAccountTransactionRepositoryInterface;
@@ -27,6 +28,7 @@ use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface
 use Domain\Exchange\UseCase\Request\UserDepositMoneyRequest;
 use Domain\Exchange\UseCase\Response\UserDepositMoneyResponse;
 use Domain\Repository\UserRepositoryInterface;
+use Money\Money;
 
 class UserDepositMoneyUseCase
 {
@@ -75,8 +77,7 @@ class UserDepositMoneyUseCase
 		BotExchangeAccountRepositoryInterface $botExchangeAccountRepository,
 		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository,
 		BotExchangeAccountTransactionRepositoryInterface $botExchangeAccountTransactionRepository,
-		BotRepositoryInterface $botRepository,
-		MoneyFromFloatPolicyInterface $moneyFromFloatPolicy
+		BotRepositoryInterface $botRepository
 	) {
 		$this->userRepository = $userRepository;
 		$this->exchangeRepository = $exchangeRepository;
@@ -86,7 +87,7 @@ class UserDepositMoneyUseCase
 		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
 		$this->botRepository = $botRepository;
 		$this->botExchangeAccountTransactionRepository = $botExchangeAccountTransactionRepository;
-		$this->moneyFromFloatPolicy = $moneyFromFloatPolicy;
+		$this->moneyFromFloatPolicy = new MoneyFromFloatPolicy();
 	}
 
 	public function execute(UserDepositMoneyRequest $request): UserDepositMoneyResponse
@@ -115,7 +116,7 @@ class UserDepositMoneyUseCase
 		$this->userExchangeAccountTransactionRepository->save($transaction);
 		$this->userExchangeAccountRepository->save($userAccount);
 		$bots = $this->botRepository->findByExchangeId($exchange->getId());
-		$botMoney = $money->divide(count($bots));
+		$botMoney = $money->divide(count($bots), Money::ROUND_DOWN);
 		foreach ($bots as $bot) {
 			try {
 				$botAccount = $this->botExchangeAccountRepository->findByBotIdExchangeIdCurrency($bot->getId(), $exchange->getId(), $money->getCurrency());

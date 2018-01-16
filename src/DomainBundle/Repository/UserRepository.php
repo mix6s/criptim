@@ -18,7 +18,6 @@ use Domain\ValueObject\UserId;
 class UserRepository extends EntityRepository implements UserRepositoryInterface
 {
 
-
 	public function findById(UserId $userId): User
 	{
 		/** @var User $user */
