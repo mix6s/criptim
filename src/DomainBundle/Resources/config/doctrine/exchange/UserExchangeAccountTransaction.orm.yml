@@ -3,7 +3,9 @@ Domain\Exchange\Entity\UserExchangeAccountTransaction:
     id:
         id:
             type: userExchangeAccountTransactionId
-            generator: { strategy: NONE }
+            generator: { strategy: SEQUENCE }
+            sequenceGenerator:
+                sequenceName: user_exchange_account_transaction_id_seq
     fields:
         userId:
             type: userId

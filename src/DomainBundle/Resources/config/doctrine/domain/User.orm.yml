@@ -4,4 +4,6 @@ Domain\Entity\User:
     id:
         id:
             type: userId
-            generator: { strategy: NONE }
+            generator: { strategy: SEQUENCE }
+            sequenceGenerator:
+                sequenceName: user_id_seq

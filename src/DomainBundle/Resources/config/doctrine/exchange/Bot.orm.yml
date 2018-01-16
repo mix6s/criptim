@@ -3,7 +3,9 @@ Domain\Exchange\Entity\Bot:
     id:
         id:
             type: botId
-            generator: { strategy: NONE }
+            generator: { strategy: SEQUENCE }
+            sequenceGenerator:
+                sequenceName: bot_id_seq
     fields:
         exchangeId:
             type: exchangeId
