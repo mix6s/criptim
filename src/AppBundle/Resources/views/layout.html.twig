@@ -32,14 +32,14 @@
                         </g>
                     </svg>
                 </a>
-                <a href="#" class="logo logo--header">
+                <a href="{{ path('homepage') }}" class="logo logo--header">
                     <span class="logo__text logo__text--bold">Crip</span><span
                             class="logo__text logo__text--light">tim</span>
                 </a>
             </div>
 
             <div class="header__block header__block--right">
-                <a href="#" class="header__wallet">
+                <a href="{{ path('cashier') }}" class="header__wallet">
                     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
                         <g fill="#DEDEDE" fill-rule="nonzero">
                             <path d="M23 13v-2c.143-1.796-1.036-3-3-3H9c-1.821 0-3 1.204-3 3v9c0 1.796 1.179 3 3 3h11c1.964 0 3.143-1.204 3-3v-2c.647-.357 1-.94 1-2v-1c0-.952-.353-1.533-1-2zm0 3c0 .7-.323 1-1 1h-5c-.677 0-1-.3-1-1v-1c0-.7.323-1 1-1h5c.677 0 1 .3 1 1v1zm-3 6H9c-1.25 0-2-.778-2-2v-9c0-1.222.75-2 2-2h11c1.25 0 2 .778 2 2v2h-5c-1.321-.222-2.179.667-2 2v1c-.179 1.444.679 2.333 2 2h5v2c0 1.222-.75 2-2 2z"/>
@@ -97,7 +97,7 @@
                     <div class="sidebar-nav">
                         <div class="sidebar-logo">
                             <span class="sidebar-logo__img"></span>
-                            <a href="#" class="logo">
+                            <a href="{{ path('homepage') }}" class="logo">
                                 <span class="logo__text logo__text--bold">Crip</span><span
                                         class="logo__text logo__text--light">tim</span>
                             </a>
@@ -118,7 +118,7 @@
                                 </a>
                             </li>
                             <li class="main-navigation__item">
-                                <a href="#" class="main-navigation__link">
+                                <a href="{{ path('monitoring') }}" class="main-navigation__link">
                             <span class="main-navigation__icon main-navigation__icon--users">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
                                     <g fill="none" fill-rule="evenodd" stroke="#DEDEDE">
@@ -132,7 +132,7 @@
                                 </a>
                             </li>
                             <li class="main-navigation__item">
-                                <a href="#" class="main-navigation__link">
+                                <a href="{{ path('cashier') }}" class="main-navigation__link">
                             <span class="main-navigation__icon main-navigation__icon--users">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
                                     <g fill="#DEDEDE" fill-rule="nonzero">
@@ -145,7 +145,7 @@
                                 </a>
                             </li>
                             <li class="main-navigation__item">
-                                <a href="#" class="main-navigation__link">
+                                <a href="{{ path('about') }}" class="main-navigation__link">
                             <span class="main-navigation__icon main-navigation__icon--users">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                      width="30" height="30" viewBox="0 0 30 30">
@@ -182,7 +182,7 @@
                                 </a>
                             </li>
                             <li class="main-navigation__item">
-                                <a href="#" class="main-navigation__link">
+                                <a href="{{ path('rules') }}" class="main-navigation__link">
                             <span class="main-navigation__icon main-navigation__icon--users">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                      width="30" height="30" viewBox="0 0 30 30">
@@ -221,8 +221,8 @@
                         </ul>
                     </div>
                     <div class="sidebar-login">
-                        <a href="#" class="button button--action">Зарегистрироваться</a>
-                        <a href="#" class="button button--main">Войти</a>
+                        <a href="{{ path('registration') }}" class="button button--action">Зарегистрироваться</a>
+                        <a href="{{ path('login') }}" class="button button--main">Войти</a>
                     </div>
                     <a href="#" class="sidebar-mobile__close js-close-sidebar">
                         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">

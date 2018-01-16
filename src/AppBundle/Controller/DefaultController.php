@@ -20,4 +20,140 @@ class DefaultController extends Controller
         return $this->render('@App/Default/index.html.twig', [
         ]);
     }
+
+    /**
+     * @Route("/main", name="main")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function testAction(Request $request)
+    {
+        return $this->render('@App/Default/main.html.twig');
+    }
+
+    /**
+     * @Route("/main_pro", name="main_pro")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function mainProAction(Request $request)
+    {
+        return $this->render('@App/Default/main-pro.html.twig');
+    }
+
+    /**
+     * @Route("/cashier", name="cashier")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function cashierAction(Request $request)
+    {
+        return $this->render('@App/Default/cashier.html.twig');
+    }
+
+    /**
+     * @Route("/cashier_complete", name="cashier_complete")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function cashierCompleteAction(Request $request)
+    {
+        return $this->render('@App/Default/cashier-complete.html.twig');
+
+    }
+
+    /**
+     * @Route("/cashier_error", name="cashier_error")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function cashierErrorAction(Request $request)
+    {
+        return $this->render('@App/Default/cashier-error.html.twig');
+
+    }
+
+    /**
+     * @Route("/cashier_recharge", name="cashier_recharge")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function cashierRechargeAction(Request $request)
+    {
+        return $this->render('@App/Default/cashier-recharge.html.twig');
+
+    }
+
+    /**
+     * @Route("/cashier_withdraw", name="cashier_withdraw")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function cashierWithdrawAction(Request $request)
+    {
+        return $this->render('@App/Default/cashier-withdraw.html.twig');
+
+    }
+
+    /**
+     * @Route("/cashier_authorization", name="cashier_authorization")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function cashierAuthorizationAction(Request $request)
+    {
+        return $this->render('@App/Default/cashier_authorization.html.twig');
+
+    }
+
+    /**
+     * @Route("/monitoring", name="monitoring")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function monitoringAction(Request $request)
+    {
+        return $this->render('@App/Default/monitoring.html.twig');
+    }
+
+    /**
+     * @Route("/about", name="about")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function aboutAction(Request $request)
+    {
+        return $this->render('@App/Default/page-about.html.twig');
+    }
+
+    /**
+     * @Route("/rules", name="rules")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function rulesAction(Request $request)
+    {
+        return $this->render('@App/Default/rules.html.twig');
+    }
+
+    /**
+     * @Route("/auth", name="auth")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function authAction(Request $request)
+    {
+        return $this->render('@App/Default/auth.html.twig');
+
+    }
+
+    /**
+     * @Route("/popup_commission", name="popup_commission")
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function popupCommissionAction()
+    {
+        return $this->render('@App/Default/popup-commission.html.twig');
+    }
+
 }
