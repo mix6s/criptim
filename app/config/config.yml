@@ -75,6 +75,9 @@ doctrine:
             botId:
                 class:                DomainBundle\Type\BotIdType
                 commented:            true
+            exchangeId:
+                class:                DomainBundle\Type\ExchangeIdType
+                commented:            true
             orderId:
                 class:                DomainBundle\Type\OrderIdType
                 commented:            true
@@ -90,6 +93,12 @@ doctrine:
             botTradingSessionId:
                 class:                DomainBundle\Type\BotTradingSessionIdType
                 commented:            true
+            currency:
+                class:                DomainBundle\Type\CurrencyType
+                commented:            true
+            money:
+                class:                DomainBundle\Type\MoneyType
+                commented:            true
     orm:
         auto_generate_proxy_classes: '%kernel.debug%'
         naming_strategy: doctrine.orm.naming_strategy.underscore
@@ -100,8 +109,13 @@ doctrine:
                 prefix: AppBundle\Entity
             Domain:
                 type: yml
-                dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine'
+                dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine/domain'
                 prefix: Domain\Entity
+                is_bundle: false
+            Domain.Exchange:
+                type: yml
+                dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine/exchange'
+                prefix: Domain\Exchange\Entity
                 is_bundle: false
 
 

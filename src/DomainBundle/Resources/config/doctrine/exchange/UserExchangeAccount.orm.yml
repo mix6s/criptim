@@ -1,0 +1,12 @@
+Domain\Exchange\Entity\UserExchangeAccount:
+    type: entity
+    id:
+        userId:
+            type: userId
+        exchangeId:
+            type: exchangeId
+        currency:
+            type: currency
+    fields:
+        balance:
+            type: money
