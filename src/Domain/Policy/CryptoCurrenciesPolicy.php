@@ -15,12 +15,13 @@ use Money\Currency;
 
 class CryptoCurrenciesPolicy implements Currencies
 {
+	const DOMAIN_SUBUNIT = 4;
 	const BTC = 'BTC';
 	const ETH = 'ETH';
 
 	const SUPPORT_CURRENCIES = [
 		self::BTC => 8,
-        self::ETH => 3
+        self::ETH => 3,
 	];
 
 	private static $currencies = null;
@@ -53,7 +54,7 @@ class CryptoCurrenciesPolicy implements Currencies
 				'Unknown crypto currency: ' . $currency->getCode()
 			);
 		}
-		return self::SUPPORT_CURRENCIES[$currency->getCode()];
+		return self::SUPPORT_CURRENCIES[$currency->getCode()] + self::DOMAIN_SUBUNIT;
 	}
 
 	/**
