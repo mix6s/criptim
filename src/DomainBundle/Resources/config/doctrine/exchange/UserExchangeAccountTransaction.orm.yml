@@ -1,4 +1,5 @@
 Domain\Exchange\Entity\UserExchangeAccountTransaction:
+    repositoryClass: DomainBundle\Exchange\Repository\UserExchangeAccountTransactionRepository
     type: entity
     id:
         id:

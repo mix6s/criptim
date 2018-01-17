@@ -10,7 +10,7 @@ namespace Domain\Exchange\Repository;
 
 
 use Domain\Exception\EntityNotFoundException;
-use Domain\Exchange\Entity\UserExchangeAccount;
+use Domain\Exchange\Entity\BotExchangeAccount;
 use Domain\Exchange\ValueObject\BotId;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Money\Currency;
@@ -21,24 +21,24 @@ interface BotExchangeAccountRepositoryInterface
 	 * @param BotId $botId
 	 * @param ExchangeId $exchangeId
 	 * @param Currency $currency
-	 * @return UserExchangeAccount
+	 * @return BotExchangeAccount
 	 * @throws EntityNotFoundException
 	 */
 	public function findByBotIdExchangeIdCurrency(
 		BotId $botId,
 		ExchangeId $exchangeId,
 		Currency $currency
-	): UserExchangeAccount;
+	): BotExchangeAccount;
 
 	/**
 	 * @param BotId $botId
 	 * @param ExchangeId $exchangeId
-	 * @return UserExchangeAccount[]
+	 * @return BotExchangeAccount[]
 	 */
 	public function findByBotIdExchangeId(
 		BotId $botId,
 		ExchangeId $exchangeId
 	): array ;
 
-	public function save(UserExchangeAccount $account);
+	public function save(BotExchangeAccount $account);
 }

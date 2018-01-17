@@ -23,5 +23,5 @@ interface UserExchangeAccountTransactionRepositoryInterface
 	 * @param \DateTimeImmutable $dt
 	 * @return UserExchangeAccountTransaction[]
 	 */
-	public function findByExchangeIdCurrencyDate(ExchangeId $exchangeId, Currency $currency, \DateTimeImmutable $dt): array ;
+	public function findLastByExchangeIdCurrencyDate(ExchangeId $exchangeId, Currency $currency, \DateTimeImmutable $dt): array;
 }

@@ -121,7 +121,7 @@ doctrine:
                 dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine/domain'
                 prefix: Domain\Entity
                 is_bundle: false
-            Domain.Exchange:
+            Domain:Exchange:
                 type: yml
                 dir: '%kernel.project_dir%/src/DomainBundle/Resources/config/doctrine/exchange'
                 prefix: Domain\Exchange\Entity

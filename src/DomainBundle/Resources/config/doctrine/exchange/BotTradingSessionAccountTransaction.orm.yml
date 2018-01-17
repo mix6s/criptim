@@ -1,4 +1,5 @@
 Domain\Exchange\Entity\BotTradingSessionAccountTransaction:
+    repositoryClass: DomainBundle\Exchange\Repository\BotTradingSessionAccountTransactionRepository
     type: entity
     id:
         id:

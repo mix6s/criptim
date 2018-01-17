@@ -170,7 +170,7 @@ class ProcessBotTradingUseCase
 			if ($diff->isZero()) {
 				continue;
 			}
-			$transactions = $this->userExchangeAccountTransactionRepository->findByExchangeIdCurrencyDate(
+			$transactions = $this->userExchangeAccountTransactionRepository->findLastByExchangeIdCurrencyDate(
 				$bot->getExchangeId(),
 				$diff->getCurrency(),
 				$session->getCreatedAt()

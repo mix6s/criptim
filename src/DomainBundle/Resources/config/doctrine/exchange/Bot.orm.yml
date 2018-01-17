@@ -1,4 +1,5 @@
 Domain\Exchange\Entity\Bot:
+    repositoryClass: DomainBundle\Exchange\Repository\BotRepository
     type: entity
     id:
         id:
