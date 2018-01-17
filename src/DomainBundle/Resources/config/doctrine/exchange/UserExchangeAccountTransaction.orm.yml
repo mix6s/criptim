@@ -1,5 +1,13 @@
 Domain\Exchange\Entity\UserExchangeAccountTransaction:
     repositoryClass: DomainBundle\Exchange\Repository\UserExchangeAccountTransactionRepository
+    namedNativeQueries:
+        findLastByExchangeIdCurrencyDate:
+          name: findLastByExchangeIdCurrencyDate
+          resultClass: __CLASS__
+          query: "SELECT DISTINCT ON (user_id) id, user_id, exchange_id, currency, money, balance, type, dt
+          FROM user_exchange_account_transaction
+          WHERE currency = :currency AND exchange_id = :excange_id AND  dt <= :dt
+          ORDER BY user_id, dt DESC"
     type: entity
     id:
         id:

@@ -10,6 +10,7 @@ namespace DomainBundle\Exchange\Repository;
 
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
 use Domain\Exchange\Entity\UserExchangeAccountTransaction;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
 use Domain\Exchange\ValueObject\ExchangeId;
@@ -20,7 +21,8 @@ class UserExchangeAccountTransactionRepository extends EntityRepository implemen
 
 	public function save(UserExchangeAccountTransaction $transaction)
 	{
-		// TODO: Implement save() method.
+		$this->getEntityManager()->persist($transaction);
+		$this->getEntityManager()->flush($transaction);
 	}
 
 	/**
@@ -34,6 +36,10 @@ class UserExchangeAccountTransactionRepository extends EntityRepository implemen
 		Currency $currency,
 		\DateTimeImmutable $dt
 	): array {
-
+		return $this->createNativeNamedQuery('findLastByExchangeIdCurrencyDate')
+			->setParameter('currency', $currency)
+			->setParameter('exchange_id', $exchangeId)
+			->setParameter('dt', $dt)
+			->getResult();
 	}
 }
