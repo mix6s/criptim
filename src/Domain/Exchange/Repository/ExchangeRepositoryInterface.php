@@ -15,8 +15,6 @@ use Domain\Exchange\ValueObject\ExchangeId;
 
 interface ExchangeRepositoryInterface
 {
-	public function save(ExchangeInterface $exchange);
-
 	/**
 	 * @param ExchangeId $exchangeId
 	 * @return ExchangeInterface
