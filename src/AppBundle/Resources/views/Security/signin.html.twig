@@ -1,32 +1,128 @@
-{% extends '@App/layout.html.twig' %}
+{% extends "@App/layout.html.twig" %}
 
 {% block content %}
-    <div class="container">
-        <section class="signin page wrapper">
-            <h1 class="title">Вход на сайт</h1>
-            <form action="{{ path("fos_user_security_check") }}" method="post" class="signin__form">
-                {% if csrf_token %}
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
-                {% endif %}
-                <div class="signin__item">
-                    <label for="email" class="label">Ваш e-mail</label>
-                    <input id="email" type="email" name="_username" class="input {{ error ? 'input--error' : '' }}" placeholder="example@gmail.com" value="{{ last_username }}" required>
-                    {% if error %}
-                        <div class="form-message form-message--error">
-                            {{ error.messageKey|trans(error.messageData, 'security') }}
-                        </div>
-                    {% endif %}
 
-                </div>
-                <div class="signin__item">
-                    <label for="pass-1" class="label">Пароль</label>
-                    <input id="pass-1"  name="_password" type="password" class="input" required>
-                </div>
-                <div class="signin__button">
-                    <button class="btn btn--action">Войти</button>
-                    <a href="{{ path('fos_user_resetting_request') }}" class="signin__link">Забыли пароль?</a>
-                </div>
-            </form>
-        </section>
+    <a href="#" class="title title--main title--back">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 30 30">
+            <defs>
+                <path id="a" d="M10 14h15v2H10z"/>
+            </defs>
+            <g fill="none" fill-rule="evenodd">
+                <path stroke="#C90A2A" d="M10.5 14.5h14v1h-14z"/>
+                <path stroke="#C90A2A" stroke-width="2" d="M15 9l-6 6 6 6"/>
+            </g>
+        </svg>
+
+        <span>Авторизация</span>
+    </a>
+
+    <ul class="tabs js-tabs-container">
+        <li class="tabs-item tabs-item--active"><a href="{{ path('login') }}" class="tabs-item__link" data-tab="authorization">Вход</a></li>
+        <li class="tabs-item"><a href="{{ path('registration') }}" class="tabs-item__link" data-tab="registration">Регистрация</a></li>
+    </ul>
+
+    <div class="tab-content js-tab-content tab-content--active" id="authorization">
+        <form action="{{ path("fos_user_security_check") }}" method="post" class="auth-form-content" >
+            {% if csrf_token %}
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+            {% endif %}
+
+            <div class="form-content">
+                <label class="field-block">
+                    <span class="field-block__title">Электронная почта</span>
+                    <input id="email" type="text" name="_username" class="field-block__field" placeholder="example@gmail.com" value="{{ last_username }}" required="required">
+                </label>
+                {% if error %}
+                    <div class="form-message form-message--error">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <label class="field-block">
+                    <span class="field-block__title field-block__title--password">Пароль <a href="{{ path('fos_user_resetting_request') }}" class="field-block__pass-restore">Забыли пароль?</a></span>
+                    <div class="field-block__password-container js-password-container">
+                        <input id="pass-1" name="_password" type="password" class="field-block__field" required="required">
+
+                        <a href="javascript: void(0);" class="field-block__password-visible js-change-password-visibility">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                                <g fill="#737276" fill-rule="nonzero">
+                                    <path d="M15.491 9c-4.187 0-7.795 2.384-9.453 5.825a.38.38 0 0 0 0 .332c1.658 3.441 5.266 5.825 9.453 5.825 4.187 0 7.796-2.384 9.454-5.825a.38.38 0 0 0 0-.332C23.287 11.385 19.678 9 15.49 9zm0 10.125c-2.364 0-4.278-1.85-4.278-4.133 0-2.284 1.916-4.133 4.278-4.133 2.365 0 4.279 1.851 4.279 4.133s-1.916 4.133-4.279 4.133z"/>
+                                    <ellipse cx="15.5" cy="14.877" rx="2.5" ry="2.415"/>
+                                </g>
+                            </svg>
+                        </a>
+                    </div>
+                </label>
+
+                <label class="form-checkbox">
+                    <input type="checkbox" class="form-checkbox__field">
+                    <span class="form-checkbox__text">
+                    <span class="form-checkbox__descr">Запомнить меня</span>
+                </span>
+                </label>
+
+                <button type="submit" class="button button--action form-content__button">Войти</button>
+            </div>
+        </form>
+
+        <div class="social">
+            <span class="social__text">Или войдите через</span>
+
+            <ul class="social__list">
+                <li class="social__item">
+                    <a href="" class="social__link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                            <path fill="#737276" fill-rule="nonzero" d="M19.638 14.98h-2.67V25h-4.044V14.98H11v-3.52h1.924V9.18c0-1.63.755-4.181 4.08-4.181L20 5.013V8.43h-2.174c-.356 0-.858.182-.858.96v2.072h3.023l-.353 3.518z"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="social__item">
+                    <a href="" class="social__link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                            <path fill="#737276" fill-rule="nonzero" d="M26.873 19.74a1.534 1.534 0 0 0-.082-.148c-.416-.712-1.212-1.586-2.386-2.622l-.025-.024-.013-.011-.012-.012h-.013c-.533-.483-.87-.807-1.012-.973-.258-.316-.316-.637-.175-.961.1-.245.475-.763 1.125-1.554.341-.42.612-.755.812-1.008 1.441-1.82 2.066-2.982 1.874-3.488l-.074-.119c-.05-.07-.18-.136-.387-.195-.209-.06-.475-.07-.8-.03l-3.599.024a.491.491 0 0 0-.25.006l-.163.035-.062.03-.05.036a.545.545 0 0 0-.137.124.805.805 0 0 0-.125.208 18.954 18.954 0 0 1-1.337 2.669c-.309.49-.592.915-.85 1.275-.258.36-.475.625-.65.795a4.46 4.46 0 0 1-.475.41c-.141.102-.25.146-.324.13a9.57 9.57 0 0 1-.213-.048.806.806 0 0 1-.281-.29 1.253 1.253 0 0 1-.144-.463 4.849 4.849 0 0 1-.044-.48 9.53 9.53 0 0 1 .007-.57c.008-.245.012-.411.012-.498 0-.3.007-.627.019-.979l.031-.836c.009-.206.013-.423.013-.653 0-.23-.015-.409-.044-.54a1.782 1.782 0 0 0-.131-.38.65.65 0 0 0-.256-.284 1.488 1.488 0 0 0-.419-.16c-.441-.095-1.004-.146-1.687-.154-1.55-.016-2.545.079-2.986.285a1.673 1.673 0 0 0-.475.355c-.15.174-.171.27-.063.285.5.071.854.241 1.062.51l.075.142c.059.103.117.285.175.546.059.261.096.55.113.866a8.769 8.769 0 0 1 0 1.483c-.042.411-.081.732-.119.961-.037.23-.094.415-.169.557a2.32 2.32 0 0 1-.15.261.21.21 0 0 1-.062.06.98.98 0 0 1-.337.06c-.117 0-.259-.056-.425-.167a2.945 2.945 0 0 1-.519-.457 6.12 6.12 0 0 1-.606-.812c-.225-.348-.458-.76-.7-1.234l-.2-.344a29.036 29.036 0 0 1-.512-.967 18.18 18.18 0 0 1-.575-1.228.788.788 0 0 0-.3-.38l-.062-.035a.87.87 0 0 0-.2-.101 1.381 1.381 0 0 0-.287-.077L3.8 8.594c-.35 0-.587.076-.712.226l-.05.071a.367.367 0 0 0-.038.19c0 .087.025.194.075.32a38.32 38.32 0 0 0 1.63 3.227c.588 1.036 1.098 1.87 1.531 2.503.433.633.875 1.23 1.325 1.791.45.562.748.922.893 1.08.146.158.26.277.344.356l.312.285c.2.19.494.417.881.682.388.265.817.526 1.287.783a7.2 7.2 0 0 0 1.644.628 5.97 5.97 0 0 0 1.824.196h1.437c.292-.024.512-.11.662-.26l.05-.06a.765.765 0 0 0 .094-.22c.029-.098.044-.207.044-.326-.009-.34.018-.646.08-.919.063-.273.134-.478.213-.617.08-.138.17-.255.269-.35.1-.094.17-.152.213-.172a.839.839 0 0 1 .1-.041c.2-.063.434-.002.705.184.271.186.525.415.763.688.237.273.522.58.856.92.333.34.625.592.874.759l.25.142c.167.095.384.182.65.261.266.079.5.099.7.06l3.199-.048c.316 0 .562-.05.737-.149.175-.098.279-.207.312-.326a.873.873 0 0 0 .007-.403 1.43 1.43 0 0 0-.088-.315z"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="social__item">
+                    <a href="" class="social__link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                            <g fill="#737276" fill-rule="nonzero">
+                                <path d="M13.974 19.011c-1.531-.16-2.912-.54-4.094-1.471-.147-.116-.299-.228-.432-.357-.518-.5-.57-1.074-.16-1.664.35-.506.938-.641 1.549-.35.118.055.23.126.339.201 2.203 1.524 5.23 1.566 7.441.069.22-.17.454-.308.725-.378.528-.136 1.02.059 1.303.524.324.53.32 1.05-.079 1.461-.611.633-1.347 1.09-2.164 1.409-.773.302-1.62.454-2.457.554.126.139.186.207.265.287 1.137 1.15 2.28 2.297 3.414 3.451.386.394.467.881.254 1.339-.233.5-.753.829-1.264.794-.323-.023-.575-.185-.8-.412-.858-.87-1.732-1.724-2.573-2.61-.245-.258-.363-.209-.579.015-.863.895-1.74 1.776-2.624 2.653-.396.393-.868.464-1.328.24-.488-.24-.8-.741-.775-1.246.016-.342.183-.602.416-.836 1.126-1.132 2.248-2.267 3.371-3.4.074-.076.144-.156.252-.273z"/>
+                                <path d="M14.907 15.069c-2.732-.01-4.972-2.29-4.957-5.046.016-2.786 2.258-5.03 5.017-5.023 2.764.008 4.983 2.285 4.97 5.1-.015 2.75-2.27 4.978-5.03 4.969zm2.483-5.04a2.444 2.444 0 0 0-2.443-2.458 2.447 2.447 0 0 0-2.449 2.488 2.443 2.443 0 0 0 2.462 2.44 2.439 2.439 0 0 0 2.43-2.47z"/>
+                            </g>
+                        </svg>
+                    </a>
+                </li>
+                <li class="social__item">
+                    <a href="" class="social__link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                            <path fill="#737276" fill-rule="nonzero" d="M26 8.126a8.266 8.266 0 0 1-2.474.715 4.523 4.523 0 0 0 1.894-2.51 8.423 8.423 0 0 1-2.737 1.102C21.897 6.55 20.778 6 19.538 6c-2.379 0-4.308 2.032-4.308 4.537 0 .355.038.702.112 1.034-3.58-.19-6.754-1.996-8.879-4.742A4.689 4.689 0 0 0 5.88 9.11c0 1.575.762 2.964 1.916 3.776a4.144 4.144 0 0 1-1.95-.569v.057c0 2.197 1.485 4.032 3.454 4.45-.36.101-.741.158-1.135.158-.278 0-.547-.029-.81-.084.548 1.804 2.138 3.115 4.023 3.151A8.37 8.37 0 0 1 5 21.927a11.734 11.734 0 0 0 6.603 2.041c7.925 0 12.257-6.914 12.257-12.91l-.015-.588A8.869 8.869 0 0 0 26 8.126z"/>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
+
+    <script>
+        $(document).ready(function () {
+            initComponents();
+        });
+
+        function initComponents() {
+            initPasswordTypeSwitcher();
+        };
+
+        function initPasswordTypeSwitcher() {
+            if (window.PasswordTypeSwitcher) {
+
+                var params = {
+                    container : $('.js-password-container')
+                };
+
+                var passwordSwitcher = new PasswordTypeSwitcher(params);
+            }
+        };
+
+    </script>
 {% endblock %}

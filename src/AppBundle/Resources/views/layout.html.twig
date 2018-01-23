@@ -221,8 +221,12 @@
                         </ul>
                     </div>
                     <div class="sidebar-login">
-                        <a href="{{ path('registration') }}" class="button button--action">Зарегистрироваться</a>
-                        <a href="{{ path('login') }}" class="button button--main">Войти</a>
+                        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                            <a href="{{ path('fos_user_security_logout') }}" class="button button--main">Выйти</a>
+                        {% else %}
+                            <a href="{{ path('registration') }}" class="button button--action">Зарегистрироваться</a>
+                            <a href="{{ path('login') }}" class="button button--main">Войти</a>
+                        {% endif %}
                     </div>
                     <a href="#" class="sidebar-mobile__close js-close-sidebar">
                         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">

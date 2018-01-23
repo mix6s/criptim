@@ -1,42 +1,129 @@
-{% extends '@App/layout.html.twig' %}
-
-{% form_theme form _self %}
-{% block form_errors %}
-    {% if errors|length > 0 %}
-        {% for error in errors %}
-            <div class="form-message form-message--error">
-                {{ error.message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endblock form_errors %}
-
+{% extends "@App/layout.html.twig" %}
 
 {% block content %}
-    <div class="container">
-    <section class="registration page wrapper">
-        <h1 class="title">Регистрация</h1>
-        <form action="{{ path('registration') }}" method="post"  class="registration__form">
-            <div class="registration__item">
-                {{ form_widget(form._token) }}
-                {{ form_label(form.email, 'Ваш E-mail', {label_attr : {class: 'label'}}) }}
-                {{ form_widget(form.email, {attr: {placeholder: 'example@gmail.com',class: not form.email.vars.valid ? 'input input--error' : 'input'}}) }}
-                {{ form_errors(form.email) }}
-            </div>
-            <div class="registration__item">
-                {{ form_label(form.plainPassword.first, 'Пароль', {label_attr : {class: 'label'}}) }}
-                {{ form_widget(form.plainPassword.first, {attr: {class: not form.plainPassword.first.vars.valid ? 'input input--error' : 'input'}}) }}
+
+    <a href="#" class="title title--main title--back">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 30 30">
+            <defs>
+                <path id="a" d="M10 14h15v2H10z"/>
+            </defs>
+            <g fill="none" fill-rule="evenodd">
+                <path stroke="#C90A2A" d="M10.5 14.5h14v1h-14z"/>
+                <path stroke="#C90A2A" stroke-width="2" d="M15 9l-6 6 6 6"/>
+            </g>
+        </svg>
+
+        <span>Авторизация</span>
+    </a>
+
+    <ul class="tabs js-tabs-container">
+        <li class="tabs-item"><a href="{{ path('login') }}" class="tabs-item__link" data-tab="authorization">Вход</a></li>
+        <li class="tabs-item tabs-item--active"><a href="{{ path('registration') }}" class="tabs-item__link" data-tab="registration">Регистрация</a></li>
+    </ul>
+    {{ form_start(form) }}
+
+    <form action="" class="auth-form-content" >
+        {{ form_widget(form._token) }}
+        {{ form_errors(form._token) }}
+
+        <div class="form-content">
+            <label class="field-block">
+                <span class="field-block__title">Электронная почта</span>
+                {{ form_widget(form.email, {attr: {placeholder: 'workmail@gmail.com', class: 'field-block__field', name: 'email', type: 'text'}}) }}
+            </label>
+            {{ form_errors(form.email) }}
+
+            <label class="field-block">
+                <span class="field-block__title field-block__title--password">Придумайте пароль</span>
+                <div class="field-block__password-container js-password-container">
+                    {{ form_widget(form.plainPassword.first, {attr: {class: 'field-block__field', name: 'password'}}) }}
+                    {#<input type="password" class="field-block__field" placeholder="workmail@gmail.com" name="password">#}
+                    <a href="javascript: void(0);" class="field-block__password-visible js-change-password-visibility">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                            <g fill="#737276" fill-rule="nonzero">
+                                <path d="M15.491 9c-4.187 0-7.795 2.384-9.453 5.825a.38.38 0 0 0 0 .332c1.658 3.441 5.266 5.825 9.453 5.825 4.187 0 7.796-2.384 9.454-5.825a.38.38 0 0 0 0-.332C23.287 11.385 19.678 9 15.49 9zm0 10.125c-2.364 0-4.278-1.85-4.278-4.133 0-2.284 1.916-4.133 4.278-4.133 2.365 0 4.279 1.851 4.279 4.133s-1.916 4.133-4.279 4.133z"/>
+                                <ellipse cx="15.5" cy="14.877" rx="2.5" ry="2.415"/>
+                            </g>
+                        </svg>
+                    </a>
+                </div>
                 {{ form_errors(form.plainPassword.first) }}
-            </div>
-            <div class="registration__item">
-                {{ form_label(form.plainPassword.second, 'Подтведите пароль', {label_attr : {class: 'label'}}) }}
-                {{ form_widget(form.plainPassword.second, {attr: {class: not form.plainPassword.second.vars.valid ? 'input input--error' : 'input'}}) }}
+
+            </label>
+
+            <label class="field-block">
+                <span class="field-block__title field-block__title--password">Придумайте пароль</span>
+                <div class="field-block__password-container js-password-container">
+                    {{ form_widget(form.plainPassword.second, {attr: {class: 'field-block__field', name: 'password'}}) }}
+
+                    {#<input type="password" class="field-block__field" placeholder="workmail@gmail.com" name="password">#}
+                    <a href="javascript: void(0);" class="field-block__password-visible js-change-password-visibility">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                            <g fill="#737276" fill-rule="nonzero">
+                                <path d="M15.491 9c-4.187 0-7.795 2.384-9.453 5.825a.38.38 0 0 0 0 .332c1.658 3.441 5.266 5.825 9.453 5.825 4.187 0 7.796-2.384 9.454-5.825a.38.38 0 0 0 0-.332C23.287 11.385 19.678 9 15.49 9zm0 10.125c-2.364 0-4.278-1.85-4.278-4.133 0-2.284 1.916-4.133 4.278-4.133 2.365 0 4.279 1.851 4.279 4.133s-1.916 4.133-4.279 4.133z"/>
+                                <ellipse cx="15.5" cy="14.877" rx="2.5" ry="2.415"/>
+                            </g>
+                        </svg>
+                    </a>
+                </div>
                 {{ form_errors(form.plainPassword.second) }}
-            </div>
-            <div class="registration__button">
-                <button class="btn btn--action">Зарегистрироваться</button>
-            </div>
-        </form>
-    </section>
-    </div>
+
+            </label>
+
+            <label class="form-checkbox">
+                <input type="checkbox" class="form-checkbox__field">
+                <span class="form-checkbox__text">
+                    <span class="form-checkbox__descr">Я ознакомился и <a href="#" class="form-checkbox__link">принимаю соглашение об оказании услуг</a>.</span>
+                </span>
+            </label>
+
+            <button type="submit" class="button button--action form-content__button">Зарегистрироваться</button>
+        </div>
+    </form>
+    <script>
+        $(document).ready(function () {
+            initComponents();
+        });
+
+        function initComponents() {
+            initPasswordTypeSwitcher();
+        };
+
+        function initPasswordTypeSwitcher() {
+            if (window.PasswordTypeSwitcher) {
+
+                var params = {
+                    container : $('.js-password-container')
+                };
+
+                var passwordSwitcher = new PasswordTypeSwitcher(params);
+            }
+        };
+
+
+    </script>
+    {% if isDev %}
+        <div id="dev-tools">
+            <button class="js-auto-fill">Авторега (password = 123)</button>
+        </div>
+        <script>
+            function generateEmail() {
+                var chars = 'abcdefghijklmnopqrstuvwxyz1234567890';
+                var string = '';
+                for (var i = 0; i < 5; i++) {
+                    string += chars[Math.floor(Math.random() * chars.length)];
+                }
+                return string + '@domain.com';
+            }
+
+            $(document).on('click', '.js-auto-fill', function () {
+                var email = generateEmail();
+                var password = 123;
+                $('#registration_form_email').val(email);
+                $('#registration_form_plainPassword_first').val(password);
+                $('#registration_form_plainPassword_second').val(password);
+            })
+        </script>
+    {% endif %}
+
 {% endblock %}
