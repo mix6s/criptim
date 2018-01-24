@@ -10,11 +10,11 @@ namespace DomainBundle\Type;
 
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\JsonArrayType;
+use Doctrine\DBAL\Types\JsonType;
 use Money\Currency;
 use Money\Money;
 
-class MoneyType extends JsonArrayType
+class MoneyType extends JsonType
 {
 	const TYPE = 'money';
 

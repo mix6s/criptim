@@ -10,10 +10,10 @@ namespace DomainBundle\Type;
 
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\JsonArrayType;
+use Doctrine\DBAL\Types\JsonType;
 use Domain\Exchange\ValueObject\TradingStrategySettings;
 
-class TradingStrategySettingsType extends JsonArrayType
+class TradingStrategySettingsType extends JsonType
 {
 	const TYPE = 'tradingStrategySettings';
 
