@@ -121,8 +121,7 @@ class SecurityController extends Controller
 		return $this->render(
 			'@App/Security/registration.html.twig',
 			[
-				'form' => $form->createView(),
-                'isDev' => $this->container->get('kernel')->getEnvironment() === 'dev'
+				'form' => $form->createView()
 			]
 		);
 	}
