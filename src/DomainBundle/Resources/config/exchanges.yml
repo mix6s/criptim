@@ -1,0 +1,7 @@
+services:
+    Exchange\HitBtcExchange:
+        class: DomainBundle\Exchange\Entity\HitBtcExchange
+        arguments:
+            - '1'
+            - 'public'
+            - 'secret'

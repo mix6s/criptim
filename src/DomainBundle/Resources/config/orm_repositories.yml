@@ -1,0 +1,54 @@
+services:
+    ORM\BotExchangeAccountRepository:
+        class: DomainBundle\Exchange\Repository\BotExchangeAccountRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\BotExchangeAccount
+
+    ORM\BotExchangeAccountTransactionRepository:
+        class: DomainBundle\Exchange\Repository\BotExchangeAccountTransactionRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\BotExchangeAccountTransaction
+
+    ORM\BotTradingSessionAccountRepository:
+        class: DomainBundle\Exchange\Repository\BotTradingSessionAccountRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\BotTradingSessionAccount
+
+    ORM\BotRepository:
+        class: DomainBundle\Exchange\Repository\BotRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\Bot
+
+    ORM\BotTradingSessionAccountTransactionRepository:
+        class: DomainBundle\Exchange\Repository\BotTradingSessionAccountTransactionRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\BotTradingSessionAccountTransaction
+
+    ORM\BotTradingSessionRepository:
+        class: DomainBundle\Exchange\Repository\BotTradingSessionRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\BotTradingSession
+
+    ORM\UserExchangeAccountRepository:
+        class: DomainBundle\Exchange\Repository\UserExchangeAccountRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\UserExchangeAccount
+
+    ORM\UserExchangeAccountTransactionRepository:
+        class: DomainBundle\Exchange\Repository\UserExchangeAccountTransactionRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\UserExchangeAccountTransaction
+
+    ORM\UserRepository:
+        class: DomainBundle\Repository\UserRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Entity\User

@@ -22,7 +22,7 @@ class ExchangeRepository implements ExchangeRepositoryInterface
 	 */
 	private $exchanges;
 
-	public function __construct(array $exchanges)
+	public function __construct(array $exchanges = [])
 	{
 		foreach ($exchanges as $exchange) {
 			if (!$exchange instanceof ExchangeInterface) {
@@ -47,5 +47,13 @@ class ExchangeRepository implements ExchangeRepositoryInterface
 			throw new EntityNotFoundException(sprintf('Exchange with id %s not found', $exchangeId));
 		}
 		return $exchange;
+	}
+
+	/**
+	 * @return ExchangeInterface[]
+	 */
+	public function findAll(): array
+	{
+		return $this->exchanges;
 	}
 }

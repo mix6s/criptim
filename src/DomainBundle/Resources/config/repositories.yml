@@ -1,0 +1,12 @@
+services:
+    TradingStrategyRepository:
+        class: DomainBundle\Exchange\Repository\TradingStrategyRepository
+        arguments:
+            $strategies:
+                - '@TradingStrategy\Martin'
+
+    ExchangeRepository:
+        class: DomainBundle\Exchange\Repository\ExchangeRepository
+        arguments:
+            $exchanges:
+                - '@Exchange\HitBtcExchange'

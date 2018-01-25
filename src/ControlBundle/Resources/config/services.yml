@@ -1,0 +1,6 @@
+services:
+    Form\CreateBotRequestFormType:
+        class: ControlBundle\Form\Type\CreateBotRequestFormType
+        arguments: ['@ExchangeRepository', '@TradingStrategyRepository']
+        tags:
+            - { name: form.type, alias: ControlBundle\Form\Type\CreateBotRequestFormType }

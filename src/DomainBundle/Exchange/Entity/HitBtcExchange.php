@@ -6,7 +6,7 @@
  * Time: 11:50 AM
  */
 
-namespace DomainBundle\Exchange\Entity\HitBtc;
+namespace DomainBundle\Exchange\Entity;
 
 
 use Domain\Exception\DomainException;
@@ -17,9 +17,11 @@ use GuzzleHttp\Client;
 
 class HitBtcExchange implements ExchangeInterface
 {
+	const ID = 'hitbtc';
+
 	const API_ENDPOINT = 'https://api.hitbtc.com/api/2';
 	/**
-	 * @var string
+	 * @var ExchangeId
 	 */
 	private $id;
 	/**
@@ -37,7 +39,7 @@ class HitBtcExchange implements ExchangeInterface
 
 	public function __construct(string $id, string $publicKey, string $privateKey)
 	{
-		$this->id = $id;
+		$this->id = new ExchangeId(self::ID . $id);
 		$this->publicKey = $publicKey;
 		$this->privateKey = $privateKey;
 		$this->client = new Client();
@@ -48,7 +50,7 @@ class HitBtcExchange implements ExchangeInterface
 	 */
 	public function getId(): ExchangeId
 	{
-		return new ExchangeId($this->id);
+		return $this->id;
 	}
 
 	public function createOrder(OrderId $orderId)

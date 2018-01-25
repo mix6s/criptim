@@ -22,4 +22,6 @@ interface BotRepositoryInterface
 	public function findByExchangeId(ExchangeId $exchangeId): array;
 
 	public function findById(BotId $botId): Bot;
+
+	public function save(Bot $bot);
 }

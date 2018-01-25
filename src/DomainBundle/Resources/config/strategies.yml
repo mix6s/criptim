@@ -1,0 +1,3 @@
+services:
+    TradingStrategy\Martin:
+        class: DomainBundle\Exchange\TradingStrategy\Martin
