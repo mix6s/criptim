@@ -4,7 +4,43 @@
     <div class="container">
         <div class="row mb-10">
             <div class="col-md-12">
-                <a href="{{ path('control.bots.create') }}" class="btn btn-primary">Создать бота</a>
+                <a href="{{ path('control.bots.create') }}" class="btn btn-primary">Create</a>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-12">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Exchange</th>
+                        <th>Strategy</th>
+                        <th>Strategy settings</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for bot in bots %}
+                    <tr>
+                        <td>
+                            {{ bot.id }}
+                        </td>
+                        <td>
+                            {{ bot.exchangeId }}
+                        </td>
+                        <td>
+                            {{ bot.tradingStrategyId }}
+                        </td>
+                        <td>
+                            {{ bot.tradingStrategySettings }}
+                        </td>
+                        <td>
+                            <a class="btn btn-info" href="{{ path('control.bots.edit', {id: bot.id}) }}">Change</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -56,7 +56,7 @@ class CreateBotRequestFormType extends AbstractType
 							return $exchange->getId();
 						}, $this->exchangeRepository->findAll());
 					}),
-					'label' => 'Биржа'
+					'label' => 'Exchange'
 				]
 			)
 			->add(
@@ -68,18 +68,18 @@ class CreateBotRequestFormType extends AbstractType
 							return $strategy->getId();
 						}, $this->tradingStrategyRepository->findAll());
 					}),
-					'label' => 'Стратегия'
+					'label' => 'Strategy'
 				]
 			)
 			->add(
 				'tradingStrategySettings',
 				TradingStrategySettingsFormType::class,
 				[
-					'label' => 'Параметры'
+					'label' => 'Strategy settings'
 				]
 			)
 			->add(
-				'Создать',
+				'Save',
 				SubmitType::class,
 				[
 				]

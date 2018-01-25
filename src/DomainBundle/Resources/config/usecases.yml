@@ -1,0 +1,4 @@
+services:
+    UseCase\CreateBotUseCase:
+        class: Domain\Exchange\UseCase\CreateBotUseCase
+        arguments: ['@Exchange\IdFactory', '@ExchangeRepository', '@TradingStrategyRepository', '@ORM\BotRepository']

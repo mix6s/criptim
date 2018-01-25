@@ -39,4 +39,10 @@ class BotRepository extends EntityRepository implements BotRepositoryInterface
 		}
 		return $bot;
 	}
+
+	public function save(Bot $bot)
+	{
+		$this->getEntityManager()->persist($bot);
+		$this->getEntityManager()->flush($bot);
+	}
 }

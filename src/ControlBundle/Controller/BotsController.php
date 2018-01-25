@@ -10,6 +10,7 @@ namespace ControlBundle\Controller;
 
 
 use ControlBundle\Form\Type\CreateBotRequestFormType;
+use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\UseCase\Request\CreateBotRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +26,7 @@ class BotsController extends Controller
 	 */
 	public function listAction(Request $request)
 	{
+		/** @var Bot[] $bots */
 		$bots = $this->get('ORM\BotRepository')->findAll();
 
 		return $this->render('@Control/Bots/list.html.twig', [
@@ -42,7 +44,29 @@ class BotsController extends Controller
 		if ($form->isSubmitted() && $form->isValid()) {
 			/** @var CreateBotRequest $request */
 			$request = $form->getData();
-			dump($request);
+			$response = $this->get('UseCase\CreateBotUseCase')->execute($request);
+			$this->addFlash('info', 'Bot created');
+			return $this->redirectToRoute('control.bots.list');
+		}
+
+		return $this->render('@Control/Bots/new.html.twig', [
+			'form' => $form->createView()
+		]);
+	}
+
+	/**
+	 * @Route("/edit/{id}", name="control.bots.edit")
+	 */
+	public function editAction(Request $request, $id)
+	{
+		$form = $this->createForm(CreateBotRequestFormType::class);
+		$form->handleRequest($request);
+		if ($form->isSubmitted() && $form->isValid()) {
+			/** @var CreateBotRequest $request */
+			$request = $form->getData();
+			$response = $this->get('UseCase\CreateBotUseCase')->execute($request);
+			$this->addFlash('info', 'Bot created');
+			return $this->redirectToRoute('control.bots.list');
 		}
 
 		return $this->render('@Control/Bots/new.html.twig', [

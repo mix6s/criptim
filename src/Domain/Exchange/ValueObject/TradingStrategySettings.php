@@ -28,4 +28,9 @@ class TradingStrategySettings
 	{
 		return $this->data;
 	}
+
+	public function __toString()
+	{
+		return json_encode($this->data);
+	}
 }

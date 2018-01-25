@@ -1,4 +1,5 @@
 imports:
+    - { resource: '@DomainBundle/Resources/config/usecases.yml' }
     - { resource: '@DomainBundle/Resources/config/exchanges.yml' }
     - { resource: '@DomainBundle/Resources/config/strategies.yml' }
     - { resource: '@DomainBundle/Resources/config/repositories.yml' }
