@@ -1,5 +1,6 @@
 Domain\Entity\User:
     type: entity
+    table: domain_user
     repositoryClass: DomainBundle\Repository\UserRepository
     id:
         id:

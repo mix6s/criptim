@@ -1,4 +1,7 @@
 services:
+    UseCase\CreateUserUseCase:
+        class: Domain\UseCase\CreateUserUseCase
+        arguments: ['@UserIdFactory', '@ORM\UserRepository']
     UseCase\CreateBotUseCase:
         class: Domain\Exchange\UseCase\CreateBotUseCase
         arguments: ['@Exchange\IdFactory', '@ExchangeRepository', '@TradingStrategyRepository', '@ORM\BotRepository']

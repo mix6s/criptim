@@ -29,7 +29,7 @@ class OrderIdType extends Type
 
 	public function convertToDatabaseValue($value, AbstractPlatform $platform)
 	{
-		return (int)$value;
+		return (string)$value;
 	}
 
 	public function getName()

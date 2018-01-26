@@ -8,5 +8,7 @@ imports:
 services:
     Exchange\IdFactory:
         class: DomainBundle\Exchange\Factory\IdFactory
-        arguments:
-            - '@doctrine.dbal.default_connection'
+        arguments: ['@doctrine.dbal.default_connection']
+    UserIdFactory:
+        class: DomainBundle\Factory\UserIdFactory
+        arguments: ['@doctrine.dbal.default_connection']

@@ -10,6 +10,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Domain\Entity\Player;
+use Domain\ValueObject\UserId;
 use DomainBundle\Entity\PlayerMetadata;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -34,6 +35,12 @@ class User extends \FOS\UserBundle\Model\User
 	 * @ORM\GeneratedValue(strategy="IDENTITY")
 	 */
 	protected $id;
+
+	/**
+	 * @ORM\Column(type="userId", unique=true, nullable=true)
+	 * @var UserId
+	 */
+	private $domainUserId;
 
 	/**
 	 * @return int
@@ -75,4 +82,19 @@ class User extends \FOS\UserBundle\Model\User
 		return parent::setEmailCanonical($usernameCanonical);
 	}
 
+	/**
+	 * @return UserId|null
+	 */
+	public function getDomainUserId()
+	{
+		return $this->domainUserId;
+	}
+
+	/**
+	 * @param UserId $domainUserId
+	 */
+	public function setDomainUserId(UserId $domainUserId)
+	{
+		$this->domainUserId = $domainUserId;
+	}
 }
