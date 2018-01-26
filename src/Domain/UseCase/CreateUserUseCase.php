@@ -40,6 +40,6 @@ class CreateUserUseCase
 		$id = $this->userIdFactory->getUserId();
 		$user = new User($id);
 		$this->userRepository->save($user);
-		return new CreateUserResponse($id);
+		return new CreateUserResponse($user);
 	}
 }

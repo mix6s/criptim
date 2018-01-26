@@ -6,6 +6,11 @@ imports:
     - { resource: '@DomainBundle/Resources/config/orm_repositories.yml' }
 
 services:
+    TwigExtension:
+        class: DomainBundle\TwigExtension
+        arguments: ['@service_container']
+        tags:
+            - { name: twig.extension }
     Exchange\IdFactory:
         class: DomainBundle\Exchange\Factory\IdFactory
         arguments: ['@doctrine.dbal.default_connection']

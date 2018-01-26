@@ -25,6 +25,8 @@ use Domain\Exchange\Repository\ExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\ExchangeRepositoryInterface;
 use Domain\Exchange\Repository\UserExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
+use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
+use Domain\Exchange\UseCase\Request\GetUserExchangeAccountRequest;
 use Domain\Exchange\UseCase\Request\UserDepositMoneyRequest;
 use Domain\Exchange\UseCase\Response\UserDepositMoneyResponse;
 use Domain\Repository\UserRepositoryInterface;
@@ -68,6 +70,14 @@ class UserDepositMoneyUseCase
 	 * @var MoneyFromFloatPolicyInterface
 	 */
 	private $moneyFromFloatPolicy;
+	/**
+	 * @var GetBotExchangeAccountUseCase
+	 */
+	private $getBotExchangeAccountUserCase;
+	/**
+	 * @var GetUserExchangeAccountUseCase
+	 */
+	private $getUserExchangeAccountUseCase;
 
 	public function __construct(
 		UserRepositoryInterface $userRepository,
@@ -77,7 +87,9 @@ class UserDepositMoneyUseCase
 		BotExchangeAccountRepositoryInterface $botExchangeAccountRepository,
 		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository,
 		BotExchangeAccountTransactionRepositoryInterface $botExchangeAccountTransactionRepository,
-		BotRepositoryInterface $botRepository
+		BotRepositoryInterface $botRepository,
+		GetBotExchangeAccountUseCase $getBotExchangeAccountUserCase,
+		GetUserExchangeAccountUseCase $getUserExchangeAccountUseCase
 	) {
 		$this->userRepository = $userRepository;
 		$this->exchangeRepository = $exchangeRepository;
@@ -88,6 +100,8 @@ class UserDepositMoneyUseCase
 		$this->botRepository = $botRepository;
 		$this->botExchangeAccountTransactionRepository = $botExchangeAccountTransactionRepository;
 		$this->moneyFromFloatPolicy = new MoneyFromFloatPolicy();
+		$this->getBotExchangeAccountUserCase = $getBotExchangeAccountUserCase;
+		$this->getUserExchangeAccountUseCase = $getUserExchangeAccountUseCase;
 	}
 
 	public function execute(UserDepositMoneyRequest $request): UserDepositMoneyResponse
@@ -96,14 +110,14 @@ class UserDepositMoneyUseCase
 		$exchange = $this->exchangeRepository->findById($request->getExchangeId());
 		$money = $this->moneyFromFloatPolicy->getMoney($request->getCurrency(), $request->getAmount());
 
-		try {
-			$userAccount = $this->userExchangeAccountRepository->findByUserIdExchangeIdCurrency($user->getId(), $exchange->getId(), $money->getCurrency());
-		} catch (EntityNotFoundException $exception) {
-			$userAccount = new UserExchangeAccount($user->getId(), $exchange->getId(), $money->getCurrency());
-		}
+		$getUserExchangeAccountRequest = new GetUserExchangeAccountRequest();
+		$getUserExchangeAccountRequest->setUserId($user->getId());
+		$getUserExchangeAccountRequest->setCurrency($money->getCurrency());
+		$getUserExchangeAccountRequest->setExchangeId($exchange->getId());
+		$userAccount = $this->getUserExchangeAccountUseCase->execute($getUserExchangeAccountRequest)->getUserExchangeAccount();
+		$userAccount->change($money);
 
 		$transactionId = $this->idFactory->getUserExchangeAccountTransactionId();
-		$userAccount->change($money);
 		$transaction = new UserExchangeAccountTransaction(
 			$transactionId,
 			$user->getId(),
@@ -118,13 +132,13 @@ class UserDepositMoneyUseCase
 		$bots = $this->botRepository->findByExchangeId($exchange->getId());
 		$botMoney = $money->divide(count($bots), Money::ROUND_DOWN);
 		foreach ($bots as $bot) {
-			try {
-				$botAccount = $this->botExchangeAccountRepository->findByBotIdExchangeIdCurrency($bot->getId(), $exchange->getId(), $money->getCurrency());
-			} catch (DomainException $exception) {
-				$botAccount = new BotExchangeAccount($bot->getId(), $exchange->getId(), $money->getCurrency());
-			}
+			$getBotExchangeAccountRequest = new GetBotExchangeAccountRequest();
+			$getBotExchangeAccountRequest->setBotId($bot->getId());
+			$getBotExchangeAccountRequest->setExchangeId($exchange->getId());
+			$getBotExchangeAccountRequest->setCurrency($money->getCurrency());
+			$botAccount = $this->getBotExchangeAccountUserCase->execute($getBotExchangeAccountRequest)->getBotExchangeAccount();
+			$botAccount->change($botMoney);
 			$botTransactionId = $this->idFactory->getBotExchangeAccountTransactionId();
-			$botAccount->change($money);
 			$botTransaction = new BotExchangeAccountTransaction(
 				$botTransactionId,
 				$bot->getId(),

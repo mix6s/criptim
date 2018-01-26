@@ -40,7 +40,8 @@
             <ul class="nav navbar-nav">
                 {% set menuUrls = {
                 'control.index' : 'Criptim',
-                'control.bots.list' : 'Bots'
+                'control.bots.list' : 'Bots',
+                'control.users.list' : 'Users',
                 } %}
                 {% for route, title in menuUrls %}
                     <li class="{{ route == app.request.get('_route') ? 'active' : '' }}"><a href="{{ url(route) }}">{{ title }}</a></li>

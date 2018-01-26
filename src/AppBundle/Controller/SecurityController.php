@@ -102,7 +102,7 @@ class SecurityController extends Controller
 				$plainPassword = $user->getPlainPassword();
 				$event = new FormEvent($form, $request);
 				$response = $this->get('UseCase\CreateUserUseCase')->execute(new CreateUserRequest());
-				$user->setDomainUserId($response->getUserId());
+				$user->setDomainUserId($response->getUser()->getId());
 				$dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 				$userManager->updateUser($user);
 				$response = $event->getResponse();

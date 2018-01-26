@@ -26,4 +26,9 @@ class Id
 	{
 		return $this->id;
 	}
+
+	public function isEmpty(): bool
+	{
+		return empty($this->id);
+	}
 }

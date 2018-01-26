@@ -14,6 +14,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Status</th>
+                        <th>BTC balance</th>
                         <th>Exchange</th>
                         <th>Strategy</th>
                         <th>Strategy settings</th>
@@ -28,6 +29,9 @@
                         </td>
                         <td>
                             {{ bot.status }}
+                        </td>
+                        <td>
+                            {{ bot|botBalance('BTC')|moneyFormat }}
                         </td>
                         <td>
                             {{ bot.exchangeId }}

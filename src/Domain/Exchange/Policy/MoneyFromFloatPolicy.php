@@ -9,7 +9,7 @@
 namespace Domain\Exchange\Policy;
 
 
-use Domain\Policy\CryptoCurrenciesPolicy;
+use Domain\Policy\DomainCurrenciesPolicy;
 use Money\Currency;
 use Money\Money;
 use Money\Parser\DecimalMoneyParser;
@@ -17,7 +17,7 @@ use Money\Parser\DecimalMoneyParser;
 class MoneyFromFloatPolicy implements MoneyFromFloatPolicyInterface
 {
 	/**
-	 * @var CryptoCurrenciesPolicy
+	 * @var DomainCurrenciesPolicy
 	 */
 	private $currencies;
 	/**
@@ -27,7 +27,7 @@ class MoneyFromFloatPolicy implements MoneyFromFloatPolicyInterface
 
 	public function __construct()
 	{
-		$this->currencies = new CryptoCurrenciesPolicy();
+		$this->currencies = new DomainCurrenciesPolicy();
 		$this->parser = new DecimalMoneyParser($this->currencies);
 	}
 

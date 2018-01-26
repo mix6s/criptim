@@ -32,18 +32,43 @@ class UserDepositMoneyRequest
 	 */
 	private $amount;
 
-	public function __construct(UserId $userId, ExchangeId $exchangeId, Currency $currency, float $amount)
+
+	/**
+	 * @param UserId $userId
+	 */
+	public function setUserId(UserId $userId)
 	{
 		$this->userId = $userId;
+	}
+
+	/**
+	 * @param ExchangeId $exchangeId
+	 */
+	public function setExchangeId(ExchangeId $exchangeId)
+	{
 		$this->exchangeId = $exchangeId;
+	}
+
+	/**
+	 * @param Currency $currency
+	 */
+	public function setCurrency(Currency $currency)
+	{
 		$this->currency = $currency;
+	}
+
+	/**
+	 * @param float $amount
+	 */
+	public function setAmount(float $amount)
+	{
 		$this->amount = $amount;
 	}
 
 	/**
 	 * @return UserId
 	 */
-	public function getUserId(): UserId
+	public function getUserId()
 	{
 		return $this->userId;
 	}
@@ -51,7 +76,7 @@ class UserDepositMoneyRequest
 	/**
 	 * @return ExchangeId
 	 */
-	public function getExchangeId(): ExchangeId
+	public function getExchangeId()
 	{
 		return $this->exchangeId;
 	}
@@ -59,7 +84,7 @@ class UserDepositMoneyRequest
 	/**
 	 * @return float
 	 */
-	public function getAmount(): float
+	public function getAmount()
 	{
 		return $this->amount;
 	}
@@ -67,7 +92,7 @@ class UserDepositMoneyRequest
 	/**
 	 * @return Currency
 	 */
-	public function getCurrency(): Currency
+	public function getCurrency()
 	{
 		return $this->currency;
 	}

@@ -1,0 +1,50 @@
+{% extends '@Control/layout.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th rowspan="2">ID</th>
+                        <th rowspan="2">Username</th>
+                        <th rowspan="2">DomainId</th>
+                        <th>Exchanges BTC balance</th>
+                    </tr>
+                    <tr>
+                        {% for exchange in exchanges %}
+                            <th>{{ exchange.id }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                {{ user.id }}
+                            </td>
+                            <td>
+                                {{ user.username }}
+                            </td>
+                            <td>
+                                {{ user.domainUserId }}
+                            </td>
+                            {% for exchange in exchanges %}
+                                {% if user.domainUserId is empty %}
+                                    <td></td>
+                                {% else %}
+                                    <td>
+                                        {{ user.domainUserId|userExchangeBalance(exchange.id, 'BTC')|moneyFormat }}
+                                        <a class="btn btn-info btn-xs" href="{{ path('control.users.exchangeDeposit', {userId: user.domainUserId, exchangeId: exchange.id}) }}"><i class="fa fa-plus"></i> Deposit</a>
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

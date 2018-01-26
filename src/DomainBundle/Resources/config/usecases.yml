@@ -8,3 +8,14 @@ services:
     UseCase\EditBotUseCase:
         class: Domain\Exchange\UseCase\EditBotUseCase
         arguments: ['@Exchange\IdFactory', '@ExchangeRepository', '@TradingStrategyRepository', '@ORM\BotRepository']
+
+    UseCase\GetBotExchangeAccountUseCase:
+        class: Domain\Exchange\UseCase\GetBotExchangeAccountUseCase
+        arguments: ['@ORM\BotExchangeAccountRepository']
+    UseCase\GetUserExchangeAccountUseCase:
+        class: Domain\Exchange\UseCase\GetUserExchangeAccountUseCase
+        arguments: ['@ORM\UserExchangeAccountRepository']
+
+    UseCase\UserDepositMoneyUseCase:
+        class: Domain\Exchange\UseCase\UserDepositMoneyUseCase
+        arguments: ['@ORM\UserRepository', '@ExchangeRepository', '@ORM\UserExchangeAccountRepository', '@Exchange\IdFactory', '@ORM\BotExchangeAccountRepository', '@ORM\UserExchangeAccountTransactionRepository', '@ORM\BotExchangeAccountTransactionRepository', '@ORM\BotRepository', '@UseCase\GetBotExchangeAccountUseCase', '@UseCase\GetUserExchangeAccountUseCase']

@@ -10,3 +10,8 @@ services:
             arguments: ['@ExchangeRepository', '@TradingStrategyRepository']
             tags:
                 - { name: form.type, alias: ControlBundle\Form\Type\EditBotRequestFormType }
+    Form\UserDepositMoneyRequestFormType:
+            class: ControlBundle\Form\Type\UserDepositMoneyRequestFormType
+            arguments: ['@ExchangeRepository']
+            tags:
+                - { name: form.type, alias: ControlBundle\Form\Type\UserDepositMoneyRequestFormType }

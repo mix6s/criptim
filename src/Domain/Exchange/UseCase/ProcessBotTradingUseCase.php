@@ -26,6 +26,7 @@ use Domain\Exchange\Repository\BotTradingSessionRepositoryInterface;
 use Domain\Exchange\Repository\TradingStrategyRepositoryInterface;
 use Domain\Exchange\Repository\UserExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
+use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
 use Domain\Exchange\UseCase\Request\ProcessBotTradingRequest;
 use Money\Money;
 
@@ -71,6 +72,10 @@ class ProcessBotTradingUseCase
 	 * @var UserExchangeAccountTransactionRepositoryInterface
 	 */
 	private $userExchangeAccountTransactionRepository;
+	/**
+	 * @var GetBotExchangeAccountUseCase
+	 */
+	private $getBotExchangeAccountUserCase;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
@@ -82,7 +87,8 @@ class ProcessBotTradingUseCase
 		BotTradingSessionAccountTransactionRepositoryInterface $botTradingSessionAccountTransactionRepository,
 		BotRepositoryInterface $botRepository,
 	 	UserExchangeAccountRepositoryInterface $userExchangeAccountRepository,
-		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository
+		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository,
+		GetBotExchangeAccountUseCase $getBotExchangeAccountUserCase
 	) {
 		$this->botTradingSessionRepository = $botTradingSessionRepository;
 		$this->idFactory = $idFactory;
@@ -94,6 +100,7 @@ class ProcessBotTradingUseCase
 		$this->botTradingSessionAccountTransactionRepository = $botTradingSessionAccountTransactionRepository;
 		$this->userExchangeAccountRepository = $userExchangeAccountRepository;
 		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
+		$this->getBotExchangeAccountUserCase = $getBotExchangeAccountUserCase;
 	}
 
 	public function execute(ProcessBotTradingRequest $request)
@@ -149,11 +156,11 @@ class ProcessBotTradingUseCase
 			$this->botTradingSessionAccountTransactionRepository->save($sessionAccountTransaction);
 			$this->botTradingSessionAccountRepository->save($sessionAccount);
 
-			try {
-				$botAccount = $this->botExchangeAccountRepository->findByBotIdExchangeIdCurrency($bot->getId(), $bot->getExchangeId(), $sessionAccount->getCurrency());
-			} catch (EntityNotFoundException $exception) {
-				$botAccount = new BotExchangeAccount($bot->getId(), $bot->getExchangeId(), $inMoney->getCurrency());
-			}
+			$getBotExchangeAccountRequest = new GetBotExchangeAccountRequest();
+			$getBotExchangeAccountRequest->setBotId($bot->getId());
+			$getBotExchangeAccountRequest->setExchangeId($bot->getExchangeId());
+			$getBotExchangeAccountRequest->setCurrency($sessionAccount->getCurrency());
+			$botAccount = $this->getBotExchangeAccountUserCase->execute($getBotExchangeAccountRequest)->getBotExchangeAccount();
 			$botAccount->change($inMoney);
 			$botAccTransactionId = $this->idFactory->getBotExchangeAccountTransactionId();
 			$botAccTransaction = new BotExchangeAccountTransaction(

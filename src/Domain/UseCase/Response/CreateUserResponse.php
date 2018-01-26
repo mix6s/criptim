@@ -9,25 +9,26 @@
 namespace Domain\UseCase\Response;
 
 
-use Domain\ValueObject\UserId;
+use Domain\Entity\User;
 
 class CreateUserResponse
 {
 	/**
-	 * @var UserId
+	 * @var User
 	 */
-	private $userId;
+	private $user;
 
-	public function __construct(UserId $userId)
+	public function __construct(User $user)
 	{
-		$this->userId = $userId;
+		$this->user = $user;
 	}
 
 	/**
-	 * @return UserId
+	 * @return User
 	 */
-	public function getUserId(): UserId
+	public function getUser(): User
 	{
-		return $this->userId;
+		return $this->user;
 	}
+
 }
