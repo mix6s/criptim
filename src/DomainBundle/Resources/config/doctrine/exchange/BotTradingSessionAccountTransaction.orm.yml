@@ -4,7 +4,7 @@ Domain\Exchange\Entity\BotTradingSessionAccountTransaction:
     id:
         id:
             type: botTradingSessionAccountTransactionId
-            generator: { strategy: SEQUENCE }
+            generator: { strategy: NONE }
             sequenceGenerator:
                 sequenceName: bot_trading_session_account_transaction_id_seq
     fields:

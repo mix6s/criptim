@@ -24,4 +24,6 @@ interface ExchangeInterface
 	public function cancelOrder(OrderId $orderId);
 
 	public function getSymbol(string $symbol);
+
+	public function getFee();
 }

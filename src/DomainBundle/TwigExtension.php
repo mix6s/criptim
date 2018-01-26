@@ -67,6 +67,7 @@ class TwigExtension extends \Twig_Extension
 		$account = $this->container->get('UseCase\GetUserExchangeAccountUseCase')->execute($request)->getUserExchangeAccount();
 		return $account->getBalance();
 	}
+
 	public function moneyFormatFilter(Money $money)
 	{
 		return $this->formatter->format($money);

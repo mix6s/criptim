@@ -218,8 +218,8 @@ class ProcessBotTradingUseCase
 	private function processSession(BotTradingSession $session)
 	{
 		$tradingStrategy = $this->tradingStrategyRepository->findById($session->getTradingStrategyId());
-		$tradingStrategy->processTrading($session);
 		$session->process();
+		$tradingStrategy->processTrading($session);
 		$this->botTradingSessionRepository->save($session);
 	}
 

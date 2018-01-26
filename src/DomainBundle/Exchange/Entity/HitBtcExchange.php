@@ -68,6 +68,11 @@ class HitBtcExchange implements ExchangeInterface
 		// TODO: Implement getSymbol() method.
 	}
 
+	public function getFee()
+	{
+		return 0.1 / 100;
+	}
+
 	private function apiAuthRequest(string $method, string $uri, array $data = null)
 	{
 		$options = [

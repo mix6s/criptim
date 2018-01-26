@@ -1,3 +1,4 @@
 services:
     TradingStrategy\Martin:
         class: DomainBundle\Exchange\TradingStrategy\Martin
+        arguments: ['@ORM\BotTradingSessionRepository','@ORM\BotTradingSessionAccountRepository', '@UseCase\GetBotTradingSessionAccountUseCase']

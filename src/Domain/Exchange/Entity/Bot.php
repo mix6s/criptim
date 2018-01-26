@@ -79,6 +79,11 @@ class Bot
 		$this->status = self::STATUS_INACTIVE;
 	}
 
+	public function isActive(): bool
+	{
+		return $this->status === self::STATUS_ACTIVE;
+	}
+
 	/**
 	 * @return BotId
 	 */

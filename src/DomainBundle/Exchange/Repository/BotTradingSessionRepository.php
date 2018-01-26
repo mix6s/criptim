@@ -27,10 +27,11 @@ class BotTradingSessionRepository extends EntityRepository implements BotTrading
 	{
 		$session = $this->getEntityManager()->createQueryBuilder()
 			->select('s')
-			->from('Domain:Exchange:BotTradingSession', 's')
+			->from('Domain\Exchange\Entity\BotTradingSession', 's')
 			->where('s.botId = :id')
 			->setParameter('id', $botId)
-			->orderBy('updatedAt', 'DESC')
+			->orderBy('s.updatedAt', 'DESC')
+			->setMaxResults(1)
 			->getQuery()
 			->getOneOrNullResult();
 		if ($session === null) {

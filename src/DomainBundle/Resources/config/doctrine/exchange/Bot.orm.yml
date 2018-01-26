@@ -4,7 +4,7 @@ Domain\Exchange\Entity\Bot:
     id:
         id:
             type: botId
-            generator: { strategy: SEQUENCE }
+            generator: { strategy: NONE }
             sequenceGenerator:
                 sequenceName: bot_id_seq
     fields:

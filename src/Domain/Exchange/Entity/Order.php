@@ -63,4 +63,20 @@ class Order
 		$this->status = self::STATUS_NEW;
 		$this->execAmount = 0.;
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getStatus(): string
+	{
+		return $this->status;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType(): string
+	{
+		return $this->type;
+	}
 }

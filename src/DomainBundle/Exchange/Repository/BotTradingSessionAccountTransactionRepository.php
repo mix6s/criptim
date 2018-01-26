@@ -42,14 +42,14 @@ class BotTradingSessionAccountTransactionRepository extends EntityRepository imp
 	): BotTradingSessionAccountTransaction {
 		$transaction = $this->getEntityManager()->createQueryBuilder()
 			->select('t')
-			->from('Domain:Exchange:BotTradingSessionAccountTransaction', 't')
+			->from('Domain\Exchange\Entity\BotTradingSessionAccountTransaction', 't')
 			->where('t.botTradingSessionId = :session_id')
 			->andWhere('t.currency = :currency')
 			->andWhere('t.dt <= :dt')
 			->setParameter('session_id', $sessionId)
 			->setParameter('currency', $currency)
 			->setParameter('dt', $dt)
-			->orderBy('dt', 'DESC')
+			->orderBy('t.dt', 'DESC')
 			->getQuery()
 			->getOneOrNullResult();
 		if ($transaction === null) {
