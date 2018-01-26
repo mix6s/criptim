@@ -34,7 +34,7 @@ class BotRepository extends EntityRepository implements BotRepositoryInterface
 	{
 		/** @var Bot $bot */
 		$bot = $this->find($botId);
-		if (empty($user)) {
+		if (empty($bot)) {
 			throw new EntityNotFoundException(sprintf('Bot with id %d not found', (string)$botId));
 		}
 		return $bot;

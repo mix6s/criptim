@@ -10,8 +10,11 @@ namespace ControlBundle\Controller;
 
 
 use ControlBundle\Form\Type\CreateBotRequestFormType;
+use ControlBundle\Form\Type\EditBotRequestFormType;
 use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\UseCase\Request\CreateBotRequest;
+use Domain\Exchange\UseCase\Request\EditBotRequest;
+use Domain\Exchange\ValueObject\BotId;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -43,8 +46,8 @@ class BotsController extends Controller
 		$form->handleRequest($request);
 		if ($form->isSubmitted() && $form->isValid()) {
 			/** @var CreateBotRequest $request */
-			$request = $form->getData();
-			$response = $this->get('UseCase\CreateBotUseCase')->execute($request);
+			$createRequest = $form->getData();
+			$response = $this->get('UseCase\CreateBotUseCase')->execute($createRequest);
 			$this->addFlash('info', 'Bot created');
 			return $this->redirectToRoute('control.bots.list');
 		}
@@ -59,13 +62,21 @@ class BotsController extends Controller
 	 */
 	public function editAction(Request $request, $id)
 	{
-		$form = $this->createForm(CreateBotRequestFormType::class);
+		$bot = $this->get('ORM\BotRepository')->findById(new BotId($id));
+		$editRequest = new EditBotRequest();
+		$editRequest->setBotId($bot->getId());
+		$editRequest->setExchangeId($bot->getExchangeId());
+		$editRequest->setTradingStrategyId($bot->getTradingStrategyId());
+		$editRequest->setTradingStrategySettings($bot->getTradingStrategySettings());
+		$editRequest->setStatus($bot->getStatus());
+
+		$form = $this->createForm(EditBotRequestFormType::class, $editRequest);
 		$form->handleRequest($request);
 		if ($form->isSubmitted() && $form->isValid()) {
-			/** @var CreateBotRequest $request */
-			$request = $form->getData();
-			$response = $this->get('UseCase\CreateBotUseCase')->execute($request);
-			$this->addFlash('info', 'Bot created');
+			/** @var EditBotRequest $request */
+			$editRequest = $form->getData();
+			$response = $this->get('UseCase\EditBotUseCase')->execute($editRequest);
+			$this->addFlash('info', 'Bot edited');
 			return $this->redirectToRoute('control.bots.list');
 		}
 

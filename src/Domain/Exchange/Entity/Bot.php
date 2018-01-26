@@ -48,6 +48,27 @@ class Bot
 		$this->status = self::STATUS_INACTIVE;
 	}
 
+	public function changeExchangeId(ExchangeId $exchangeId)
+	{
+		$this->exchangeId = $exchangeId;
+	}
+
+	public function changeTradingStrategyId(TradingStrategyId $tradingStrategyId)
+	{
+		$this->tradingStrategyId = $tradingStrategyId;
+	}
+
+	public function changeTradingStrategySettings(TradingStrategySettings $tradingStrategySettings)
+	{
+		$this->tradingStrategySettings = $tradingStrategySettings;
+	}
+
+
+	public function changeStatus(string $status)
+	{
+		$this->status = $status;
+	}
+
 	public function activate()
 	{
 		$this->status = self::STATUS_ACTIVE;
@@ -88,5 +109,13 @@ class Bot
 	public function getTradingStrategySettings(): TradingStrategySettings
 	{
 		return $this->tradingStrategySettings;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getStatus(): string
+	{
+		return $this->status;
 	}
 }

@@ -7,12 +7,13 @@
                 <a href="{{ path('control.bots.create') }}" class="btn btn-primary">Create</a>
             </div>
         </div>
-        <div class="col-md-12">
+        <div class="row">
             <div class="col-md-12">
                 <table class="table table-bordered">
                     <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Status</th>
                         <th>Exchange</th>
                         <th>Strategy</th>
                         <th>Strategy settings</th>
@@ -24,6 +25,9 @@
                     <tr>
                         <td>
                             {{ bot.id }}
+                        </td>
+                        <td>
+                            {{ bot.status }}
                         </td>
                         <td>
                             {{ bot.exchangeId }}

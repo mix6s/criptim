@@ -4,3 +4,9 @@ services:
         arguments: ['@ExchangeRepository', '@TradingStrategyRepository']
         tags:
             - { name: form.type, alias: ControlBundle\Form\Type\CreateBotRequestFormType }
+
+    Form\EditBotRequestFormType:
+            class: ControlBundle\Form\Type\EditBotRequestFormType
+            arguments: ['@ExchangeRepository', '@TradingStrategyRepository']
+            tags:
+                - { name: form.type, alias: ControlBundle\Form\Type\EditBotRequestFormType }
