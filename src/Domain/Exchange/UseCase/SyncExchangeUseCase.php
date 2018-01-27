@@ -9,6 +9,7 @@
 namespace Domain\Exchange\UseCase;
 
 
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Repository\OrderRepositoryInterface;
 use Domain\Exchange\UseCase\Request\SyncExchangeRequest;
 use DomainBundle\Exchange\Repository\ExchangeRepository;
@@ -39,5 +40,25 @@ class SyncExchangeUseCase
 
 		$repositoryOrders = $this->orderRepository->findActiveByExchangeId($exchange->getId());
 		$exchangeActiveOrders = $exchange->getActiveOrders();
+
+		foreach ($repositoryOrders as $order) {
+			$exist = false;
+			foreach ($exchangeActiveOrders as $exchangeOrder) {
+				if ($order->getId()->equals($exchangeOrder->getId())) {
+					$exist = true;
+					$order->updateFrom($exchangeOrder);
+					break;
+				}
+			}
+			if (!$exist) {
+				try {
+					$exchangeOrder = $exchange->getOrder($order->getId());
+				} catch (EntityNotFoundException $exception) {
+					continue;
+				}
+				$order->updateFrom($exchangeOrder);
+			}
+			$this->orderRepository->save($order);
+		}
 	}
 }

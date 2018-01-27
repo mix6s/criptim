@@ -33,14 +33,14 @@ interface ExchangeInterface
 	public function getAsk(string $symbol): float;
 
 	/**
-	 * @return Order[]
+	 * @return ExchangeOrder[]
 	 */
 	public function getActiveOrders(): array;
 
 	/**
 	 * @param OrderId $orderId
-	 * @return Order
+	 * @return ExchangeOrder
 	 * @throws EntityNotFoundException
 	 */
-	public function getOrder(OrderId $orderId): Order;
+	public function getOrder(OrderId $orderId): ExchangeOrder;
 }

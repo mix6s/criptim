@@ -125,4 +125,21 @@ class Order
 	{
 		return $this->id;
 	}
+
+	public function updateFrom(ExchangeOrder $order)
+	{
+		if ($order->getStatus() !== null) {
+			$this->status = $order->getStatus();
+		}
+
+		if ($order->getPrice() !== null) {
+			$this->price = $order->getPrice();
+		}
+		if ($order->getAmount() !== null) {
+			$this->amount = $order->getAmount();
+		}
+		if ($order->getExecAmount() !== null) {
+			$this->execAmount = $order->getExecAmount();
+		}
+	}
 }

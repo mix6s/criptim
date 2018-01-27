@@ -45,7 +45,7 @@ class OrderRepository extends EntityRepository implements OrderRepositoryInterfa
 	public function findActiveByExchangeId(ExchangeId $exchangeId): array
 	{
 		return $this->createNativeNamedQuery('findActiveByExchangeId')
-			->setParameter('currency', [Order::STATUS_NEW, Order::STATUS_PARTIALLY_FILLED])
+			->setParameter('statuses', [Order::STATUS_NEW, Order::STATUS_PARTIALLY_FILLED])
 			->setParameter('exchange_id', $exchangeId)
 			->getResult();
 	}

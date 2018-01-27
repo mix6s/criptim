@@ -23,5 +23,9 @@ interface OrderRepositoryInterface
 	 */
 	public function findActive(BotTradingSessionId $sessionId): array;
 
+	/**
+	 * @param ExchangeId $exchangeId
+	 * @return Order[]
+	 */
 	public function findActiveByExchangeId(ExchangeId $exchangeId): array;
 }

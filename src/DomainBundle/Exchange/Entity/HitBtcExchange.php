@@ -12,6 +12,7 @@ namespace DomainBundle\Exchange\Entity;
 use Domain\Exception\DomainException;
 use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\ExchangeInterface;
+use Domain\Exchange\Entity\ExchangeOrder;
 use Domain\Exchange\Entity\Order;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
@@ -57,21 +58,27 @@ class HitBtcExchange implements ExchangeInterface
 
 	public function createOrder(Order $order)
 	{
-		$orderId = (string)$order->getId();
-		$len = strlen($orderId);
-		if ($len < 8) {
-			for ($i = $len; $i < 8; $i++) {
-				$orderId = '0' . $orderId;
-			}
-		}
 		$data = $this->apiAuthRequest('POST', '/order', [
-			'clientOrderId' => $orderId,
+			'clientOrderId' => $this->getOrderId($order->getId()),
 			'symbol' => $order->getSymbol()->getBaseCurrency() . $order->getSymbol()->getCounterCurrency(),
 			'side' => (string)$order->getType(),
 			'quantity' => $order->getAmount(),
 			'price' => $order->getPrice(),
 		]);
 	}
+
+	private function getOrderId(OrderId $id)
+	{
+		$orderId = (string)$id;
+		$len = strlen($orderId);
+		if ($len < 8) {
+			for ($i = $len; $i < 8; $i++) {
+				$orderId = '0' . $orderId;
+			}
+		}
+		return $orderId;
+	}
+
 
 	public function cancelOrder(Order $order)
 	{
@@ -111,20 +118,47 @@ class HitBtcExchange implements ExchangeInterface
 	}
 
 	/**
-	 * @return Order[]
+	 * @return ExchangeOrder[]
 	 */
 	public function getActiveOrders(): array
 	{
-		return [];
+		$data = $this->apiAuthRequest('GET', '/order');
+		$orders = [];
+		foreach ($data as $item) {
+			$orders[] = $this->toExchangeOrder($item);
+		}
+		return $orders;
+	}
+
+	/**
+	 * @param array $data
+	 * @return ExchangeOrder
+	 */
+	private function toExchangeOrder(array $data): ExchangeOrder
+	{
+		$orderId = (int)$data['clientOrderId'];
+		return new ExchangeOrder(
+			new OrderId((string)$orderId),
+			$data['side'] ?? null,
+			$data['price'] ?? null,
+			$data['quantity'] ?? null,
+			$data['cumQuantity'] ?? null,
+			$data['symbol'] ?? null,
+			$data['status'] ?? null
+		);
 	}
 
 	/**
 	 * @param OrderId $orderId
-	 * @return Order
+	 * @return ExchangeOrder
 	 * @throws EntityNotFoundException
 	 */
-	public function getOrder(OrderId $orderId): Order
+	public function getOrder(OrderId $orderId): ExchangeOrder
 	{
+		$data = $this->apiAuthRequest('GET', sprintf('/history/order?clientOrderId=%s', $this->getOrderId($orderId)));
+		if (!empty($data[0])) {
+			return $this->toExchangeOrder($data[0]);
+		}
 		throw new EntityNotFoundException();
 	}
 

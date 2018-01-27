@@ -31,4 +31,9 @@ class Id
 	{
 		return empty($this->id);
 	}
+
+	public function equals(Id $id): bool
+	{
+		return $this->id ===  $id->id && get_class($this) === get_class($id);
+	}
 }
