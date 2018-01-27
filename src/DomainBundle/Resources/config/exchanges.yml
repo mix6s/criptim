@@ -3,5 +3,5 @@ services:
         class: DomainBundle\Exchange\Entity\HitBtcExchange
         arguments:
             - '1'
-            - 'public'
-            - 'secret'
+            - '60814693769423c90c8aa81bff9649af'
+            - '56aca2ba03d793e03c9cf186b75718c2'

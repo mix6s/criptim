@@ -52,3 +52,9 @@ services:
         factory: ['@doctrine.orm.default_entity_manager', getRepository]
         arguments:
             - Domain\Entity\User
+
+    ORM\OrderRepository:
+        class: DomainBundle\Exchange\Repository\OrderRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Exchange\Entity\Order

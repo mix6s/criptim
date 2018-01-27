@@ -17,6 +17,7 @@ use Money\Money;
 class BotTradingSessionAccountTransaction
 {
 	const TYPE_BOT_TRANSFER = 'bot_transfer';
+	const TYPE_NEW_ORDER = 'new_order';
 	/**
 	 * @var BotTradingSessionAccountTransactionId
 	 */

@@ -227,8 +227,7 @@ class ProcessBotTradingUseCase
 	{
 		$id = $this->idFactory->getBotTradingSessionId();
 		$bot = $this->botRepository->findById($request->getBotId());
-		$session = new BotTradingSession($id, $request->getBotId(), $bot->getTradingStrategyId(),
-			$bot->getTradingStrategySettings());
+		$session = new BotTradingSession($id, $request->getBotId(), $bot->getExchangeId(), $bot->getTradingStrategyId(), $bot->getTradingStrategySettings());
 		$botAccounts = $this->botExchangeAccountRepository->findByBotIdExchangeId($bot->getId(), $bot->getExchangeId());
 		foreach ($botAccounts as $botAccount) {
 			if ($botAccount->getBalance()->isZero()) {

@@ -100,6 +100,9 @@ doctrine:
             money:
                 class:                DomainBundle\Type\MoneyType
                 commented:            true
+            currencyPair:
+                class:                DomainBundle\Type\CurrencyPairType
+                commented:            true
             tradingStrategyId:
                 class:                DomainBundle\Type\TradingStrategyIdType
                 commented:            true

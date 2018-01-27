@@ -56,6 +56,12 @@ class CryptoMoneyFormatter implements MoneyFormatter
 			$formatted = '-'.$formatted;
 		}
 
-		return $formatted . ' ' . $this->currencies->getFormattedCurrency($money->getCurrency());
+		return $formatted;
 	}
+
+	public function formatWithCurrency(Money $money)
+	{
+		return $this->format($money) . ' ' . $this->currencies->getFormattedCurrency($money->getCurrency());
+	}
+
 }

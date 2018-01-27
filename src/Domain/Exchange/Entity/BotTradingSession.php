@@ -11,6 +11,7 @@ namespace Domain\Exchange\Entity;
 
 use Domain\Exchange\ValueObject\BotId;
 use Domain\Exchange\ValueObject\BotTradingSessionId;
+use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\TradingStrategyId;
 use Domain\Exchange\ValueObject\TradingStrategySettings;
 
@@ -52,8 +53,12 @@ class BotTradingSession
 	 * @var string
 	 */
 	private $status;
+	/**
+	 * @var ExchangeId
+	 */
+	private $exchangeId;
 
-	public function __construct(BotTradingSessionId $id, BotId $botId, TradingStrategyId $tradingStrategyId, TradingStrategySettings $tradingStrategySettings)
+	public function __construct(BotTradingSessionId $id, BotId $botId, ExchangeId $exchangeId, TradingStrategyId $tradingStrategyId, TradingStrategySettings $tradingStrategySettings)
 	{
 		$this->id = $id;
 		$this->botId = $botId;
@@ -63,6 +68,7 @@ class BotTradingSession
 		$this->createdAt = new \DateTimeImmutable();
 		$this->updatedAt = new \DateTimeImmutable();
 		$this->endedAt = null;
+		$this->exchangeId = $exchangeId;
 	}
 
 
@@ -145,5 +151,13 @@ class BotTradingSession
 	public function getEndedAt()
 	{
 		return $this->endedAt;
+	}
+
+	/**
+	 * @return ExchangeId
+	 */
+	public function getExchangeId(): ExchangeId
+	{
+		return $this->exchangeId;
 	}
 }

@@ -11,6 +11,7 @@ namespace Domain\Exchange\Repository;
 
 use Domain\Exchange\Entity\Order;
 use Domain\Exchange\ValueObject\BotTradingSessionId;
+use Domain\Exchange\ValueObject\ExchangeId;
 
 interface OrderRepositoryInterface
 {
@@ -21,4 +22,6 @@ interface OrderRepositoryInterface
 	 * @return Order[]
 	 */
 	public function findActive(BotTradingSessionId $sessionId): array;
+
+	public function findActiveByExchangeId(ExchangeId $exchangeId): array;
 }

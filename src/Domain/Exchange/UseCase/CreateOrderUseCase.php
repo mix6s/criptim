@@ -10,16 +10,18 @@ namespace Domain\Exchange\UseCase;
 
 
 use Domain\Exception\DomainException;
+use Domain\Exchange\Entity\BotTradingSessionAccountTransaction;
 use Domain\Exchange\Entity\Order;
 use Domain\Exchange\Factory\IdFactoryInterface;
 use Domain\Exchange\Policy\MoneyFromFloatPolicy;
 use Domain\Exchange\Repository\BotTradingSessionAccountRepositoryInterface;
+use Domain\Exchange\Repository\BotTradingSessionAccountTransactionRepositoryInterface;
 use Domain\Exchange\Repository\ExchangeRepositoryInterface;
 use Domain\Exchange\Repository\OrderRepositoryInterface;
 use Domain\Exchange\UseCase\Request\CreateOrderRequest;
-use Domain\Exchange\UseCase\Request\GetBotTradingSessionAccountRequest;
+use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
 use Domain\Exchange\UseCase\Response\CreateOrderResponse;
-use Money\Currency;
+use DomainBundle\Exchange\Policy\CryptoMoneyFormatter;
 use Money\Money;
 
 class CreateOrderUseCase
@@ -33,10 +35,6 @@ class CreateOrderUseCase
 	 */
 	private $botTradingSessionAccountRepository;
 	/**
-	 * @var GetBotTradingSessionAccountUseCase
-	 */
-	private $getBotTradingSessionAccountUseCase;
-	/**
 	 * @var IdFactoryInterface
 	 */
 	private $idFactory;
@@ -48,21 +46,33 @@ class CreateOrderUseCase
 	 * @var MoneyFromFloatPolicy
 	 */
 	private $moneyFromFloatPolicy;
+	/**
+	 * @var GetBotTradingSessionBalancesUseCase
+	 */
+	private $getBotTradingSessionBalancesUseCase;
+	/**
+	 * @var BotTradingSessionAccountTransactionRepositoryInterface
+	 */
+	private $botTradingSessionAccountTransactionRepository;
+	private $formatter;
 
 	public function __construct(
 		ExchangeRepositoryInterface $exchangeRepository,
 		BotTradingSessionAccountRepositoryInterface $botTradingSessionAccountRepository,
-		GetBotTradingSessionAccountUseCase $getBotTradingSessionAccountUseCase,
+		BotTradingSessionAccountTransactionRepositoryInterface $botTradingSessionAccountTransactionRepository,
+		GetBotTradingSessionBalancesUseCase $getBotTradingSessionBalancesUseCase,
 		IdFactoryInterface $idFactory,
 		OrderRepositoryInterface $orderRepository
 	)
 	{
 		$this->exchangeRepository = $exchangeRepository;
 		$this->botTradingSessionAccountRepository = $botTradingSessionAccountRepository;
-		$this->getBotTradingSessionAccountUseCase = $getBotTradingSessionAccountUseCase;
 		$this->idFactory = $idFactory;
 		$this->orderRepository = $orderRepository;
 		$this->moneyFromFloatPolicy = new MoneyFromFloatPolicy();
+		$this->formatter = new CryptoMoneyFormatter();
+		$this->getBotTradingSessionBalancesUseCase = $getBotTradingSessionBalancesUseCase;
+		$this->botTradingSessionAccountTransactionRepository = $botTradingSessionAccountTransactionRepository;
 	}
 
 	public function execute(CreateOrderRequest $request): CreateOrderResponse
@@ -75,43 +85,46 @@ class CreateOrderUseCase
 		} else {
 			$currency = $request->getSymbol()->getBaseCurrency();
 		}
-		$accRequest = new GetBotTradingSessionAccountRequest();
+
+		$minAmount = $this->formatter->format(new Money(1, $request->getSymbol()->getBaseCurrency()));
+		if ((float)$request->getAmount() < (float)$minAmount) {
+			throw new DomainException(sprintf('Amount %s is too small', $request->getAmount()));
+		}
+
+		$accRequest = new GetBotTradingSessionBalancesRequest();
 		$accRequest->setBotTradingSessionId($sessionId);
 		$accRequest->setCurrency($currency);
+		$balances = $this->getBotTradingSessionBalancesUseCase->execute($accRequest);
 
-		$account = $this->getBotTradingSessionAccountUseCase->execute($accRequest)->getBotTradingSessionAccount();
-
-		$activeOrders = $this->orderRepository->findActive($sessionId);
-		$inOrderBalance = new Money(0, $currency);
-		foreach ($activeOrders as $order) {
-			if ($order->getType() !== $request->getType()) {
-				continue;
-			}
-			$orderAmount = $this->moneyFromFloatPolicy->getMoney($currency, $request->getAmount());
-			if ($order->getType() === 'buy') {
-				$orderTotal = $orderAmount->multiply($request->getPrice())->multiply(1 + $exchange->getFee());
-			} else {
-				$orderTotal = $orderAmount->multiply($request->getPrice());
-			}
-			$inOrderBalance = $inOrderBalance->add($orderTotal);
-		}
-
-		$availableBalance = $account->getBalance()->subtract($inOrderBalance);
-		$amount = $this->moneyFromFloatPolicy->getMoney($currency, $request->getAmount());
 		if ($request->getType() === 'buy') {
-			$total = $amount->multiply($request->getPrice())->multiply(1 + $exchange->getFee());
+			$total = $this->moneyFromFloatPolicy->getMoney($currency, $request->getPrice())
+				->multiply($request->getAmount())
+				->multiply(1 + $exchange->getFee());
 		} else {
-			$total = $amount->multiply($request->getPrice());
+			$total = $this->moneyFromFloatPolicy->getMoney($currency, $request->getAmount());
 		}
 
-		if ($availableBalance->lessThanOrEqual($total)) {
+		if ($balances->getAvailableBalance()->lessThanOrEqual($total)) {
 			throw new DomainException("Insufficient funds");
 		}
 
-		$orderId = $this->idFactory->getOrderId();
-		$symbol = $request->getSymbol()->getBaseCurrency()->getCode() . $request->getSymbol()->getCounterCurrency()->getCode();
-		$order = new Order($orderId, $sessionId, $request->getType(), $request->getPrice(), $request->getAmount(), $symbol);
+		$orderId = $this->idFactory->getOrderId();;
+		$order = new Order($orderId, $sessionId, $request->getType(), $request->getPrice(), $request->getAmount(), $request->getSymbol());
+		$exchange->createOrder($order);
 		$this->orderRepository->save($order);
-		return new CreateOrderResponse();
+
+/*		$difference = $total->absolute()->multiply(-1);
+		$balances->getBotTradingSessionAccount()->change($difference);
+		$sessionAccountTransaction = new BotTradingSessionAccountTransaction(
+			$this->idFactory->getBotTradingSessionAccountTransactionId(),
+			$sessionId,
+			$currency,
+			$difference,
+			$balances->getBotTradingSessionAccount()->getBalance(),
+			BotTradingSessionAccountTransaction::TYPE_NEW_ORDER
+		);
+		$this->botTradingSessionAccountTransactionRepository->save($sessionAccountTransaction);
+		$this->botTradingSessionAccountRepository->save($balances->getBotTradingSessionAccount());*/
+		return new CreateOrderResponse($order);
 	}
 }

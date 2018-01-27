@@ -15,11 +15,19 @@ use Domain\Exchange\Repository\BotRepositoryInterface;
 use Domain\Exchange\Repository\BotTradingSessionAccountRepositoryInterface;
 use Domain\Exchange\Repository\BotTradingSessionRepositoryInterface;
 use Domain\Exchange\Repository\ExchangeRepositoryInterface;
-use Domain\Exchange\UseCase\GetBotTradingSessionAccountUseCase;
-use Domain\Exchange\UseCase\Request\GetBotTradingSessionAccountRequest;
+use Domain\Exchange\Repository\OrderRepositoryInterface;
+use Domain\Exchange\UseCase\CreateOrderUseCase;
+use Domain\Exchange\UseCase\GetBotTradingSessionBalancesUseCase;
+use Domain\Exchange\UseCase\Request\CreateOrderRequest;
+use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
 use Domain\Exchange\ValueObject\TradingStrategyId;
 use Domain\Exchange\ValueObject\TradingStrategySettings;
+use Domain\Policy\DomainCurrenciesPolicy;
+use DomainBundle\Exchange\Policy\CryptoMoneyFormatter;
 use Money\Currency;
+use Money\CurrencyPair;
+use Money\Money;
+use Money\Number;
 
 class Martin implements TradingStrategyInterface
 {
@@ -34,10 +42,6 @@ class Martin implements TradingStrategyInterface
 	 */
 	private $botTradingSessionAccountRepository;
 	/**
-	 * @var GetBotTradingSessionAccountUseCase
-	 */
-	private $getBotTradingSessionAccountUseCase;
-	/**
 	 * @var BotTradingSessionRepositoryInterface
 	 */
 	private $botTradingSessionRepository;
@@ -49,21 +53,41 @@ class Martin implements TradingStrategyInterface
 	 * @var ExchangeRepositoryInterface
 	 */
 	private $exchangeRepository;
+	/**
+	 * @var CreateOrderUseCase
+	 */
+	private $createOrderUseCase;
+	/**
+	 * @var GetBotTradingSessionBalancesUseCase
+	 */
+	private $getBotTradingSessionBalancesUseCase;
+	/**
+	 * @var OrderRepositoryInterface
+	 */
+	private $orderRepository;
+	private $formatter;
+	private $currencies;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
 		BotTradingSessionAccountRepositoryInterface $botTradingSessionAccountRepository,
-		GetBotTradingSessionAccountUseCase $getBotTradingSessionAccountUseCase,
+		GetBotTradingSessionBalancesUseCase $getBotTradingSessionBalancesUseCase,
 		BotRepositoryInterface $botRepository,
-		ExchangeRepositoryInterface $exchangeRepository
+		ExchangeRepositoryInterface $exchangeRepository,
+		CreateOrderUseCase $createOrderUseCase,
+		OrderRepositoryInterface $orderRepository
 	)
 	{
 		$this->id = new TradingStrategyId(self::ID);
 		$this->botTradingSessionAccountRepository = $botTradingSessionAccountRepository;
-		$this->getBotTradingSessionAccountUseCase = $getBotTradingSessionAccountUseCase;
 		$this->botTradingSessionRepository = $botTradingSessionRepository;
 		$this->botRepository = $botRepository;
 		$this->exchangeRepository = $exchangeRepository;
+		$this->createOrderUseCase = $createOrderUseCase;
+		$this->getBotTradingSessionBalancesUseCase = $getBotTradingSessionBalancesUseCase;
+		$this->orderRepository = $orderRepository;
+		$this->formatter = new CryptoMoneyFormatter();
+		$this->currencies = new DomainCurrenciesPolicy();
 	}
 
 	public function getId(): TradingStrategyId
@@ -86,18 +110,81 @@ class Martin implements TradingStrategyInterface
 		$baseCurrency = new Currency($settings['baseCurrency']);
 		$quoteCurrency = new Currency($settings['quoteCurrency']);
 
-		$getAccountRequest = new GetBotTradingSessionAccountRequest();
-		$getAccountRequest->setBotTradingSessionId($session->getId());
 
-		$getAccountRequest->setCurrency($baseCurrency);
-		$baseCurrencyAccount = $this->getBotTradingSessionAccountUseCase->execute($getAccountRequest)->getBotTradingSessionAccount();
+		$balancesRequest = new GetBotTradingSessionBalancesRequest();
+		$balancesRequest->setBotTradingSessionId($session->getId());
 
-		$getAccountRequest->setCurrency($quoteCurrency);
-		$quoteCurrencyAccount = $this->getBotTradingSessionAccountUseCase->execute($getAccountRequest)->getBotTradingSessionAccount();
+		$balancesRequest->setCurrency($baseCurrency);
+		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+
+		$balancesRequest->setCurrency($quoteCurrency);
+		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+
+		$buyOrdersCount = 0;
+		$sellOrdersCount = 0;
+		$activeOrders = $this->orderRepository->findActive($session->getId());
+		foreach ($activeOrders as $order) {
+			if ($order->getType() === 'sell') {
+				$sellOrdersCount++;
+			} else {
+				$buyOrdersCount++;
+			}
+		}
+
+		$minBalance = new Money(0, $baseCurrency);
+		if ($baseCurrencyBalances->getAvailableBalance()->greaterThan($minBalance)) {
+			/*foreach ($activeOrders as $order) {
+				if ($order->getType() === 'buy') {
+					continue;
+				}
+				//$exchange->cancelOrder($order);
+			}*/
+		}
+		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
+		$price = $exchange->getBid($symbolString) * (0.995);
 
 
+		$ratio = 1 / ($price * (1 + $exchange->getFee()));
+		$amountMoney = $this->convert($quoteCurrencyBalances->getAvailableBalance(), $baseCurrency, $ratio);
+		if ($amountMoney->lessThan(new Money(1, $baseCurrency))) {
+			return;
+		}
+		$amount = $this->formatter->format($amountMoney);
+		$createOrderRequest = new CreateOrderRequest();
+		$createOrderRequest->setBotTradingSessionId($session->getId());
+		$createOrderRequest->setExchangeId($exchange->getId());
+		$createOrderRequest->setSymbol(new CurrencyPair($baseCurrency, $quoteCurrency, 0));
 
-		var_dump($baseCurrencyAccount->getBalance());
-		var_dump($quoteCurrencyAccount->getBalance());
+		$createOrderRequest->setType('buy');
+		$createOrderRequest->setAmount($amount);
+		$createOrderRequest->setPrice($price);
+
+		$order = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+
+		var_dump($order);
+		//var_dump($baseCurrencyBalances->getAvailableBalance());
+		//var_dump($quoteCurrencyBalances->getAvailableBalance());
+	}
+
+	/**
+	 * @param Money    $money
+	 * @param Currency $counterCurrency
+	 * @param int      $roundingMode
+	 *
+	 * @return Money
+	 */
+	private function convert(Money $money, Currency $counterCurrency, $ratio, $roundingMode = Money::ROUND_DOWN)
+	{
+
+		$baseCurrency = $money->getCurrency();
+		$baseCurrencySubunit = $this->currencies->subunitFor($baseCurrency);
+		$counterCurrencySubunit = $this->currencies->subunitFor($counterCurrency);
+		$subunitDifference = $baseCurrencySubunit - $counterCurrencySubunit;
+
+		$ratio = (string) Number::fromString($ratio)->base10($subunitDifference);
+
+		$counterValue = $money->multiply($ratio, $roundingMode);
+
+		return new Money($counterValue->getAmount(), $counterCurrency);
 	}
 }

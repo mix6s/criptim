@@ -10,7 +10,9 @@ namespace DomainBundle\Exchange\Entity;
 
 
 use Domain\Exception\DomainException;
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\ExchangeInterface;
+use Domain\Exchange\Entity\Order;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
 use GuzzleHttp\Client;
@@ -53,12 +55,25 @@ class HitBtcExchange implements ExchangeInterface
 		return $this->id;
 	}
 
-	public function createOrder(OrderId $orderId)
+	public function createOrder(Order $order)
 	{
-		// TODO: Implement createOrder() method.
+		$orderId = (string)$order->getId();
+		$len = strlen($orderId);
+		if ($len < 8) {
+			for ($i = $len; $i < 8; $i++) {
+				$orderId = '0' . $orderId;
+			}
+		}
+		$data = $this->apiAuthRequest('POST', '/order', [
+			'clientOrderId' => $orderId,
+			'symbol' => $order->getSymbol()->getBaseCurrency() . $order->getSymbol()->getCounterCurrency(),
+			'side' => (string)$order->getType(),
+			'quantity' => $order->getAmount(),
+			'price' => $order->getPrice(),
+		]);
 	}
 
-	public function cancelOrder(OrderId $orderId)
+	public function cancelOrder(Order $order)
 	{
 		// TODO: Implement cancelOrder() method.
 	}
@@ -82,16 +97,52 @@ class HitBtcExchange implements ExchangeInterface
 		if ($method === 'POST') {
 			$options['form_params'] = $data;
 		}
-		$response = $this->client->request($method, $uri, $options);
+		$response = $this->client->request($method, self::API_ENDPOINT . $uri, $options);
 
 		if ($response->getStatusCode() !== 200) {
 			throw new DomainException(sprintf('HitBtc api response error: %s', $response->getReasonPhrase()), $response->getStatusCode());
 		}
 
-		$body = json_decode($response->getBody());
+		$body = json_decode($response->getBody(), true);
 		if (!empty($body['error'])) {
 			throw new DomainException($body['error']['message'] ?? 'HitBtc api error', $body['error']['code'] ?? null);
 		}
+		return $body;
+	}
 
+	/**
+	 * @return Order[]
+	 */
+	public function getActiveOrders(): array
+	{
+		return [];
+	}
+
+	/**
+	 * @param OrderId $orderId
+	 * @return Order
+	 * @throws EntityNotFoundException
+	 */
+	public function getOrder(OrderId $orderId): Order
+	{
+		throw new EntityNotFoundException();
+	}
+
+	public function getBid(string $symbol): float
+	{
+		$orderbook = $this->getOrderBook($symbol);
+		return $orderbook['bid'][0]['price'];
+	}
+
+	public function getAsk(string $symbol): float
+	{
+		$orderbook = $this->getOrderBook($symbol);
+		return $orderbook['ask'][0]['price'];
+	}
+
+	private function getOrderBook(string $symbol)
+	{
+		$data = $this->apiAuthRequest('GET', sprintf('/public/orderbook/%s', $symbol));
+		return $data;
 	}
 }

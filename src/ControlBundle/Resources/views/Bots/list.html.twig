@@ -15,6 +15,9 @@
                         <th>ID</th>
                         <th>Status</th>
                         <th>BTC balance</th>
+                        <th>Session Balance</th>
+                        <th>In Orders Balance</th>
+                        <th>Available Balance</th>
                         <th>Exchange</th>
                         <th>Strategy</th>
                         <th>Strategy settings</th>
@@ -23,6 +26,7 @@
                     </thead>
                     <tbody>
                     {% for bot in bots %}
+                        {% set sessionBalances = bot|botSessionBalances('BTC') %}
                     <tr>
                         <td>
                             {{ bot.id }}
@@ -32,6 +36,15 @@
                         </td>
                         <td>
                             {{ bot|botBalance('BTC')|moneyFormat }}
+                        </td>
+                        <td>
+                            {{ sessionBalances.accountBalance|moneyFormat }}
+                        </td>
+                        <td>
+                            {{ sessionBalances.inOrdersBalance|moneyFormat }}
+                        </td>
+                        <td>
+                            {{ sessionBalances.availableBalance|moneyFormat }}
                         </td>
                         <td>
                             {{ bot.exchangeId }}

@@ -9,7 +9,25 @@
 namespace Domain\Exchange\UseCase\Response;
 
 
+use Domain\Exchange\Entity\Order;
+
 class CreateOrderResponse
 {
+	/**
+	 * @var Order
+	 */
+	private $order;
 
+	public function __construct(Order $order)
+	{
+		$this->order = $order;
+	}
+
+	/**
+	 * @return Order
+	 */
+	public function getOrder(): Order
+	{
+		return $this->order;
+	}
 }

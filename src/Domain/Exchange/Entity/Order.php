@@ -11,6 +11,7 @@ namespace Domain\Exchange\Entity;
 
 use Domain\Exchange\ValueObject\BotTradingSessionId;
 use Domain\Exchange\ValueObject\OrderId;
+use Money\CurrencyPair;
 
 class Order
 {
@@ -40,7 +41,7 @@ class Order
 	 */
 	private $amount;
 	/**
-	 * @var string
+	 * @var CurrencyPair
 	 */
 	private $symbol;
 	/**
@@ -52,7 +53,7 @@ class Order
 	 */
 	private $execAmount;
 
-	public function __construct(OrderId $id, BotTradingSessionId $botTradingSessionId, string $type, float $price, float $amount, string $symbol)
+	public function __construct(OrderId $id, BotTradingSessionId $botTradingSessionId, string $type, float $price, float $amount, CurrencyPair $symbol)
 	{
 		$this->id = $id;
 		$this->botTradingSessionId = $botTradingSessionId;
@@ -78,5 +79,50 @@ class Order
 	public function getType(): string
 	{
 		return $this->type;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getPrice(): float
+	{
+		return $this->price;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getExecAmount(): float
+	{
+		return $this->execAmount;
+	}
+
+	/**
+	 * @return CurrencyPair
+	 */
+	public function getSymbol(): CurrencyPair
+	{
+		return $this->symbol;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getAmount(): float
+	{
+		return $this->amount;
+	}
+
+	public function isActive(): bool
+	{
+		return in_array($this->status, [self::STATUS_NEW, self::STATUS_PARTIALLY_FILLED]);
+	}
+
+	/**
+	 * @return OrderId
+	 */
+	public function getId(): OrderId
+	{
+		return $this->id;
 	}
 }

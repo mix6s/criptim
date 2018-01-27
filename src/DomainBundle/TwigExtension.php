@@ -4,9 +4,9 @@ namespace DomainBundle;
 
 use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
+use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
 use Domain\Exchange\UseCase\Request\GetUserExchangeAccountRequest;
 use Domain\Exchange\ValueObject\ExchangeId;
-use Domain\Policy\DomainMoneyExchangePolicy;
 use Domain\ValueObject\UserId;
 use DomainBundle\Exchange\Policy\CryptoMoneyFormatter;
 use Money\Currency;
@@ -39,11 +39,23 @@ class TwigExtension extends \Twig_Extension
 	{
 		return [
 			new \Twig_SimpleFilter('botBalance', [$this, 'botBalanceFilter']),
+			new \Twig_SimpleFilter('botSessionBalances', [$this, 'botSessionBalancesFilter']),
 			new \Twig_SimpleFilter('userExchangeBalance', [$this, 'userExchangeBalanceFilter']),
 			new \Twig_SimpleFilter('moneyFormat', [$this, 'moneyFormatFilter']),
 		];
 	}
 
+	public function botSessionBalancesFilter(Bot $bot, string $currency)
+	{
+		$session = $this->container->get('ORM\BotTradingSessionRepository')->findLastByBotId($bot->getId());
+
+		$request = new GetBotTradingSessionBalancesRequest();
+		$request->setCurrency(new Currency($currency));
+		$request->setBotTradingSessionId($session->getId());
+		$balances = $this->container->get('UseCase\GetBotTradingSessionBalancesUseCase')->execute($request);
+
+		return $balances;
+	}
 
 	public function botBalanceFilter(Bot $bot, string $currency)
 	{
@@ -70,6 +82,6 @@ class TwigExtension extends \Twig_Extension
 
 	public function moneyFormatFilter(Money $money)
 	{
-		return $this->formatter->format($money);
+		return $this->formatter->formatWithCurrency($money);
 	}
 }

@@ -14,6 +14,7 @@ use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\BotTradingSession;
 use Domain\Exchange\Repository\BotTradingSessionRepositoryInterface;
 use Domain\Exchange\ValueObject\BotId;
+use Domain\Exchange\ValueObject\BotTradingSessionId;
 
 class BotTradingSessionRepository extends EntityRepository implements BotTradingSessionRepositoryInterface
 {
@@ -47,5 +48,20 @@ class BotTradingSessionRepository extends EntityRepository implements BotTrading
 	{
 		$this->getEntityManager()->persist($session);
 		$this->getEntityManager()->flush($session);
+	}
+
+	/**
+	 * @param BotTradingSessionId $botTradingSessionId
+	 * @return BotTradingSession
+	 * @throws EntityNotFoundException
+	 */
+	public function findById(BotTradingSessionId $botTradingSessionId): BotTradingSession
+	{
+		/** @var BotTradingSession $session */
+		$session = $this->find($botTradingSessionId);
+		if (empty($session)) {
+			throw new EntityNotFoundException(sprintf('BotTradingSession with id %d not found', (string)$botTradingSessionId));
+		}
+		return $session;
 	}
 }

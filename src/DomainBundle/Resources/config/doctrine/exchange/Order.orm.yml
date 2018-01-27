@@ -1,0 +1,34 @@
+Domain\Exchange\Entity\Order:
+    namedNativeQueries:
+        findActiveByExchangeId:
+          name: findActiveByExchangeId
+          resultClass: __CLASS__
+          query: "SELECT o.id, o.status, o.bot_trading_session_id, o.amount, o.type, o.exec_amount, o.price, o.symbol
+                  FROM orders AS o
+                    JOIN bot_trading_session AS bts ON bts.id = o.bot_trading_session_id
+                  WHERE o.status in (:statuses) AND exchange_id = :exchange_id
+                  ORDER BY o.id DESC"
+    repositoryClass: DomainBundle\Exchange\Repository\OrderRepository
+    table: orders
+    type: entity
+    id:
+        id:
+            type: orderId
+            generator: { strategy: NONE }
+            sequenceGenerator:
+                sequenceName: order_id_seq
+    fields:
+        botTradingSessionId:
+            type: botTradingSessionId
+        type:
+            type: string
+        price:
+            type: float
+        amount:
+            type: float
+        execAmount:
+            type: float
+        status:
+            type: string
+        symbol:
+            type: currencyPair

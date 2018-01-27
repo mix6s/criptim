@@ -10,6 +10,8 @@ Domain\Exchange\Entity\BotTradingSession:
     fields:
         botId:
             type: botId
+        exchangeId:
+            type: exchangeId
         tradingStrategyId:
             type: tradingStrategyId
         tradingStrategySettings:

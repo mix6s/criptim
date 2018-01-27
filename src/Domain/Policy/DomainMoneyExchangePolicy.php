@@ -12,6 +12,8 @@ namespace Domain\Policy;
 use Domain\Exception\DomainException;
 use Money\Currency;
 use Money\CurrencyPair;
+use Money\Exception\UnresolvableCurrencyPairException;
+use Money\Exchange;
 use Money\Money;
 use Money\Number;
 
