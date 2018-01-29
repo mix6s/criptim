@@ -31,7 +31,10 @@ services:
         arguments: ['@UseCase\GetBotTradingSessionAccountUseCase', '@ORM\OrderRepository', '@ExchangeRepository', '@ORM\BotTradingSessionRepository']
     UseCase\SyncExchangeUseCase:
         class: Domain\Exchange\UseCase\SyncExchangeUseCase
-        arguments: ['@ORM\OrderRepository', '@ExchangeRepository']
+        arguments: ['@ORM\OrderRepository', '@ExchangeRepository', '@UseCase\UpdateOrderUseCase']
     UseCase\UpdateOrderUseCase:
         class: Domain\Exchange\UseCase\UpdateOrderUseCase
         arguments: ['@ORM\OrderRepository', '@ORM\BotTradingSessionRepository', '@ExchangeRepository', '@UseCase\GetBotTradingSessionAccountUseCase', '@ORM\BotTradingSessionAccountRepository', '@ORM\BotTradingSessionAccountTransactionRepository', '@Exchange\IdFactory']
+    UseCase\CancelOrderUseCase:
+        class: Domain\Exchange\UseCase\CancelOrderUseCase
+        arguments: ['@ORM\BotTradingSessionRepository', '@ExchangeRepository', '@ORM\OrderRepository', '@UseCase\UpdateOrderUseCase']

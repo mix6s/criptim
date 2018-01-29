@@ -22,7 +22,7 @@ interface ExchangeInterface
 
 	public function createOrder(Order $order);
 
-	public function cancelOrder(Order $order);
+	public function cancelOrder(OrderId $orderId): ExchangeOrder;
 
 	public function getSymbol(string $symbol);
 

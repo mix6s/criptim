@@ -54,7 +54,6 @@ class SyncExchangeUseCase
 				if ($order->getId()->equals($exchangeOrder->getId())) {
 					$exist = true;
 					$updateOrderRequest->setExchangeOrder($exchangeOrder);
-					$updateOrderRequest->setOrderId($order->getId());
 					$this->updateOrderUseCase->execute($updateOrderRequest);
 					break;
 				}
@@ -66,7 +65,6 @@ class SyncExchangeUseCase
 					continue;
 				}
 				$updateOrderRequest->setExchangeOrder($exchangeOrder);
-				$updateOrderRequest->setOrderId($order->getId());
 				$this->updateOrderUseCase->execute($updateOrderRequest);
 			}
 		}

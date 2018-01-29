@@ -80,9 +80,10 @@ class HitBtcExchange implements ExchangeInterface
 	}
 
 
-	public function cancelOrder(Order $order)
+	public function cancelOrder(OrderId $orderId): ExchangeOrder
 	{
-		// TODO: Implement cancelOrder() method.
+		$data = $this->apiAuthRequest('DELETE', sprintf('/order/%s', $this->getOrderId($orderId)));
+		return $this->toExchangeOrder($data);
 	}
 
 	public function getSymbol(string $symbol)

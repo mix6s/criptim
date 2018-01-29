@@ -14,26 +14,8 @@ use Domain\Exchange\ValueObject\OrderId;
 
 class UpdateOrderRequest
 {
-	/** @var  OrderId */
-	private $orderId;
 	/** @var  ExchangeOrder */
 	private $exchangeOrder;
-
-	/**
-	 * @return OrderId
-	 */
-	public function getOrderId(): OrderId
-	{
-		return $this->orderId;
-	}
-
-	/**
-	 * @param OrderId $orderId
-	 */
-	public function setOrderId(OrderId $orderId)
-	{
-		$this->orderId = $orderId;
-	}
 
 	/**
 	 * @return ExchangeOrder

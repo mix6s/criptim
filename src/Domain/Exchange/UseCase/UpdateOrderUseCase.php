@@ -79,8 +79,8 @@ class UpdateOrderUseCase
 
 	public function execute(UpdateOrderRequest $request): UpdateOrderResponse
 	{
-		$order = $this->orderRepository->findById($request->getOrderId());
 		$exchangeOrder = $request->getExchangeOrder();
+		$order = $this->orderRepository->findById($exchangeOrder->getId());
 		if ($exchangeOrder->getStatus() === null) {
 			$order->updateFrom($exchangeOrder);
 			$this->orderRepository->save($order);
