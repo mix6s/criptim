@@ -32,3 +32,7 @@ Domain\Exchange\Entity\Order:
             type: string
         symbol:
             type: currencyPair
+        createdAt:
+            type: dateTimeImmutable
+        updatedAt:
+            type: dateTimeImmutable

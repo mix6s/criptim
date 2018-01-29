@@ -52,6 +52,14 @@ class Order
 	 * @var float
 	 */
 	private $execAmount;
+	/**
+	 * @var \DateTimeImmutable
+	 */
+	private $createdAt;
+	/**
+	 * @var \DateTimeImmutable
+	 */
+	private $updatedAt;
 
 	public function __construct(OrderId $id, BotTradingSessionId $botTradingSessionId, string $type, float $price, float $amount, CurrencyPair $symbol)
 	{
@@ -63,6 +71,8 @@ class Order
 		$this->symbol = $symbol;
 		$this->status = self::STATUS_NEW;
 		$this->execAmount = 0.;
+		$this->createdAt = new \DateTimeImmutable();
+		$this->updatedAt = new \DateTimeImmutable();
 	}
 
 	/**
@@ -141,6 +151,7 @@ class Order
 		if ($order->getExecAmount() !== null) {
 			$this->execAmount = $order->getExecAmount();
 		}
+		$this->updatedAt = new \DateTimeImmutable();
 	}
 
 	/**
@@ -149,5 +160,21 @@ class Order
 	public function getBotTradingSessionId(): BotTradingSessionId
 	{
 		return $this->botTradingSessionId;
+	}
+
+	/**
+	 * @return \DateTimeImmutable
+	 */
+	public function getCreatedAt(): \DateTimeImmutable
+	{
+		return $this->createdAt;
+	}
+
+	/**
+	 * @return \DateTimeImmutable
+	 */
+	public function getUpdatedAt(): \DateTimeImmutable
+	{
+		return $this->updatedAt;
 	}
 }
