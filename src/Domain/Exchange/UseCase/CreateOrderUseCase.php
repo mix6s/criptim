@@ -112,19 +112,6 @@ class CreateOrderUseCase
 		$order = new Order($orderId, $sessionId, $request->getType(), $request->getPrice(), $request->getAmount(), $request->getSymbol());
 		$exchange->createOrder($order);
 		$this->orderRepository->save($order);
-
-/*		$difference = $total->absolute()->multiply(-1);
-		$balances->getBotTradingSessionAccount()->change($difference);
-		$sessionAccountTransaction = new BotTradingSessionAccountTransaction(
-			$this->idFactory->getBotTradingSessionAccountTransactionId(),
-			$sessionId,
-			$currency,
-			$difference,
-			$balances->getBotTradingSessionAccount()->getBalance(),
-			BotTradingSessionAccountTransaction::TYPE_NEW_ORDER
-		);
-		$this->botTradingSessionAccountTransactionRepository->save($sessionAccountTransaction);
-		$this->botTradingSessionAccountRepository->save($balances->getBotTradingSessionAccount());*/
 		return new CreateOrderResponse($order);
 	}
 }

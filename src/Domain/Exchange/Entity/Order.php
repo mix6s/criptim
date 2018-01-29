@@ -142,4 +142,12 @@ class Order
 			$this->execAmount = $order->getExecAmount();
 		}
 	}
+
+	/**
+	 * @return BotTradingSessionId
+	 */
+	public function getBotTradingSessionId(): BotTradingSessionId
+	{
+		return $this->botTradingSessionId;
+	}
 }

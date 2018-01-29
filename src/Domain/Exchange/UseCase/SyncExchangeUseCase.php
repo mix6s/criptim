@@ -12,6 +12,7 @@ namespace Domain\Exchange\UseCase;
 use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Repository\OrderRepositoryInterface;
 use Domain\Exchange\UseCase\Request\SyncExchangeRequest;
+use Domain\Exchange\UseCase\Request\UpdateOrderRequest;
 use DomainBundle\Exchange\Repository\ExchangeRepository;
 
 class SyncExchangeUseCase
@@ -24,14 +25,20 @@ class SyncExchangeUseCase
 	 * @var ExchangeRepository
 	 */
 	private $exchangeRepository;
+	/**
+	 * @var UpdateOrderUseCase
+	 */
+	private $updateOrderUseCase;
 
 	public function __construct(
 		OrderRepositoryInterface $orderRepository,
-		ExchangeRepository $exchangeRepository
+		ExchangeRepository $exchangeRepository,
+		UpdateOrderUseCase $updateOrderUseCase
 	)
 	{
 		$this->orderRepository = $orderRepository;
 		$this->exchangeRepository = $exchangeRepository;
+		$this->updateOrderUseCase = $updateOrderUseCase;
 	}
 
 	public function execute(SyncExchangeRequest $request)
@@ -40,13 +47,15 @@ class SyncExchangeUseCase
 
 		$repositoryOrders = $this->orderRepository->findActiveByExchangeId($exchange->getId());
 		$exchangeActiveOrders = $exchange->getActiveOrders();
-
+		$updateOrderRequest = new UpdateOrderRequest();
 		foreach ($repositoryOrders as $order) {
 			$exist = false;
 			foreach ($exchangeActiveOrders as $exchangeOrder) {
 				if ($order->getId()->equals($exchangeOrder->getId())) {
 					$exist = true;
-					$order->updateFrom($exchangeOrder);
+					$updateOrderRequest->setExchangeOrder($exchangeOrder);
+					$updateOrderRequest->setOrderId($order->getId());
+					$this->updateOrderUseCase->execute($updateOrderRequest);
 					break;
 				}
 			}
@@ -56,9 +65,10 @@ class SyncExchangeUseCase
 				} catch (EntityNotFoundException $exception) {
 					continue;
 				}
-				$order->updateFrom($exchangeOrder);
+				$updateOrderRequest->setExchangeOrder($exchangeOrder);
+				$updateOrderRequest->setOrderId($order->getId());
+				$this->updateOrderUseCase->execute($updateOrderRequest);
 			}
-			$this->orderRepository->save($order);
 		}
 	}
 }
