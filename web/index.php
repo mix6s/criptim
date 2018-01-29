@@ -13,6 +13,7 @@ if ($env == 'dev') {
 	Debug::enable();
 }
 $kernel = new AppKernel($env, $env == 'dev');
+$kernel->loadEnvFile();
 if (PHP_VERSION_ID < 70000) {
 	$kernel->loadClassCache();
 }

@@ -5,7 +5,6 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
-/app/config/parameters.yml
 /bin/symfony_requirements
 /node_modules
 /bower_components
