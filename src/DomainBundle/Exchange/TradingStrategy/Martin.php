@@ -20,6 +20,7 @@ use Domain\Exchange\Repository\OrderRepositoryInterface;
 use Domain\Exchange\UseCase\CancelOrderUseCase;
 use Domain\Exchange\UseCase\CreateOrderUseCase;
 use Domain\Exchange\UseCase\GetBotTradingSessionBalancesUseCase;
+use Domain\Exchange\UseCase\Request\CancelOrderRequest;
 use Domain\Exchange\UseCase\Request\CreateOrderRequest;
 use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
 use Domain\Exchange\ValueObject\TradingStrategyId;
@@ -120,6 +121,7 @@ class Martin implements TradingStrategyInterface
 		$exchange = $this->exchangeRepository->findById($bot->getExchangeId());
 
 		$settings = $session->getTradingStrategySettings()->getData();
+		$profitPercent = $settings['profit'] ?? 0.3;
 		$baseCurrency = new Currency($settings['baseCurrency']);
 		$quoteCurrency = new Currency($settings['quoteCurrency']);
 		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
@@ -129,12 +131,16 @@ class Martin implements TradingStrategyInterface
 
 		$balancesRequest->setCurrency($baseCurrency);
 		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
-
 		$balancesRequest->setCurrency($quoteCurrency);
 		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 
 		$buyOrdersCount = 0;
 		$sellOrdersCount = 0;
+
+		$minBalance = new Money(0, $baseCurrency);
+		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
+		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
+
 		$activeOrders = $this->orderRepository->findActive($session->getId());
 		foreach ($activeOrders as $order) {
 			if ($order->getType() === 'sell') {
@@ -144,18 +150,33 @@ class Martin implements TradingStrategyInterface
 			}
 		}
 
-		$minBalance = new Money(0, $baseCurrency);
-		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
-		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
-
 
 		if ($baseCurrencyBalances->getAvailableBalance()->greaterThan($minBalance)) {
-			/*foreach ($activeOrders as $order) {
+			$cancelOrderRequest = new CancelOrderRequest();
+			foreach ($activeOrders as $order) {
 				if ($order->getType() === 'buy') {
 					continue;
 				}
-				//$exchange->cancelOrder($order);
-			}*/
+				$cancelOrderRequest->setOrderId($order->getId());
+				$this->cancelOrderUseCase->execute($cancelOrderRequest);
+			}
+			$balancesRequest->setCurrency($baseCurrency);
+			$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+			$balancesRequest->setCurrency($quoteCurrency);
+			$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+
+			$quoteTotal = $quoteCurrencyBalances->getStartBalance()
+				->subtract($quoteCurrencyBalances->getAvailableBalance())
+				->subtract($quoteCurrencyBalances->getInOrdersBalance());
+			$sellPrice = $quoteTotal->multiply(1 + $profitPercent / 100)->divide($baseCurrencyBalances->getAccountBalance());
+			$sellAmount = null;
+			/*
+				sell_amount = self.sell(session, sell_price)
+            	if sell_amount is not None:
+                	self.last_sell_amount = sell_amount
+			 */
+		} else {
+
 		}
 
 		$price = $exchange->getBid($symbolString) * (0.995);

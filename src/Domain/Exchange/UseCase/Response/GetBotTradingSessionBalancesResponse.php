@@ -30,13 +30,18 @@ class GetBotTradingSessionBalancesResponse
 	 * @var BotTradingSessionAccount
 	 */
 	private $botTradingSessionAccount;
+	/**
+	 * @var Money
+	 */
+	private $startBalance;
 
-	public function __construct(BotTradingSessionAccount $botTradingSessionAccount, Money $accountBalance, Money $inOrdersBalance, Money $availableBalance)
+	public function __construct(BotTradingSessionAccount $botTradingSessionAccount, Money $accountBalance, Money $inOrdersBalance, Money $availableBalance, Money $startBalance)
 	{
 		$this->accountBalance = $accountBalance;
 		$this->inOrdersBalance = $inOrdersBalance;
 		$this->availableBalance = $availableBalance;
 		$this->botTradingSessionAccount = $botTradingSessionAccount;
+		$this->startBalance = $startBalance;
 	}
 
 	/**
@@ -69,5 +74,13 @@ class GetBotTradingSessionBalancesResponse
 	public function getBotTradingSessionAccount(): BotTradingSessionAccount
 	{
 		return $this->botTradingSessionAccount;
+	}
+
+	/**
+	 * @return Money
+	 */
+	public function getStartBalance(): Money
+	{
+		return $this->startBalance;
 	}
 }

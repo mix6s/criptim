@@ -9,7 +9,9 @@
 namespace Domain\Exchange\UseCase;
 
 
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Policy\MoneyFromFloatPolicy;
+use Domain\Exchange\Repository\BotTradingSessionAccountTransactionRepositoryInterface;
 use Domain\Exchange\Repository\BotTradingSessionRepositoryInterface;
 use Domain\Exchange\Repository\ExchangeRepositoryInterface;
 use Domain\Exchange\Repository\OrderRepositoryInterface;
@@ -38,12 +40,17 @@ class GetBotTradingSessionBalancesUseCase
 	private $botTradingSessionRepository;
 	/** @var MoneyFromFloatPolicy  */
 	private $moneyFromFloatPolicy;
+	/**
+	 * @var BotTradingSessionAccountTransactionRepositoryInterface
+	 */
+	private $botTradingSessionAccountTransactionRepository;
 
 	public function __construct(
 		GetBotTradingSessionAccountUseCase $getBotTradingSessionAccountUseCase,
 		OrderRepositoryInterface $orderRepository,
 		ExchangeRepositoryInterface $exchangeRepository,
-		BotTradingSessionRepositoryInterface $botTradingSessionRepository
+		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
+		BotTradingSessionAccountTransactionRepositoryInterface $botTradingSessionAccountTransactionRepository
 	)
 	{
 		$this->getBotTradingSessionAccountUseCase = $getBotTradingSessionAccountUseCase;
@@ -51,6 +58,7 @@ class GetBotTradingSessionBalancesUseCase
 		$this->moneyFromFloatPolicy = new MoneyFromFloatPolicy();
 		$this->exchangeRepository = $exchangeRepository;
 		$this->botTradingSessionRepository = $botTradingSessionRepository;
+		$this->botTradingSessionAccountTransactionRepository = $botTradingSessionAccountTransactionRepository;
 	}
 
 	public function execute(GetBotTradingSessionBalancesRequest $request): GetBotTradingSessionBalancesResponse
@@ -87,6 +95,14 @@ class GetBotTradingSessionBalancesUseCase
 			$inOrderBalance = $inOrderBalance->add($orderTotal);
 		}
 		$availableBalance = $account->getBalance()->subtract($inOrderBalance);
-		return new GetBotTradingSessionBalancesResponse($account, $account->getBalance(), $inOrderBalance, $availableBalance);
+
+		try {
+			$startBalance = $this->botTradingSessionAccountTransactionRepository
+				->findLastBySessionIdCurrencyDate($session->getId(), $request->getCurrency(), $session->getCreatedAt())->getBalance();
+		} catch (EntityNotFoundException $exception) {
+			$startBalance = new Money(0, $request->getCurrency());
+		}
+
+		return new GetBotTradingSessionBalancesResponse($account, $account->getBalance(), $inOrderBalance, $availableBalance, $startBalance);
 	}
 }

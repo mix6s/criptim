@@ -25,4 +25,12 @@ class CancelOrderRequest
 	{
 		return $this->orderId;
 	}
+
+	/**
+	 * @param OrderId $orderId
+	 */
+	public function setOrderId(OrderId $orderId)
+	{
+		$this->orderId = $orderId;
+	}
 }
