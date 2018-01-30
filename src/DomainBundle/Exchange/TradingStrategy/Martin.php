@@ -9,6 +9,7 @@
 namespace DomainBundle\Exchange\TradingStrategy;
 
 
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\BotTradingSession;
 use Domain\Exchange\Entity\TradingStrategyInterface;
 use Domain\Exchange\Policy\MoneyFromFloatPolicy;
@@ -88,8 +89,7 @@ class Martin implements TradingStrategyInterface
 		CreateOrderUseCase $createOrderUseCase,
 		OrderRepositoryInterface $orderRepository,
 		CancelOrderUseCase $cancelOrderUseCase
-	)
-	{
+	) {
 		$this->id = new TradingStrategyId(self::ID);
 		$this->botTradingSessionAccountRepository = $botTradingSessionAccountRepository;
 		$this->botTradingSessionRepository = $botTradingSessionRepository;
@@ -121,10 +121,17 @@ class Martin implements TradingStrategyInterface
 		$exchange = $this->exchangeRepository->findById($bot->getExchangeId());
 
 		$settings = $session->getTradingStrategySettings()->getData();
-		$profitPercent = $settings['profit'] ?? 0.3;
+		$profitPercent = $settings['profit_percent'] ?? 0.3;
+		$priceDecPercent = $settings['price_dec_percent'] ?? 0.1;
 		$baseCurrency = new Currency($settings['baseCurrency']);
 		$quoteCurrency = new Currency($settings['quoteCurrency']);
 		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
+
+		$createOrderRequest = new CreateOrderRequest();
+		$createOrderRequest->setBotTradingSessionId($session->getId());
+		$createOrderRequest->setExchangeId($exchange->getId());
+		$createOrderRequest->setSymbol(new CurrencyPair($baseCurrency, $quoteCurrency, 0));
+		$cancelOrderRequest = new CancelOrderRequest();
 
 		$balancesRequest = new GetBotTradingSessionBalancesRequest();
 		$balancesRequest->setBotTradingSessionId($session->getId());
@@ -134,12 +141,27 @@ class Martin implements TradingStrategyInterface
 		$balancesRequest->setCurrency($quoteCurrency);
 		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 
+		$bidPrice = $exchange->getBid($symbolString);
+		$askPrice = $exchange->getBid($symbolString);
+		$currentPrice = $askPrice;
 		$buyOrdersCount = 0;
 		$sellOrdersCount = 0;
+		try {
+			$firstBuyOrder = $this->orderRepository->findFirstBuy($session->getId());
+		} catch (EntityNotFoundException $exception) {
+			$firstBuyOrder = null;
+		}
+		try {
+			$lastSellOrder = $this->orderRepository->findLastSell($session->getId());
+		} catch (EntityNotFoundException $exception) {
+			$lastSellOrder = null;
+		}
+
 
 		$minBalance = new Money(0, $baseCurrency);
 		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
-		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
+		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency,
+			$exchange->getPriceTickSize($symbolString));
 
 		$activeOrders = $this->orderRepository->findActive($session->getId());
 		foreach ($activeOrders as $order) {
@@ -150,9 +172,7 @@ class Martin implements TradingStrategyInterface
 			}
 		}
 
-
 		if ($baseCurrencyBalances->getAvailableBalance()->greaterThan($minBalance)) {
-			$cancelOrderRequest = new CancelOrderRequest();
 			foreach ($activeOrders as $order) {
 				if ($order->getType() === 'buy') {
 					continue;
@@ -168,46 +188,36 @@ class Martin implements TradingStrategyInterface
 			$quoteTotal = $quoteCurrencyBalances->getStartBalance()
 				->subtract($quoteCurrencyBalances->getAvailableBalance())
 				->subtract($quoteCurrencyBalances->getInOrdersBalance());
-			$sellPrice = $quoteTotal->multiply(1 + $profitPercent / 100)->divide($baseCurrencyBalances->getAccountBalance());
-			$sellAmount = null;
-			/*
-				sell_amount = self.sell(session, sell_price)
-            	if sell_amount is not None:
-                	self.last_sell_amount = sell_amount
-			 */
+			$sellPrice = $this->round(
+				$quoteTotal
+					->multiply(1 + $profitPercent / 100)
+					->divide($baseCurrencyBalances->getAccountBalance()),
+				$priceTickSize
+			);
+			$sellAmount = $baseCurrencyBalances->getAvailableBalance();
+			if ($sellAmount->greaterThanOrEqual($amountInc)) {
+				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
+				$createOrderRequest->setPrice($this->formatter->format($sellPrice));
+				$createOrderRequest->setType('sell');
+				$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+			}
 		} else {
+			if (
+				$sellOrdersCount === 0
+				&& $firstBuyOrder !== null
+				&& (
+					$currentPrice > $firstBuyOrder->getPrice() * (1 + $priceDecPercent * 3 / 100)
+				)
+			) {
 
+			}
 		}
-
-		$price = $exchange->getBid($symbolString) * (0.995);
-
-
-		$ratio = 1 / ($price * (1 + $exchange->getFee()));
-		$amountMoney = $this->convert($quoteCurrencyBalances->getAvailableBalance(), $baseCurrency, $ratio);
-		if ($amountMoney->lessThan($amountInc)) {
-			return;
-		}
-		$amount = $this->formatter->format($amountMoney);
-		$createOrderRequest = new CreateOrderRequest();
-		$createOrderRequest->setBotTradingSessionId($session->getId());
-		$createOrderRequest->setExchangeId($exchange->getId());
-		$createOrderRequest->setSymbol(new CurrencyPair($baseCurrency, $quoteCurrency, 0));
-
-		$createOrderRequest->setType('buy');
-		$createOrderRequest->setAmount($amount);
-		$createOrderRequest->setPrice($price);
-
-		$order = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
-
-		var_dump($order);
-		//var_dump($baseCurrencyBalances->getAvailableBalance());
-		//var_dump($quoteCurrencyBalances->getAvailableBalance());
 	}
 
 	/**
-	 * @param Money    $money
+	 * @param Money $money
 	 * @param Currency $counterCurrency
-	 * @param int      $roundingMode
+	 * @param int $roundingMode
 	 *
 	 * @return Money
 	 */
@@ -219,10 +229,16 @@ class Martin implements TradingStrategyInterface
 		$counterCurrencySubunit = $this->currencies->subunitFor($counterCurrency);
 		$subunitDifference = $baseCurrencySubunit - $counterCurrencySubunit;
 
-		$ratio = (string) Number::fromString($ratio)->base10($subunitDifference);
+		$ratio = (string)Number::fromString($ratio)->base10($subunitDifference);
 
 		$counterValue = $money->multiply($ratio, $roundingMode);
 
 		return new Money($counterValue->getAmount(), $counterCurrency);
+	}
+
+	private function round(Money $money, Money $rounding): Money
+	{
+		return new Money(floor($money->getAmount() / $rounding->getAmount()) * $rounding->getAmount(),
+			$money->getCurrency());
 	}
 }

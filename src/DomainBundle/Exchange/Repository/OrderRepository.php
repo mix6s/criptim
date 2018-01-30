@@ -55,6 +55,7 @@ class OrderRepository extends EntityRepository implements OrderRepositoryInterfa
 	/**
 	 * @param OrderId $orderId
 	 * @return Order
+	 * @throws EntityNotFoundException
 	 */
 	public function findById(OrderId $orderId): Order
 	{
@@ -62,6 +63,56 @@ class OrderRepository extends EntityRepository implements OrderRepositoryInterfa
 		$order = $this->find($orderId);
 		if (empty($order)) {
 			throw new EntityNotFoundException(sprintf('Order with id %d not found', (string)$orderId));
+		}
+		return $order;
+	}
+
+	/**
+	 * @param BotTradingSessionId $sessionId
+	 * @return Order
+	 * @throws EntityNotFoundException
+	 */
+	public function findLastSell(BotTradingSessionId $sessionId): Order
+	{
+		$order = $this->getEntityManager()->createQueryBuilder()
+			->select('o')
+			->from('Domain\Exchange\Entity\Order', 'o')
+			->where('o.botTradingSessionId = :id')
+			->andWhere('o.type = :type')
+			->andWhere('o.status != :status')
+			->setParameter('id', $sessionId)
+			->setParameter('type', 'sell')
+			->setParameter('status', Order::STATUS_CANCELED)
+			->orderBy('o.createdAt', 'DESC')
+			->getQuery()
+			->getOneOrNullResult();
+		if ($order === null) {
+			throw new EntityNotFoundException();
+		}
+		return $order;
+	}
+
+	/**
+	 * @param BotTradingSessionId $sessionId
+	 * @return Order
+	 * @throws EntityNotFoundException
+	 */
+	public function findFirstBuy(BotTradingSessionId $sessionId): Order
+	{
+		$order = $this->getEntityManager()->createQueryBuilder()
+			->select('o')
+			->from('Domain\Exchange\Entity\Order', 'o')
+			->where('o.botTradingSessionId = :id')
+			->andWhere('o.type = :type')
+			->andWhere('o.status != :status')
+			->setParameter('id', $sessionId)
+			->setParameter('type', 'buy')
+			->setParameter('status', Order::STATUS_CANCELED)
+			->orderBy('o.createdAt', 'ASC')
+			->getQuery()
+			->getOneOrNullResult();
+		if ($order === null) {
+			throw new EntityNotFoundException();
 		}
 		return $order;
 	}

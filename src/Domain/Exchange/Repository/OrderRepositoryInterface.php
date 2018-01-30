@@ -9,6 +9,7 @@
 namespace Domain\Exchange\Repository;
 
 
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\Order;
 use Domain\Exchange\ValueObject\BotTradingSessionId;
 use Domain\Exchange\ValueObject\ExchangeId;
@@ -27,8 +28,23 @@ interface OrderRepositoryInterface
 	/**
 	 * @param OrderId $orderId
 	 * @return Order
+	 * @throws EntityNotFoundException
 	 */
 	public function findById(OrderId $orderId): Order;
+
+	/**
+	 * @param BotTradingSessionId $sessionId
+	 * @return Order
+	 * @throws EntityNotFoundException
+	 */
+	public function findLastSell(BotTradingSessionId $sessionId): Order;
+
+	/**
+	 * @param BotTradingSessionId $sessionId
+	 * @return Order
+	 * @throws EntityNotFoundException
+	 */
+	public function findFirstBuy(BotTradingSessionId $sessionId): Order;
 
 	/**
 	 * @param ExchangeId $exchangeId
