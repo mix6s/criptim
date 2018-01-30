@@ -278,6 +278,9 @@ class ProcessBotTradingUseCase
 	private function isNeedToCreateSession(ProcessBotTradingRequest $request): bool
 	{
 		$bot = $this->botRepository->findById($request->getBotId());
+		if (!$bot->isActive()) {
+			return false;
+		}
 		$tradingStrategy = $this->tradingStrategyRepository->findById($bot->getTradingStrategyId());
 		return $tradingStrategy->isNeedToStartTrading($bot->getTradingStrategySettings());
 	}
