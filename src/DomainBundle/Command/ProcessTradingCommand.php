@@ -25,12 +25,7 @@ class ProcessTradingCommand extends ContainerAwareCommand
 		/** @var Bot[] $bots */
 		$bots = $this->getContainer()->get('ORM\BotRepository')->findAll();
 		foreach ($bots as $bot) {
-			if (!$bot->isActive()) {
-				continue;
-			}
 			$botId = $bot->getId();
-
-
 			$em->transactional(function () use ($useCase, $botId) {
 				$processRequest = new ProcessBotTradingRequest($botId);
 				$useCase->execute($processRequest);
