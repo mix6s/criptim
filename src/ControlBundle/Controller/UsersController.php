@@ -14,6 +14,8 @@ use ControlBundle\Form\Type\UserDepositMoneyRequestFormType;
 use Domain\Exchange\UseCase\Request\UserDepositMoneyRequest;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\ValueObject\UserId;
+use Money\Currency;
+use Money\Money;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -60,6 +62,43 @@ class UsersController extends Controller
 		return $this->render('@Control/Users/exchangeDeposit.html.twig', [
 			'form' => $form->createView()
 		]);
+	}
+
+	/**
+	 * @Route("/{userId}/profileData", name="control.users.profileData")
+	 * @param string $user_id
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 */
+	public function userProfileDataAction(string $userId)
+	{
+		$userId = new UserId($userId);
+
+		$balance = $deposits = $cashouts = new Money(0, new Currency('BTC'));
+		$userExchangeAccounts = $this->get('ORM\UserExchangeAccountRepository')->findByUserId($userId);
+		foreach ($userExchangeAccounts as $userExchangeAccount) {
+			$balance = $balance->add($userExchangeAccount->getBalance());
+		}
+		$userExchangeAccountTransactions = $this->get('ORM\UserExchangeAccountTransactionRepository')->findByUserIdType($userId, 'deposit');
+		foreach ($userExchangeAccountTransactions as $userExchangeAccountTransaction) {
+			$deposits = $deposits->add($userExchangeAccountTransaction->getBalance());
+		}
+		$userExchangeAccountTransactions = $this->get('ORM\UserExchangeAccountTransactionRepository')->findByUserIdType($userId, 'cashout');
+		foreach ($userExchangeAccountTransactions as $userExchangeAccountTransaction) {
+			$cashouts = $cashouts->add($userExchangeAccountTransaction->getBalance());
+		}
+
+		dump($balance);
+		dump($deposits);
+		dump($cashouts);
+
+		return $this->render('@Control/Users/profileData.html.twig', [
+			[
+				'balance' => $balance,
+				'deposits' => $deposits,
+				'cashouts' => $deposits
+			]
+		]);
+
 	}
 
 

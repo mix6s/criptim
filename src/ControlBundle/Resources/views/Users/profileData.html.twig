@@ -1,0 +1,16 @@
+{% extends '@Control/layout.html.twig' %}
+
+{% block body %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Balance: {{ balance(exchange.id, 'BTC')|moneyFormat }}</li>
+                    <li>Deposits: {{ deposits(exchange.id, 'BTC')|moneyFormat }}</li>
+                    <li>Cashouts: {{ cashouts(exchange.id, 'BTC')|moneyFormat }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
