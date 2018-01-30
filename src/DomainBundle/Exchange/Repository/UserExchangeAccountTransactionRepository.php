@@ -14,6 +14,8 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Domain\Exchange\Entity\UserExchangeAccountTransaction;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
 use Domain\Exchange\ValueObject\ExchangeId;
+use Domain\ValueObject\UserId;
+use DomainBundle\Type\UserExchangeAccountTransactionIdType;
 use Money\Currency;
 
 class UserExchangeAccountTransactionRepository extends EntityRepository implements UserExchangeAccountTransactionRepositoryInterface
@@ -41,5 +43,20 @@ class UserExchangeAccountTransactionRepository extends EntityRepository implemen
 			->setParameter('exchange_id', $exchangeId)
 			->setParameter('dt', $dt)
 			->getResult();
+	}
+
+	/**
+	 * @param UserId $userId
+	 * @param string $type
+	 * @return UserExchangeAccountTransaction[]
+	 */
+	public function findByUserIdType(UserId $userId, string $type): array
+	{
+		return $this->findBy(
+			[
+				'userId' => $userId,
+				'type' => $type
+			]
+		);
 	}
 }

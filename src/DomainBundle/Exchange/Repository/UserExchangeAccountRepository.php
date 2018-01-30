@@ -44,6 +44,17 @@ class UserExchangeAccountRepository extends EntityRepository implements UserExch
 		return $account;
 	}
 
+	/**
+	 * @param UserId $userId
+	 * @return UserExchangeAccount[]
+	 */
+	public function findByUserId(UserId $userId): array
+	{
+		return $this->findBy([
+			'userId' => $userId,
+		]);
+	}
+
 	public function save(UserExchangeAccount $account)
 	{
 		$this->getEntityManager()->persist($account);
