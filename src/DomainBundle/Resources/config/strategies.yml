@@ -1,4 +1,4 @@
 services:
     TradingStrategy\Martin:
         class: DomainBundle\Exchange\TradingStrategy\Martin
-        arguments: ['@ORM\BotTradingSessionRepository', '@ORM\BotTradingSessionAccountRepository', '@UseCase\GetBotTradingSessionBalancesUseCase', '@ORM\BotRepository', '@ExchangeRepository', '@UseCase\CreateOrderUseCase', '@ORM\OrderRepository']
+        arguments: ['@ORM\BotTradingSessionRepository', '@ORM\BotTradingSessionAccountRepository', '@UseCase\GetBotTradingSessionBalancesUseCase', '@ORM\BotRepository', '@ExchangeRepository', '@UseCase\CreateOrderUseCase', '@ORM\OrderRepository', '@UseCase\CancelOrderUseCase']

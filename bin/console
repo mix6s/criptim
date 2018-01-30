@@ -26,6 +26,5 @@ if ($debug) {
 }
 
 $kernel = new AppKernel($env, $debug);
-$kernel->loadEnvFile();
 $application = new Application($kernel);
 $application->run($input);

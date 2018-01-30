@@ -10,10 +10,12 @@ namespace DomainBundle\Exchange\Repository;
 
 
 use Doctrine\ORM\EntityRepository;
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\Order;
 use Domain\Exchange\Repository\OrderRepositoryInterface;
 use Domain\Exchange\ValueObject\BotTradingSessionId;
 use Domain\Exchange\ValueObject\ExchangeId;
+use Domain\Exchange\ValueObject\OrderId;
 
 class OrderRepository extends EntityRepository implements OrderRepositoryInterface
 {
@@ -48,5 +50,19 @@ class OrderRepository extends EntityRepository implements OrderRepositoryInterfa
 			->setParameter('statuses', [Order::STATUS_NEW, Order::STATUS_PARTIALLY_FILLED])
 			->setParameter('exchange_id', $exchangeId)
 			->getResult();
+	}
+
+	/**
+	 * @param OrderId $orderId
+	 * @return Order
+	 */
+	public function findById(OrderId $orderId): Order
+	{
+		/** @var Order $order */
+		$order = $this->find($orderId);
+		if (empty($order)) {
+			throw new EntityNotFoundException(sprintf('Order with id %d not found', (string)$orderId));
+		}
+		return $order;
 	}
 }

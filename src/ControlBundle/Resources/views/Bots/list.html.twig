@@ -38,13 +38,13 @@
                             {{ bot|botBalance('BTC')|moneyFormat }}
                         </td>
                         <td>
-                            {{ sessionBalances.accountBalance|moneyFormat }}
+                            {{ sessionBalances ? sessionBalances.accountBalance|moneyFormat : '' }}
                         </td>
                         <td>
-                            {{ sessionBalances.inOrdersBalance|moneyFormat }}
+                            {{ sessionBalances ? sessionBalances.inOrdersBalance|moneyFormat : '' }}
                         </td>
                         <td>
-                            {{ sessionBalances.availableBalance|moneyFormat }}
+                            {{ sessionBalances ? sessionBalances.availableBalance|moneyFormat : ''}}
                         </td>
                         <td>
                             {{ bot.exchangeId }}

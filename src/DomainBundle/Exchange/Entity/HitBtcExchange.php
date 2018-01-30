@@ -39,6 +39,10 @@ class HitBtcExchange implements ExchangeInterface
 	 * @var Client
 	 */
 	private $client;
+	/**
+	 * @var null|array
+	 */
+	private $symbolData;
 
 	public function __construct(string $id, string $publicKey, string $privateKey)
 	{
@@ -46,6 +50,7 @@ class HitBtcExchange implements ExchangeInterface
 		$this->publicKey = $publicKey;
 		$this->privateKey = $privateKey;
 		$this->client = new Client();
+		$this->symbolData = null;
 	}
 
 	/**
@@ -179,5 +184,29 @@ class HitBtcExchange implements ExchangeInterface
 	{
 		$data = $this->apiAuthRequest('GET', sprintf('/public/orderbook/%s', $symbol));
 		return $data;
+	}
+
+	public function getPriceTickSize(string $symbol): float
+	{
+		$symbolData = array_filter($this->getSymbolData(), function ($item) use ($symbol) {
+			return $item['id'] === $symbol;
+		});
+		return $symbolData['tickSize'];
+	}
+
+	public function getAmountIncrement(string $symbol): float
+	{
+		$symbolData = array_filter($this->getSymbolData(), function ($item) use ($symbol) {
+			return $item['id'] === $symbol;
+		});
+		return $symbolData['quantityIncrement'];
+	}
+
+	private function getSymbolData()
+	{
+		if ($this->symbolData === null) {
+			$this->symbolData = $this->apiAuthRequest('GET', '/public/symbol');
+		}
+		return $this->symbolData;
 	}
 }

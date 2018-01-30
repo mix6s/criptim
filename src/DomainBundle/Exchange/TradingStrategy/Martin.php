@@ -11,11 +11,13 @@ namespace DomainBundle\Exchange\TradingStrategy;
 
 use Domain\Exchange\Entity\BotTradingSession;
 use Domain\Exchange\Entity\TradingStrategyInterface;
+use Domain\Exchange\Policy\MoneyFromFloatPolicy;
 use Domain\Exchange\Repository\BotRepositoryInterface;
 use Domain\Exchange\Repository\BotTradingSessionAccountRepositoryInterface;
 use Domain\Exchange\Repository\BotTradingSessionRepositoryInterface;
 use Domain\Exchange\Repository\ExchangeRepositoryInterface;
 use Domain\Exchange\Repository\OrderRepositoryInterface;
+use Domain\Exchange\UseCase\CancelOrderUseCase;
 use Domain\Exchange\UseCase\CreateOrderUseCase;
 use Domain\Exchange\UseCase\GetBotTradingSessionBalancesUseCase;
 use Domain\Exchange\UseCase\Request\CreateOrderRequest;
@@ -67,6 +69,14 @@ class Martin implements TradingStrategyInterface
 	private $orderRepository;
 	private $formatter;
 	private $currencies;
+	/**
+	 * @var CancelOrderUseCase
+	 */
+	private $cancelOrderUseCase;
+	/**
+	 * @var MoneyFromFloatPolicy
+	 */
+	private $moneyFromFloatPolicy;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
@@ -75,7 +85,8 @@ class Martin implements TradingStrategyInterface
 		BotRepositoryInterface $botRepository,
 		ExchangeRepositoryInterface $exchangeRepository,
 		CreateOrderUseCase $createOrderUseCase,
-		OrderRepositoryInterface $orderRepository
+		OrderRepositoryInterface $orderRepository,
+		CancelOrderUseCase $cancelOrderUseCase
 	)
 	{
 		$this->id = new TradingStrategyId(self::ID);
@@ -88,6 +99,8 @@ class Martin implements TradingStrategyInterface
 		$this->orderRepository = $orderRepository;
 		$this->formatter = new CryptoMoneyFormatter();
 		$this->currencies = new DomainCurrenciesPolicy();
+		$this->cancelOrderUseCase = $cancelOrderUseCase;
+		$this->moneyFromFloatPolicy = new MoneyFromFloatPolicy();
 	}
 
 	public function getId(): TradingStrategyId
@@ -109,7 +122,7 @@ class Martin implements TradingStrategyInterface
 		$settings = $session->getTradingStrategySettings()->getData();
 		$baseCurrency = new Currency($settings['baseCurrency']);
 		$quoteCurrency = new Currency($settings['quoteCurrency']);
-
+		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
 
 		$balancesRequest = new GetBotTradingSessionBalancesRequest();
 		$balancesRequest->setBotTradingSessionId($session->getId());
@@ -132,6 +145,10 @@ class Martin implements TradingStrategyInterface
 		}
 
 		$minBalance = new Money(0, $baseCurrency);
+		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
+		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
+
+
 		if ($baseCurrencyBalances->getAvailableBalance()->greaterThan($minBalance)) {
 			/*foreach ($activeOrders as $order) {
 				if ($order->getType() === 'buy') {
@@ -140,13 +157,13 @@ class Martin implements TradingStrategyInterface
 				//$exchange->cancelOrder($order);
 			}*/
 		}
-		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
+
 		$price = $exchange->getBid($symbolString) * (0.995);
 
 
 		$ratio = 1 / ($price * (1 + $exchange->getFee()));
 		$amountMoney = $this->convert($quoteCurrencyBalances->getAvailableBalance(), $baseCurrency, $ratio);
-		if ($amountMoney->lessThan(new Money(1, $baseCurrency))) {
+		if ($amountMoney->lessThan($amountInc)) {
 			return;
 		}
 		$amount = $this->formatter->format($amountMoney);

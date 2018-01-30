@@ -25,8 +25,8 @@ class DomainCurrenciesPolicy implements Currencies
 
 	const SUPPORT_CURRENCIES = [
 		self::BTC => 8,
-		self::ETH => 3,
-		self::BNT => 3,
+		self::ETH => 8,
+		self::BNT => 8,
 	];
 
 	protected static $currencies = null;

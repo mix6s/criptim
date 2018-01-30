@@ -32,6 +32,10 @@ interface ExchangeInterface
 
 	public function getAsk(string $symbol): float;
 
+	public function getPriceTickSize(string $symbol): float;
+	public function getAmountIncrement(string $symbol): float;
+
+
 	/**
 	 * @return ExchangeOrder[]
 	 */

@@ -2,6 +2,7 @@
 
 namespace DomainBundle;
 
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
 use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
@@ -47,13 +48,17 @@ class TwigExtension extends \Twig_Extension
 
 	public function botSessionBalancesFilter(Bot $bot, string $currency)
 	{
-		$session = $this->container->get('ORM\BotTradingSessionRepository')->findLastByBotId($bot->getId());
+		try {
+			$session = $this->container->get('ORM\BotTradingSessionRepository')->findLastByBotId($bot->getId());
+		} catch (EntityNotFoundException $e) {
+			return null;
+		}
+
 
 		$request = new GetBotTradingSessionBalancesRequest();
 		$request->setCurrency(new Currency($currency));
 		$request->setBotTradingSessionId($session->getId());
 		$balances = $this->container->get('UseCase\GetBotTradingSessionBalancesUseCase')->execute($request);
-
 		return $balances;
 	}
 
