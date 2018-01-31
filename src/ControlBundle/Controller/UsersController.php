@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class UsersController extends Controller
 {
 	/**
-	 * @Route("", name="control.users.list")
+	 * @Route("/", name="control.users.list")
 	 */
 	public function listAction(Request $request)
 	{
