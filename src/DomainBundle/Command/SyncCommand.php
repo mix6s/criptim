@@ -32,8 +32,8 @@ class SyncCommand extends ContainerAwareCommand
 		$syncRequest = new SyncExchangeRequest();
 		$em = $this->getContainer()->get('doctrine.orm.default_entity_manager');
 
-		try {
-			while (true) {
+		while (true) {
+			try {
 				$exchanges = $this->getContainer()->get('ExchangeRepository')->findAll();
 				foreach ($exchanges as $exchange) {
 					$output->writeln(sprintf('Sync exchange %s', $exchange->getId()));
@@ -42,11 +42,13 @@ class SyncCommand extends ContainerAwareCommand
 						$useCase->execute($syncRequest);
 					});
 				}
-				sleep(1);
+			} catch (\Throwable $exception) {
+				$this->release();
+				throw $exception;
 			}
-		} catch (\Throwable $exception) {
-
+			sleep(1);
 		}
+
 		$this->release();
 	}
 

@@ -33,6 +33,7 @@ class MoneyFromFloatPolicy implements MoneyFromFloatPolicyInterface
 
 	public function getMoney(Currency $currency, float $amount): Money
 	{
-		return $this->parser->parse((string)$amount, $currency);
+		$decimals = $this->currencies->subunitFor($currency);
+		return $this->parser->parse(number_format($amount, $decimals, '.', ''), $currency);
 	}
 }

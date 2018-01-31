@@ -45,16 +45,19 @@ class UsersController extends Controller
 	 */
 	public function exchangeDepositAction(Request $request, $userId, $exchangeId)
 	{
-		$editRequest = new UserDepositMoneyRequest();
-		$editRequest->setUserId(new UserId($userId));
-		$editRequest->setExchangeId(new ExchangeId($exchangeId));
+		$userDepositMoneyRequest = new UserDepositMoneyRequest();
+		$userDepositMoneyRequest->setUserId(new UserId($userId));
+		$userDepositMoneyRequest->setExchangeId(new ExchangeId($exchangeId));
+		$userDepositMoneyRequest->setCurrency(new Currency('BTC'));
 
-		$form = $this->createForm(UserDepositMoneyRequestFormType::class, $editRequest);
+		$form = $this->createForm(UserDepositMoneyRequestFormType::class, $userDepositMoneyRequest);
 		$form->handleRequest($request);
 		if ($form->isSubmitted() && $form->isValid()) {
 			/** @var UserDepositMoneyRequest $request */
 			$createRequest = $form->getData();
-			$response = $this->get('UseCase\UserDepositMoneyUseCase')->execute($createRequest);
+			$this->get('doctrine.orm.default_entity_manager')->transactional(function () use ($createRequest) {
+				$response = $this->get('UseCase\UserDepositMoneyUseCase')->execute($createRequest);
+			});
 			$this->addFlash('info', 'Deposit successfully created');
 			return $this->redirectToRoute('control.users.list');
 		}

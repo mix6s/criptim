@@ -45,6 +45,8 @@ interface OrderRepositoryInterface
 	 * @throws EntityNotFoundException
 	 */
 	public function findFirstBuy(BotTradingSessionId $sessionId): Order;
+	public function findLastBuy(BotTradingSessionId $sessionId): Order;
+	public function countFilledBuyOrders(BotTradingSessionId $sessionId): int;
 
 	/**
 	 * @param ExchangeId $exchangeId

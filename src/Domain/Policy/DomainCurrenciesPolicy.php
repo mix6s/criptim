@@ -22,11 +22,13 @@ class DomainCurrenciesPolicy implements Currencies
 	const BTC = 'BTC';
 	const ETH = 'ETH';
 	const BNT = 'BNT';
+	const XRP = 'XRP';
 
 	const SUPPORT_CURRENCIES = [
 		self::BTC => 8,
 		self::ETH => 8,
 		self::BNT => 8,
+		self::XRP => 8,
 	];
 
 	protected static $currencies = null;
