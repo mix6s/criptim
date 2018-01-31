@@ -144,8 +144,7 @@ class Martin implements TradingStrategyInterface
 		$bidPrice = $exchange->getBid($symbolString);
 		$askPrice = $exchange->getBid($symbolString);
 		$currentPrice = $askPrice;
-		$buyOrdersCount = 0;
-		$sellOrdersCount = 0;
+
 		try {
 			$firstBuyOrder = $this->orderRepository->findFirstBuy($session->getId());
 		} catch (EntityNotFoundException $exception) {
@@ -160,9 +159,10 @@ class Martin implements TradingStrategyInterface
 
 		$minBalance = new Money(0, $baseCurrency);
 		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
-		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency,
-			$exchange->getPriceTickSize($symbolString));
+		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
 
+		$buyOrdersCount = 0;
+		$sellOrdersCount = 0;
 		$activeOrders = $this->orderRepository->findActive($session->getId());
 		foreach ($activeOrders as $order) {
 			if ($order->getType() === 'sell') {
@@ -209,7 +209,15 @@ class Martin implements TradingStrategyInterface
 					$currentPrice > $firstBuyOrder->getPrice() * (1 + $priceDecPercent * 3 / 100)
 				)
 			) {
-
+				if ($lastSellOrder !== null) {
+					$session->end();
+				}
+				$activeOrders = $this->orderRepository->findActive($session->getId());
+				foreach ($activeOrders as $order) {
+					$cancelOrderRequest->setOrderId($order->getId());
+					$this->cancelOrderUseCase->execute($cancelOrderRequest);
+				}
+				return;
 			}
 		}
 	}

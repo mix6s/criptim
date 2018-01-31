@@ -13,27 +13,41 @@ use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\UseCase\Request\ProcessBotTradingRequest;
 use Domain\Exchange\UseCase\Request\SyncExchangeRequest;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SyncCommand extends ContainerAwareCommand
 {
+	use LockableTrait;
+
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		if (!$this->lock()) {
+			return 0;
+		}
+
+
 		$useCase = $this->getContainer()->get('UseCase\SyncExchangeUseCase');
 		$syncRequest = new SyncExchangeRequest();
 		$em = $this->getContainer()->get('doctrine.orm.default_entity_manager');
 
-		$exchanges = $this->getContainer()->get('ExchangeRepository')->findAll();
+		try {
+			while (true) {
+				$exchanges = $this->getContainer()->get('ExchangeRepository')->findAll();
+				foreach ($exchanges as $exchange) {
+					$output->writeln(sprintf('Sync exchange %s', $exchange->getId()));
+					$em->transactional(function () use ($useCase, $exchange, $syncRequest) {
+						$syncRequest->setExchangeId($exchange->getId());
+						$useCase->execute($syncRequest);
+					});
+				}
+				sleep(1);
+			}
+		} catch (\Throwable $exception) {
 
-		foreach ($exchanges as $exchange) {
-			$em->transactional(function () use ($useCase, $exchange, $syncRequest) {
-				$syncRequest->setExchangeId($exchange->getId());
-				$useCase->execute($syncRequest);
-			});
 		}
-
-
+		$this->release();
 	}
 
 	protected function configure()
