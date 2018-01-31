@@ -28,7 +28,7 @@ services:
         arguments: ['@ExchangeRepository', '@ORM\BotTradingSessionAccountRepository', '@ORM\BotTradingSessionAccountTransactionRepository', '@UseCase\GetBotTradingSessionBalancesUseCase', '@Exchange\IdFactory', '@ORM\OrderRepository']
     UseCase\GetBotTradingSessionBalancesUseCase:
         class: Domain\Exchange\UseCase\GetBotTradingSessionBalancesUseCase
-        arguments: ['@UseCase\GetBotTradingSessionAccountUseCase', '@ORM\OrderRepository', '@ExchangeRepository', '@ORM\BotTradingSessionRepository']
+        arguments: ['@UseCase\GetBotTradingSessionAccountUseCase', '@ORM\OrderRepository', '@ExchangeRepository', '@ORM\BotTradingSessionRepository', '@ORM\BotTradingSessionAccountTransactionRepository']
     UseCase\SyncExchangeUseCase:
         class: Domain\Exchange\UseCase\SyncExchangeUseCase
         arguments: ['@ORM\OrderRepository', '@ExchangeRepository', '@UseCase\UpdateOrderUseCase']
