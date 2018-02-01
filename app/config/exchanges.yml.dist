@@ -1,10 +1,3 @@
-services:
-    Exchange\HitBtcExchange_1:
-        class: DomainBundle\Exchange\Entity\HitBtcExchange
-        arguments: ['1' , 'publickey', 'privatekey']
-
-    ExchangeRepository:
-        class: DomainBundle\Exchange\Repository\ExchangeRepository
-        arguments:
-            $exchanges:
-                - '@Exchange\HitBtcExchange_1'
+parameters:
+    exchanges:
+        - ['DomainBundle\Exchange\Entity\HitBtcExchange', ['1', 'pub', 'private']]

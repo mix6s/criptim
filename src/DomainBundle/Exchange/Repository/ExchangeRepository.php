@@ -24,7 +24,10 @@ class ExchangeRepository implements ExchangeRepositoryInterface
 
 	public function __construct(array $exchanges = [])
 	{
-		foreach ($exchanges as $exchange) {
+		foreach ($exchanges as $exchangeData) {
+			$exchangeClass = $exchangeData[0];
+			$exchangeAttr = $exchangeData[1];
+			$exchange = new $exchangeClass(...$exchangeAttr);
 			if (!$exchange instanceof ExchangeInterface) {
 				throw new DomainException('Invalid Exchange');
 			}

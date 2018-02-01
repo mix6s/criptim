@@ -4,3 +4,8 @@ services:
         arguments:
             $strategies:
                 - '@TradingStrategy\Martin'
+
+    ExchangeRepository:
+        class: DomainBundle\Exchange\Repository\ExchangeRepository
+        arguments:
+            $exchanges: '%exchanges%'
