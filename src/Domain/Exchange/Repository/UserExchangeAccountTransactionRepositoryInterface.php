@@ -11,6 +11,7 @@ namespace Domain\Exchange\Repository;
 
 use Domain\Exchange\Entity\UserExchangeAccountTransaction;
 use Domain\Exchange\ValueObject\ExchangeId;
+use Domain\ValueObject\UserId;
 use Money\Currency;
 
 interface UserExchangeAccountTransactionRepositoryInterface
@@ -24,4 +25,34 @@ interface UserExchangeAccountTransactionRepositoryInterface
 	 * @return UserExchangeAccountTransaction[]
 	 */
 	public function findLastByExchangeIdCurrencyDate(ExchangeId $exchangeId, Currency $currency, \DateTimeImmutable $dt): array;
+
+	public function findLastByUserIdCurrencyDate(
+		UserId $userId,
+		Currency $currency,
+		\DateTimeInterface $dt
+	): ?UserExchangeAccountTransaction;
+
+	/**
+	 * @param UserId $userId
+	 * @param Currency $currency
+	 * @param string $type
+	 * @param \DateTimeInterface $fromDt
+	 * @param \DateTimeInterface $toDt
+	 * @return UserExchangeAccountTransaction[]
+	 */
+	public function findByUserIdCurrencyTypeFromDtToDt(
+		UserId $userId,
+		Currency $currency,
+		string $type,
+		\DateTimeInterface $fromDt,
+		\DateTimeInterface $toDt
+	): array;
+
+	/**
+	 * @param UserId $userId
+	 * @param string $type
+	 * @return UserExchangeAccountTransaction[]
+	 */
+	public function findByUserIdType(UserId $userId, string $type): array;
+
 }
