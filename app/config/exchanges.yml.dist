@@ -1,0 +1,5 @@
+services:
+    Exchange\HitBtc_test:
+        class:   'DomainBundle\Exchange\Entity\HitBtcExchange'
+        arguments: ['_test', 'pub', 'private' , '@logger']
+        tags: [domain.exchange]

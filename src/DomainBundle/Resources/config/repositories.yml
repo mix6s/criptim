@@ -7,6 +7,3 @@ services:
 
     ExchangeRepository:
         class: DomainBundle\Exchange\Repository\ExchangeRepository
-        arguments:
-            $exchanges:
-                - '@Exchange\HitBtcExchange'

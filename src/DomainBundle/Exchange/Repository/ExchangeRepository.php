@@ -20,7 +20,12 @@ class ExchangeRepository implements ExchangeRepositoryInterface
 	/**
 	 * @var ExchangeInterface[]
 	 */
-	private $exchanges;
+	private $exchanges = [];
+
+	public function addExchange(ExchangeInterface $exchange)
+	{
+		$this->exchanges[(string)$exchange->getId()] = $exchange;
+	}
 
 	public function __construct(array $exchanges = [])
 	{

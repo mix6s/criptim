@@ -10,7 +10,8 @@
                         <th rowspan="2">ID</th>
                         <th rowspan="2">Username</th>
                         <th rowspan="2">DomainId</th>
-                        <th>Exchanges BTC balance</th>
+                        <th rowspan="2">Total BTC balance</th>
+                        <th colspan="{{ exchanges|length }}">Exchanges BTC balance</th>
                     </tr>
                     <tr>
                         {% for exchange in exchanges %}
@@ -29,6 +30,9 @@
                             </td>
                             <td>
                                 {{ user.domainUserId }}
+                            </td>
+                            <td>
+                                {{ user.domainUserId|userBalance('BTC')|moneyFormat }}
                             </td>
                             {% for exchange in exchanges %}
                                 {% if user.domainUserId is empty %}
