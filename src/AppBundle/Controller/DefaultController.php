@@ -2,7 +2,8 @@
 
 namespace AppBundle\Controller;
 
-use Domain\ValueObject\UserId;
+use AppBundle\Entity\User;
+use Domain\Policy\DomainCurrenciesPolicy;
 use FOS\UserBundle\Model\UserInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -30,23 +31,23 @@ class DefaultController extends Controller
     {
 	    $user = $this->getUser();
 	    if (!$user instanceof UserInterface) {
-		    return $this->redirectToRoute('homepage');
+		    return $this->redirectToRoute('login');
 	    }
     	$context = [];
 	    return $this->render('@App/Default/profile.html.twig', $context);
     }
 
 	/**
-	 *
 	 * @Route("/balance_history.json", name="balance_history.json")
 	 */
 	public function balanceHistoryAction()
     {
 	    $user = $this->getUser();
 	    if (!$user instanceof UserInterface) {
-		    return $this->redirectToRoute('homepage');
+		    return $this->redirectToRoute('login');
 	    }
-	    $userId = new UserId($user->getId());
+	    /** @var User $user */
+	    $userId = $user->getDomainUserId();
 
 	    $em = $this->getDoctrine()->getManager();
 	    // todo: move to service
@@ -64,21 +65,26 @@ WITH dates AS (
        FROM user_exchange_account_transaction t
        WHERE t.dt < date
              AND t.user_id = :user_id
+             AND t.currency = :currency
        ORDER BY t.dt DESC
        LIMIT 1) AS balance
     FROM dates
 ) SELECT
     TO_CHAR(date, 'YYYY-MM-DD') AS date,
-    COALESCE((balance ->> 'amount') :: FLOAT / 1000000000000, 0) as balance
+    COALESCE((balance ->> 'amount') :: FLOAT / (10 ^ :subunit), 0) as balance
   FROM transactions;
 QUERY;
 	    /** @var \Doctrine\DBAL\Statement $statement */
 	    $statement = $this->getDoctrine()->getConnection()->prepare($query);
 	    $fromDt = (new \DateTimeImmutable('now - 1 month'))->format('Y-m-d H:i:s');
 	    $toDt = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s');
+	    $currency = new \Money\Currency('BTC');
+	    $subunit = (new DomainCurrenciesPolicy())->subunitFor($currency);
 	    $statement->bindParam('from_dt', $fromDt);
 	    $statement->bindParam('to_dt', $toDt);
 	    $statement->bindParam('user_id', $userId);
+	    $statement->bindParam('subunit', $subunit);
+	    $statement->bindParam('currency', $currency);
 	    $statement->execute();
 	    $result = $statement->fetchAll();
 
