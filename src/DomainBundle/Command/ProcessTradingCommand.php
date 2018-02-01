@@ -11,6 +11,7 @@ namespace DomainBundle\Command;
 
 use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\UseCase\Request\ProcessBotTradingRequest;
+use Domain\Exchange\UseCase\Request\SyncExchangeRequest;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,6 +29,8 @@ class ProcessTradingCommand extends ContainerAwareCommand
 
 
 		$useCase = $this->getContainer()->get('UseCase\ProcessBotTradingUseCase');
+		$syncUseCase = $this->getContainer()->get('UseCase\SyncExchangeUseCase');
+		$syncRequest = new SyncExchangeRequest();
 		$em = $this->getContainer()->get('doctrine.orm.default_entity_manager');
 
 		while (true) {
@@ -36,6 +39,12 @@ class ProcessTradingCommand extends ContainerAwareCommand
 				$bots = $this->getContainer()->get('ORM\BotRepository')->findAll();
 				foreach ($bots as $bot) {
 					$botId = $bot->getId();
+
+					$em->transactional(function () use ($syncUseCase, $bot, $syncRequest) {
+						$syncRequest->setExchangeId($bot->getExchangeId());
+						$syncUseCase->execute($syncRequest);
+					});
+
 					$em->transactional(function () use ($useCase, $botId) {
 						$processRequest = new ProcessBotTradingRequest($botId);
 						$useCase->execute($processRequest);
