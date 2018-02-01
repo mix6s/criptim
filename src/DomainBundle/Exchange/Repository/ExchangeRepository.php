@@ -20,14 +20,16 @@ class ExchangeRepository implements ExchangeRepositoryInterface
 	/**
 	 * @var ExchangeInterface[]
 	 */
-	private $exchanges;
+	private $exchanges = [];
+
+	public function addExchange(ExchangeInterface $exchange)
+	{
+		$this->exchanges[(string)$exchange->getId()] = $exchange;
+	}
 
 	public function __construct(array $exchanges = [])
 	{
-		foreach ($exchanges as $exchangeData) {
-			$exchangeClass = $exchangeData[0];
-			$exchangeAttr = $exchangeData[1];
-			$exchange = new $exchangeClass(...$exchangeAttr);
+		foreach ($exchanges as $exchange) {
 			if (!$exchange instanceof ExchangeInterface) {
 				throw new DomainException('Invalid Exchange');
 			}

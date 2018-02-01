@@ -1,3 +1,5 @@
-parameters:
-    exchanges:
-        - ['DomainBundle\Exchange\Entity\HitBtcExchange', ['1', 'pub', 'private']]
+services:
+    Exchange\HitBtc_test:
+        class:   'DomainBundle\Exchange\Entity\HitBtcExchange'
+        arguments: ['_test', 'pub', 'private' , '@logger']
+        tags: [domain.exchange]

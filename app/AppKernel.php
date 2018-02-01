@@ -1,5 +1,6 @@
 <?php
 
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
@@ -59,5 +60,10 @@ class AppKernel extends Kernel
 	public function registerContainerConfiguration(LoaderInterface $loader)
 	{
 		$loader->load($this->getRootDir() . '/config/config_' . $this->getEnvironment() . '.yml');
+	}
+
+	protected function build(ContainerBuilder $container)
+	{
+		$container->addCompilerPass(new \DomainBundle\ExchangePass());
 	}
 }

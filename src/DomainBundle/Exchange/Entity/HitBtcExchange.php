@@ -17,6 +17,7 @@ use Domain\Exchange\Entity\Order;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
 
 class HitBtcExchange implements ExchangeInterface
 {
@@ -43,14 +44,19 @@ class HitBtcExchange implements ExchangeInterface
 	 * @var null|array
 	 */
 	private $symbolData;
+	/**
+	 * @var LoggerInterface
+	 */
+	private $logger;
 
-	public function __construct(string $id, string $publicKey, string $privateKey)
+	public function __construct(string $id, string $publicKey, string $privateKey, LoggerInterface $logger)
 	{
 		$this->id = new ExchangeId(self::ID . $id);
 		$this->publicKey = $publicKey;
 		$this->privateKey = $privateKey;
 		$this->client = new Client();
 		$this->symbolData = null;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -110,6 +116,11 @@ class HitBtcExchange implements ExchangeInterface
 		if ($method === 'POST') {
 			$options['form_params'] = $data;
 		}
+		$this->logger->info("Api request", [
+			'uri' => $uri,
+			'method' => $method,
+			'data' => $options,
+		]);
 		$response = $this->client->request($method, self::API_ENDPOINT . $uri, $options);
 
 		if ($response->getStatusCode() !== 200) {
@@ -117,6 +128,13 @@ class HitBtcExchange implements ExchangeInterface
 		}
 
 		$body = json_decode($response->getBody(), true);
+		$this->logger->info("Api response", [
+			'uri' => $uri,
+			'method' => $method,
+			'data' => $options,
+			'raw' => $response->getBody(),
+			'response' => $body
+		]);
 		if (!empty($body['error'])) {
 			throw new DomainException($body['error']['message'] ?? 'HitBtc api error', $body['error']['code'] ?? null);
 		}
