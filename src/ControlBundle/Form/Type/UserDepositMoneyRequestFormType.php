@@ -13,6 +13,7 @@ use Domain\Exchange\Entity\ExchangeInterface;
 use Domain\Exchange\Entity\TradingStrategyInterface;
 use Domain\Exchange\UseCase\Request\CreateBotRequest;
 use Domain\Exchange\UseCase\Request\UserDepositMoneyRequest;
+use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\ValueObject\Id;
 use DomainBundle\Exchange\Repository\ExchangeRepository;
 use DomainBundle\Exchange\Repository\TradingStrategyRepository;
@@ -60,6 +61,9 @@ class UserDepositMoneyRequestFormType extends AbstractType
 							return $exchange->getId();
 						}, $this->exchangeRepository->findAll());
 					}),
+					'choice_value' => function (ExchangeId $exchangeId = null) {
+						return $exchangeId;
+					},
 					'label' => 'Exchange'
 				]
 			)

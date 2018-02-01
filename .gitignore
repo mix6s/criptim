@@ -10,3 +10,4 @@
 /bower_components
 npm-debug.log
 /web/build/
+/app/config/exchanges.yml
