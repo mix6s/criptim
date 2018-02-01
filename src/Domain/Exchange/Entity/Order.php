@@ -16,7 +16,7 @@ use Money\CurrencyPair;
 class Order
 {
 	const STATUS_NEW = 'new';
-	const STATUS_PARTIALLY_FILLED = 'partially_filled';
+	const STATUS_PARTIALLY_FILLED = 'partiallyFilled';
 	const STATUS_FILLED = 'filled';
 	const STATUS_CANCELED = 'canceled';
 
