@@ -45,6 +45,44 @@ class UserExchangeAccountTransactionRepository extends EntityRepository implemen
 			->getResult();
 	}
 
+	public function findLastByUserIdCurrencyDate(
+		UserId $userId,
+		Currency $currency,
+		\DateTimeInterface $dt
+	): ?UserExchangeAccountTransaction
+	{
+		return $this->createNativeNamedQuery('findLastByUserIdCurrencyDate')
+			->setParameter('user_id', $userId)
+			->setParameter('currency', $currency)
+			->setParameter('dt', $dt)
+			->getOneOrNullResult();
+	}
+
+	/**
+	 * @param UserId $userId
+	 * @param Currency $currency
+	 * @param string $type
+	 * @param \DateTimeInterface $fromDt
+	 * @param \DateTimeInterface $toDt
+	 * @return UserExchangeAccountTransaction[]
+	 */
+	public function findByUserIdCurrencyTypeFromDtToDt(
+		UserId $userId,
+		Currency $currency,
+		string $type,
+		\DateTimeInterface $fromDt,
+		\DateTimeInterface $toDt
+	): array
+	{
+		return $this->createNativeNamedQuery('findByUserIdCurrencyFromDtToDt')
+			->setParameter('user_id', $userId)
+			->setParameter('currency', $currency)
+			->setParameter('type', $type)
+			->setParameter('from_dt', $fromDt)
+			->setParameter('to_dt', $toDt)
+			->getResult();
+	}
+
 	/**
 	 * @param UserId $userId
 	 * @param string $type
@@ -59,4 +97,5 @@ class UserExchangeAccountTransactionRepository extends EntityRepository implemen
 			]
 		);
 	}
+
 }

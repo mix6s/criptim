@@ -8,6 +8,21 @@ Domain\Exchange\Entity\UserExchangeAccountTransaction:
           FROM user_exchange_account_transaction
           WHERE currency = :currency AND exchange_id = :exchange_id AND  dt <= :dt
           ORDER BY user_id, dt DESC"
+        findLastByUserIdCurrencyDate:
+          name: findLastByUserIdCurrencyDate
+          resultClass: Domain\Exchange\Entity\UserExchangeAccountTransaction
+          query: "SELECT DISTINCT ON (exchange_id) id, user_id, exchange_id, currency, money, balance, type, dt
+          FROM user_exchange_account_transaction
+          WHERE currency = :currency AND user_id = :user_id AND dt <= :dt
+          ORDER BY exchange_id, dt DESC LIMIT 1"
+        findByUserIdCurrencyFromDtToDt:
+          name: findByUserIdCurrencyFromDtToDt
+          resultClass: __CLASS__
+          query: "SELECT
+                  *
+                  FROM user_exchange_account_transaction
+                  WHERE currency = :currency AND user_id = :user_id AND dt > :from_dt AND dt <= :to_dt
+                  ORDER BY exchange_id, dt DESC"
     type: entity
     id:
         id:

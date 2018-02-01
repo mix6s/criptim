@@ -1,0 +1,10 @@
+services:
+    ProfitabilityCalculator:
+        class: DomainBundle\Exchange\Policy\ProfitabilityCalculator
+        arguments:
+          - '@ORM\UserExchangeAccountTransactionRepository'
+    ProfileData:
+        class: DomainBundle\Exchange\Policy\ProfileData
+        arguments:
+          - '@ORM\UserExchangeAccountRepository'
+          - '@ORM\UserExchangeAccountTransactionRepository'

@@ -9,7 +9,7 @@
                     <li>Balance: {{ balance|moneyFormat }}</li>
                     <li>Deposits: {{ deposits|moneyFormat }}</li>
                     <li>Cashouts: {{ cashouts|moneyFormat }}</li>
-                    <li>Profitability: {{ profitability.amount|moneyFormat }} ({{ profitability.percent }}%)</li>
+                    <li>Profitability: {{ profitability|number_format(2) }}% </li>
                 </ul>
             </div>
         </div>

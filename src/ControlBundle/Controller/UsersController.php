@@ -75,32 +75,17 @@ class UsersController extends Controller
 	public function userProfileDataAction(string $userId)
 	{
 		$userId = new UserId($userId);
-		$balance = $deposits = $cashouts = $profitabilityAmount = new Money(0, new Currency('BTC'));
-		$userExchangeAccounts = $this->get('ORM\UserExchangeAccountRepository')->findByUserId($userId);
-		foreach ($userExchangeAccounts as $userExchangeAccount) {
-			$balance = $balance->add($userExchangeAccount->getBalance());
-		}
-		$userExchangeAccountTransactionDeposits = $this->get('ORM\UserExchangeAccountTransactionRepository')->findByUserIdType($userId, 'deposit');
-		foreach ($userExchangeAccountTransactionDeposits as $userExchangeAccountTransactionDeposit) {
-			$deposits = $deposits->add($userExchangeAccountTransactionDeposit->getMoney());
-		}
-		$userExchangeAccountTransactionCashouts = $this->get('ORM\UserExchangeAccountTransactionRepository')->findByUserIdType($userId, 'cashout');
-		foreach ($userExchangeAccountTransactionCashouts as $userExchangeAccountTransactionCashout) {
-			$cashouts = $cashouts->add($userExchangeAccountTransactionCashout->getMoney());
-		}
-		$profitability = [
-			'amount' => $profitabilityAmount,
-			'percent' => 0
-		];
+		$fromDate = new \DateTimeImmutable('this month');
+		$toDate = new \DateTimeImmutable('now');
+
 		$context = [
-			'balance' => $balance,
-			'deposits' => $deposits,
-			'cashouts' => $cashouts,
-			'profitability' => $profitability
+			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
+			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
+			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
+			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $fromDate, $toDate)
 		];
 		return $this->render('@Control/Users/profileData.html.twig', $context);
 
 	}
-
 
 }

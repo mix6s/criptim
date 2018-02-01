@@ -30,5 +30,11 @@ interface UserExchangeAccountRepositoryInterface
 		Currency $currency
 	): UserExchangeAccount;
 
+	/**
+	 * @param UserId $userId
+	 * @return UserExchangeAccount[]
+	 */
+	public function findByUserId(UserId $userId): array;
+
 	public function save(UserExchangeAccount $account);
 }

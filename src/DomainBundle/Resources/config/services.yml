@@ -3,6 +3,7 @@ imports:
     - { resource: '@DomainBundle/Resources/config/strategies.yml' }
     - { resource: '@DomainBundle/Resources/config/repositories.yml' }
     - { resource: '@DomainBundle/Resources/config/orm_repositories.yml' }
+    - { resource: '@DomainBundle/Resources/config/policies.yml' }
 
 services:
     TwigExtension:
