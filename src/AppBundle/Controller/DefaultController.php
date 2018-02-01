@@ -3,8 +3,9 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
-use Domain\Policy\DomainCurrenciesPolicy;
+use Domain\ValueObject\UserId;
 use FOS\UserBundle\Model\UserInterface;
+use Money\Currency;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -48,46 +49,15 @@ class DefaultController extends Controller
 	    }
 	    /** @var User $user */
 	    $userId = $user->getDomainUserId();
-
-	    $em = $this->getDoctrine()->getManager();
-	    // todo: move to service
-	    $query = <<<QUERY
-WITH dates AS (
-    SELECT generate_series(
-               :from_dt :: TIMESTAMP,
-               :to_dt :: TIMESTAMP,
-               '1 day' :: INTERVAL
-           ) AS date
-), transactions AS (
-    SELECT
-      date,
-      (SELECT balance
-       FROM user_exchange_account_transaction t
-       WHERE t.dt < date
-             AND t.user_id = :user_id
-             AND t.currency = :currency
-       ORDER BY t.dt DESC
-       LIMIT 1) AS balance
-    FROM dates
-) SELECT
-    TO_CHAR(date, 'YYYY-MM-DD') AS date,
-    COALESCE((balance ->> 'amount') :: FLOAT / (10 ^ :subunit), 0) as balance
-  FROM transactions;
-QUERY;
-	    /** @var \Doctrine\DBAL\Statement $statement */
-	    $statement = $this->getDoctrine()->getConnection()->prepare($query);
-	    $fromDt = (new \DateTimeImmutable('now - 1 month'))->format('Y-m-d H:i:s');
-	    $toDt = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s');
-	    $currency = new \Money\Currency('BTC');
-	    $subunit = (new DomainCurrenciesPolicy())->subunitFor($currency);
-	    $statement->bindParam('from_dt', $fromDt);
-	    $statement->bindParam('to_dt', $toDt);
-	    $statement->bindParam('user_id', $userId);
-	    $statement->bindParam('subunit', $subunit);
-	    $statement->bindParam('currency', $currency);
-	    $statement->execute();
-	    $result = $statement->fetchAll();
-
+	    if (!$userId instanceof UserId) {
+		    return $this->redirectToRoute('login');
+	    }
+	    $fromDt = new \DateTimeImmutable('now - 1 month');
+	    $toDt = new \DateTimeImmutable('now');
+	    $currency = new Currency('BTC');
+	    $result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
+	    	$userId, $currency, $fromDt, $toDt
+	    );
 	    return $this->json($result);
     }
 

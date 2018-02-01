@@ -67,25 +67,5 @@ class UsersController extends Controller
 		]);
 	}
 
-	/**
-	 * @Route("/{userId}/profileData", name="control.users.profileData")
-	 * @param string $userId
-	 * @return \Symfony\Component\HttpFoundation\Response
-	 */
-	public function userProfileDataAction(string $userId)
-	{
-		$userId = new UserId($userId);
-		$fromDate = new \DateTimeImmutable('this month');
-		$toDate = new \DateTimeImmutable('now');
-
-		$context = [
-			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
-			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
-			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
-			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $fromDate, $toDate)
-		];
-		return $this->render('@Control/Users/profileData.html.twig', $context);
-
-	}
 
 }

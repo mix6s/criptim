@@ -8,3 +8,10 @@ services:
         arguments:
           - '@ORM\UserExchangeAccountRepository'
           - '@ORM\UserExchangeAccountTransactionRepository'
+    DomainCurrenciesPolicy:
+        class: Domain\Policy\DomainCurrenciesPolicy
+    BalanceHistory:
+        class: DomainBundle\Exchange\Policy\BalanceHistory
+        arguments:
+          - '@doctrine'
+          - '@DomainCurrenciesPolicy'
