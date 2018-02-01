@@ -188,18 +188,24 @@ class HitBtcExchange implements ExchangeInterface
 
 	public function getPriceTickSize(string $symbol): float
 	{
-		$symbolData = array_filter($this->getSymbolData(), function ($item) use ($symbol) {
-			return $item['id'] === $symbol;
-		});
-		return $symbolData['tickSize'];
+		$data = $this->getSymbolData();
+		foreach ($data as $symbolData) {
+			if ($symbolData['id'] === $symbol) {
+				return $symbolData['tickSize'];
+			}
+		}
+		throw new DomainException('Symbol not found');
 	}
 
 	public function getAmountIncrement(string $symbol): float
 	{
-		$symbolData = array_filter($this->getSymbolData(), function ($item) use ($symbol) {
-			return $item['id'] === $symbol;
-		});
-		return $symbolData['quantityIncrement'];
+		$data = $this->getSymbolData();
+		foreach ($data as $symbolData) {
+			if ($symbolData['id'] === $symbol) {
+				return $symbolData['quantityIncrement'];
+			}
+		}
+		throw new DomainException('Symbol not found');
 	}
 
 	private function getSymbolData()

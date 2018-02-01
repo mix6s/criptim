@@ -104,7 +104,7 @@ class CreateOrderUseCase
 			$total = $this->moneyFromFloatPolicy->getMoney($currency, $request->getAmount());
 		}
 
-		if ($balances->getAvailableBalance()->lessThanOrEqual($total)) {
+		if ($balances->getAvailableBalance()->lessThan($total)) {
 			throw new DomainException("Insufficient funds");
 		}
 

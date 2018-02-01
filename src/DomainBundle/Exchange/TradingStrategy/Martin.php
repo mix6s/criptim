@@ -121,10 +121,13 @@ class Martin implements TradingStrategyInterface
 		$exchange = $this->exchangeRepository->findById($bot->getExchangeId());
 
 		$settings = $session->getTradingStrategySettings()->getData();
+		$buyOrderLimit = $settings['buy_order_limit'] ?? 1;
 		$profitPercent = $settings['profit_percent'] ?? 0.3;
 		$priceDecPercent = $settings['price_dec_percent'] ?? 0.1;
-		$baseCurrency = new Currency($settings['baseCurrency']);
-		$quoteCurrency = new Currency($settings['quoteCurrency']);
+		$initAmountPercent = $settings['init_amount_percent'] ?? 1.3;
+		$amountIncPercent = $settings['amount_inc_percent'] ?? 5;
+		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
+		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
 		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
 
 		$createOrderRequest = new CreateOrderRequest();
@@ -144,13 +147,19 @@ class Martin implements TradingStrategyInterface
 		$bidPrice = $exchange->getBid($symbolString);
 		$askPrice = $exchange->getBid($symbolString);
 		$currentPrice = $askPrice;
-		$buyOrdersCount = 0;
-		$sellOrdersCount = 0;
+
 		try {
 			$firstBuyOrder = $this->orderRepository->findFirstBuy($session->getId());
 		} catch (EntityNotFoundException $exception) {
 			$firstBuyOrder = null;
 		}
+
+		try {
+			$lastBuyOrder = $this->orderRepository->findLastBuy($session->getId());
+		} catch (EntityNotFoundException $exception) {
+			$lastBuyOrder = null;
+		}
+
 		try {
 			$lastSellOrder = $this->orderRepository->findLastSell($session->getId());
 		} catch (EntityNotFoundException $exception) {
@@ -160,9 +169,9 @@ class Martin implements TradingStrategyInterface
 
 		$minBalance = new Money(0, $baseCurrency);
 		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
-		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency,
-			$exchange->getPriceTickSize($symbolString));
-
+		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
+		$buyOrdersCount = 0;
+		$sellOrdersCount = 0;
 		$activeOrders = $this->orderRepository->findActive($session->getId());
 		foreach ($activeOrders as $order) {
 			if ($order->getType() === 'sell') {
@@ -171,6 +180,7 @@ class Martin implements TradingStrategyInterface
 				$buyOrdersCount++;
 			}
 		}
+
 
 		if ($baseCurrencyBalances->getAvailableBalance()->greaterThan($minBalance)) {
 			foreach ($activeOrders as $order) {
@@ -191,7 +201,7 @@ class Martin implements TradingStrategyInterface
 			$sellPrice = $this->round(
 				$quoteTotal
 					->multiply(1 + $profitPercent / 100)
-					->divide($baseCurrencyBalances->getAccountBalance()),
+					->divide($this->formatter->format($baseCurrencyBalances->getAccountBalance())),
 				$priceTickSize
 			);
 			$sellAmount = $baseCurrencyBalances->getAvailableBalance();
@@ -209,8 +219,47 @@ class Martin implements TradingStrategyInterface
 					$currentPrice > $firstBuyOrder->getPrice() * (1 + $priceDecPercent * 3 / 100)
 				)
 			) {
-
+				if ($lastSellOrder !== null) {
+					$session->end();
+				}
+				$activeOrders = $this->orderRepository->findActive($session->getId());
+				foreach ($activeOrders as $order) {
+					$cancelOrderRequest->setOrderId($order->getId());
+					$this->cancelOrderUseCase->execute($cancelOrderRequest);
+				}
+				return;
 			}
+		}
+
+		if ($buyOrdersCount < $buyOrderLimit) {
+			$filledBuyOrdersCount = $this->orderRepository->countFilledBuyOrders($session->getId());
+			$buyNum = $filledBuyOrdersCount + 1;
+			$price = $lastBuyOrder !== null ? $lastBuyOrder->getPrice() : ($currentPrice * (1 - $priceDecPercent / 100));
+			$buyPrice = $price * (1 - $priceDecPercent / 100);
+			$isPriceBelowBuyPrice = false;
+			if ($buyPrice > $currentPrice) {
+				$isPriceBelowBuyPrice = true;
+				$buyPrice = $currentPrice;
+			}
+			$buyPrice = $this->formatter->format(
+				$this->round($this->moneyFromFloatPolicy->getMoney($quoteCurrency, $buyPrice), $priceTickSize)
+			);
+			$initAmount = (new Money($quoteCurrencyBalances->getAvailableBalance()->getAmount(), $baseCurrency))
+				->divide(100)
+				->multiply($initAmountPercent)
+				->divide($buyPrice);
+			$amount = $firstBuyOrder !== null
+				? $this->moneyFromFloatPolicy->getMoney($baseCurrency, $firstBuyOrder->getAmount())
+				: $initAmount;
+			$buyAmount = $this->round($amount, $amountInc)
+				->multiply(1 + $amountIncPercent * $buyNum / 100);
+			if ($buyAmount->lessThan($amountInc)) {
+				$buyAmount = $amountInc;
+			}
+			$createOrderRequest->setType('buy');
+			$createOrderRequest->setPrice($buyPrice);
+			$createOrderRequest->setAmount($this->formatter->format($buyAmount));
+			$this->createOrderUseCase->execute($createOrderRequest);
 		}
 	}
 
