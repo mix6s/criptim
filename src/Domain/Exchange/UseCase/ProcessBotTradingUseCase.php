@@ -28,6 +28,7 @@ use Domain\Exchange\Repository\UserExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
 use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
 use Domain\Exchange\UseCase\Request\ProcessBotTradingRequest;
+use DomainBundle\Exchange\Policy\CryptoMoneyFormatter;
 use Money\Money;
 
 class ProcessBotTradingUseCase
@@ -76,6 +77,7 @@ class ProcessBotTradingUseCase
 	 * @var GetBotExchangeAccountUseCase
 	 */
 	private $getBotExchangeAccountUserCase;
+	private $formatter;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
@@ -101,6 +103,7 @@ class ProcessBotTradingUseCase
 		$this->userExchangeAccountRepository = $userExchangeAccountRepository;
 		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
 		$this->getBotExchangeAccountUserCase = $getBotExchangeAccountUserCase;
+		$this->formatter = new CryptoMoneyFormatter();
 	}
 
 	public function execute(ProcessBotTradingRequest $request)
@@ -134,11 +137,15 @@ class ProcessBotTradingUseCase
 		$bot = $this->botRepository->findById($session->getBotId());
 		$sessionAccounts = $this->botTradingSessionAccountRepository->findByBotTradingSessionId($session->getId());
 		foreach ($sessionAccounts as $sessionAccount) {
-			$transaction = $this->botTradingSessionAccountTransactionRepository->findLastBySessionIdCurrencyDate(
-				$session->getId(),
-				$sessionAccount->getCurrency(),
-				$session->getCreatedAt()
-			);
+			try {
+				$transaction = $this->botTradingSessionAccountTransactionRepository->findLastBySessionIdCurrencyDate(
+					$session->getId(),
+					$sessionAccount->getCurrency(),
+					$session->getCreatedAt()
+				);
+			} catch (EntityNotFoundException $exception) {
+				continue;
+			}
 			$diff = $sessionAccount->getBalance()->subtract($transaction->getBalance());
 
 			$outMoney = $sessionAccount->getBalance()->multiply(-1);
@@ -188,9 +195,10 @@ class ProcessBotTradingUseCase
 			}
 
 			foreach ($transactions as $transaction) {
-				$multiplier = $transaction->getBalance()->divide($sum->getAmount(), Money::ROUND_DOWN);
-				$userDiff = $diff->multiply($multiplier, Money::ROUND_DOWN);
-
+				$sumAmount = $this->formatter->format($sum);
+				$multiplier = $transaction->getBalance()->divide($sumAmount, Money::ROUND_DOWN);
+				$multiplierAmount = $this->formatter->format($multiplier);
+				$userDiff = $diff->multiply($multiplierAmount, Money::ROUND_DOWN);
 				$userAccount = $this->userExchangeAccountRepository->findByUserIdExchangeIdCurrency(
 					$transaction->getUserId(),
 					$transaction->getExchangeId(),

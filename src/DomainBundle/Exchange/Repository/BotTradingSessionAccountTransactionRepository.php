@@ -50,6 +50,7 @@ class BotTradingSessionAccountTransactionRepository extends EntityRepository imp
 			->setParameter('currency', $currency)
 			->setParameter('dt', $dt)
 			->orderBy('t.dt', 'DESC')
+			->setMaxResults(1)
 			->getQuery()
 			->getOneOrNullResult();
 		if ($transaction === null) {
