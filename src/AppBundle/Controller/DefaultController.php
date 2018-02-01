@@ -2,6 +2,8 @@
 
 namespace AppBundle\Controller;
 
+use Domain\ValueObject\UserId;
+use FOS\UserBundle\Model\UserInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +21,68 @@ class DefaultController extends Controller
     {
         return $this->render('@App/Default/index.html.twig', [
         ]);
+    }
+
+    /**
+     * @Route("/profile", name="profile")
+    */
+    public function profileAction()
+    {
+	    $user = $this->getUser();
+	    if (!$user instanceof UserInterface) {
+		    return $this->redirectToRoute('homepage');
+	    }
+    	$context = [];
+	    return $this->render('@App/Default/profile.html.twig', $context);
+    }
+
+	/**
+	 *
+	 * @Route("/balance_history.json", name="balance_history.json")
+	 */
+	public function balanceHistoryAction()
+    {
+	    $user = $this->getUser();
+	    if (!$user instanceof UserInterface) {
+		    return $this->redirectToRoute('homepage');
+	    }
+	    $userId = new UserId($user->getId());
+
+	    $em = $this->getDoctrine()->getManager();
+	    // todo: move to service
+	    $query = <<<QUERY
+WITH dates AS (
+    SELECT generate_series(
+               :from_dt :: TIMESTAMP,
+               :to_dt :: TIMESTAMP,
+               '1 day' :: INTERVAL
+           ) AS date
+), transactions AS (
+    SELECT
+      date,
+      (SELECT balance
+       FROM user_exchange_account_transaction t
+       WHERE t.dt < date
+             AND t.user_id = :user_id
+       ORDER BY t.dt DESC
+       LIMIT 1) AS balance
+    FROM dates
+) SELECT
+    TO_CHAR(date, 'YYYY-MM-DD') AS date,
+    COALESCE((balance ->> 'amount') :: FLOAT / 1000000000000, 0) as balance
+  FROM transactions;
+QUERY;
+	    /** @var \Doctrine\DBAL\Statement $statement */
+	    $statement = $this->getDoctrine()->getConnection()->prepare($query);
+	    $fromDt = (new \DateTimeImmutable('now - 1 month'))->format('Y-m-d H:i:s');
+	    $toDt = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s');
+	    $statement->bindParam('from_dt', $fromDt);
+	    $statement->bindParam('to_dt', $toDt);
+	    $statement->bindParam('user_id', $userId);
+	    $statement->execute();
+	    $result = $statement->fetchAll();
+
+	    return $this->json($result);
     }
 
     /**
