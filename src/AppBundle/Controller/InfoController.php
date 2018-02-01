@@ -31,15 +31,20 @@ class InfoController extends Controller
 	    if (!$userId instanceof UserId) {
 	    	return $this->redirectToRoute('login');
 	    }
-	    $fromDate = new \DateTimeImmutable('this month');
+	    $fromDate = new \DateTimeImmutable('now - 1 month');
 	    $toDate = new \DateTimeImmutable('now');
-
+	    $currency = new Currency('BTC');
+	    $result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
+		    $userId, $currency, $fromDate, $toDate
+	    );
 	    $context = [
 		    'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
 		    'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
 		    'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
-		    'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $fromDate, $toDate)
+		    'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $fromDate, $toDate),
+		    'history' => json_encode($result)
 	    ];
+	    dump($context);
 	    return $this->render('@App/Info/index.html.twig', $context);
     }
 

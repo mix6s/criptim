@@ -11,101 +11,92 @@
                     <li>Cashouts: {{ cashouts|moneyFormat }}</li>
                     <li>Profitability: {{ profitability|number_format(2) }}% </li>
                 </ul>
-                <div class="schedule">
-                    <style> /* set the CSS */
-                        .line {
-                            fill: none;
-                            stroke: steelblue;
-                            stroke-width: 2px;
-                        }
-                    </style>
-                    <script src="https://d3js.org/d3.v4.min.js"></script>
-                    <script>
-                        var margin = {top: 20, right: 20, bottom: 20, left: 20},
-                            width = 1200 - margin.left - margin.right,
-                            height = 500 - margin.top - margin.bottom;
-
-                        // parse the date / time
-                        var parseTime = d3.timeParse("%Y-%m-%d");
-
-                        // set the ranges
-                        var x = d3.scaleTime().range([0, width]);
-                        var y = d3.scaleLinear().range([height, 0]);
-
-                        // define the line
-                        var valueline = d3.line()
-                            .x(function (d) {
-                                return x(d.date);
-                            })
-                            .y(function (d) {
-                                return y(d.balance);
-                            });
-                        // define the line
-                        var valueline2 = d3.line()
-                            .x(function (d) {
-                                return x(d.date);
-                            })
-                            .y(function (d) {
-                                return y(d.balance);
-                            });
-
-                        var svg = d3.select('.schedule').append('svg')
-                            .attr("width", width + margin.left + margin.right)
-                            .attr("height", height + margin.top + margin.bottom)
-                            .append("g")
-                            .attr("transform",
-                                "translate(" + margin.left + "," + margin.top + ")");
-
-                        function draw(data) {
-
-                            // format the data
-                            data.forEach(function (d) {
-                                d.date = parseTime(d.date);
-                            });
-
-                            // sort years ascending
-                            data.sort(function (a, b) {
-                                return a["date"] - b["date"];
-                            });
-
-                            // Scale the range of the data
-                            x.domain(d3.extent(data, function (d) {
-                                return d.date;
-                            }));
-                            y.domain([0, d3.max(data, function (d) {
-                                return Math.max(d.balance);
-                            })]);
-
-                            // Add the valueline path.
-                            svg.append("path")
-                                .data([data])
-                                .attr("class", "line")
-                                .attr("d", valueline);
-                            // Add the valueline path.
-                            svg.append("path")
-                                .data([data])
-                                .attr("class", "line")
-                                .attr("d", valueline2);
-                            // Add the X Axis
-                            svg.append("g")
-                                .attr("transform", "translate(0," + height + ")")
-                                .call(d3.axisBottom(x));
-
-                            // Add the Y Axis
-                            svg.append("g")
-                                .call(d3.axisLeft(y));
-                        }
-
-                        // Get the data
-                        d3.json("/info/history.json", function (error, data) {
-                            if (error) throw error;
-                            draw(data);
-                        });
-
-                    </script>
-                </div>
 
             </div>
+        </div>
+        <div>
+            <script src="{{ asset('backend/js/Chart.bundle.js') }}"></script>
+            <script src="{{ asset('backend/js/utils.js') }}"></script>
+            <script src="{{ asset('backend/js/jquery.min.js') }}"></script>
+            <script src="{{ asset('backend/js/underscore-min.js') }}"></script>
+            <div style="width:75%;">
+                <canvas id="canvas"></canvas>
+            </div>
+            <script>
+                function loadHistory() {
+                    var chartData = [];
+                    $.ajax({
+                        type: "GET",
+                        url: "/info/history.json",
+                        success: function (data) {
+                            if (data) {
+                                var labels = [];
+                                var dataset = [];
+                                _.each(data, function(e) {
+                                    labels.push(e.date);
+                                    dataset.push(e.balance);
+                                });
+                                var config = getConfig(labels, dataset);
+                                drawChart(config);
+                            }
+                        }
+                    });
+                }
+
+                function getConfig(labels, dataset) {
+                    return {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Balance change during month",
+                                display: false,
+                                fill: false,
+                                backgroundColor: window.chartColors.blue,
+                                borderColor: window.chartColors.blue,
+                                data: dataset
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            hover: {
+                                mode: 'nearest',
+                                intersect: true
+                            },
+                            scales: {
+                                xAxes: [{
+                                    display: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'day'
+                                    }
+                                }],
+                                yAxes: [{
+                                    display: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'BTC'
+                                    }
+                                }]
+                            }
+                        }
+                    };
+                }
+
+                function drawChart(config) {
+                    var ctx = document.getElementById("canvas").getContext("2d");
+                    window.myLine = new Chart(ctx, config);
+                }
+
+                $(function () {
+                    loadHistory();
+                });
+
+            </script>
         </div>
     </div>
 {% endblock %}
