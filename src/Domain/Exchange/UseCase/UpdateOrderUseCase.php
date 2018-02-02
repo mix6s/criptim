@@ -123,29 +123,33 @@ class UpdateOrderUseCase
 			->getMoney($baseCurrencyAccount->getCurrency(), $order->getExecAmount())
 			->multiply($order->getType() === 'buy' ? 1 : -1);
 
-		$baseCurrencyAccount->change($baseTotal);
-		$baseSessionAccountTransaction = new BotTradingSessionAccountTransaction(
-			$this->idFactory->getBotTradingSessionAccountTransactionId(),
-			$session->getId(),
-			$baseCurrencyAccount->getCurrency(),
-			$baseTotal,
-			$baseCurrencyAccount->getBalance(),
-			BotTradingSessionAccountTransaction::TYPE_ORDER_EXEC
-		);
-		$this->botTradingSessionAccountTransactionRepository->save($baseSessionAccountTransaction);
-		$this->botTradingSessionAccountRepository->save($baseCurrencyAccount);
+		if (!$baseTotal->isZero()) {
+			$baseCurrencyAccount->change($baseTotal);
+			$baseSessionAccountTransaction = new BotTradingSessionAccountTransaction(
+				$this->idFactory->getBotTradingSessionAccountTransactionId(),
+				$session->getId(),
+				$baseCurrencyAccount->getCurrency(),
+				$baseTotal,
+				$baseCurrencyAccount->getBalance(),
+				BotTradingSessionAccountTransaction::TYPE_ORDER_EXEC
+			);
+			$this->botTradingSessionAccountTransactionRepository->save($baseSessionAccountTransaction);
+			$this->botTradingSessionAccountRepository->save($baseCurrencyAccount);
+		}
 
-		$quoteCurrencyAccount->change($quoteTotal);
-		$quoteSessionAccountTransaction = new BotTradingSessionAccountTransaction(
-			$this->idFactory->getBotTradingSessionAccountTransactionId(),
-			$session->getId(),
-			$quoteCurrencyAccount->getCurrency(),
-			$quoteTotal,
-			$quoteCurrencyAccount->getBalance(),
-			BotTradingSessionAccountTransaction::TYPE_ORDER_EXEC
-		);
-		$this->botTradingSessionAccountTransactionRepository->save($quoteSessionAccountTransaction);
-		$this->botTradingSessionAccountRepository->save($quoteCurrencyAccount);
+		if (!$quoteTotal->isZero()) {
+			$quoteCurrencyAccount->change($quoteTotal);
+			$quoteSessionAccountTransaction = new BotTradingSessionAccountTransaction(
+				$this->idFactory->getBotTradingSessionAccountTransactionId(),
+				$session->getId(),
+				$quoteCurrencyAccount->getCurrency(),
+				$quoteTotal,
+				$quoteCurrencyAccount->getBalance(),
+				BotTradingSessionAccountTransaction::TYPE_ORDER_EXEC
+			);
+			$this->botTradingSessionAccountTransactionRepository->save($quoteSessionAccountTransaction);
+			$this->botTradingSessionAccountRepository->save($quoteCurrencyAccount);
+		}
 
 		$this->orderRepository->save($order);
 		return new UpdateOrderResponse();

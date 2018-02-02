@@ -31,10 +31,10 @@ class ProcessTradingCommand extends ContainerAwareCommand
 		$useCase = $this->getContainer()->get('UseCase\ProcessBotTradingUseCase');
 		$syncUseCase = $this->getContainer()->get('UseCase\SyncExchangeUseCase');
 		$syncRequest = new SyncExchangeRequest();
-		$em = $this->getContainer()->get('doctrine.orm.default_entity_manager');
 
 		while (true) {
 			try {
+				$em = $this->getContainer()->get('doctrine.orm.default_entity_manager');
 				/** @var Bot[] $bots */
 				$bots = $this->getContainer()->get('ORM\BotRepository')->findAll();
 				foreach ($bots as $bot) {
@@ -44,11 +44,12 @@ class ProcessTradingCommand extends ContainerAwareCommand
 						$syncRequest->setExchangeId($bot->getExchangeId());
 						$syncUseCase->execute($syncRequest);
 					});
-
+					$em->clear();
 					$em->transactional(function () use ($useCase, $botId) {
 						$processRequest = new ProcessBotTradingRequest($botId);
 						$useCase->execute($processRequest);
 					});
+					$em->clear();
 				}
 			} catch (\Throwable $exception) {
 				$this->release();
