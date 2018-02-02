@@ -9,9 +9,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Domain\Entity\Player;
 use Domain\ValueObject\UserId;
-use DomainBundle\Entity\PlayerMetadata;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
