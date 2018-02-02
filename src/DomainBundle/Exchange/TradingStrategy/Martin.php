@@ -239,7 +239,7 @@ class Martin implements TradingStrategyInterface
 				$sellOrdersCount === 0
 				&& $firstBuyOrder !== null
 				&& (
-					$currentPrice > $firstBuyOrder->getPrice() * (1 + $priceDecPercent * 3 / 100)
+					$currentPrice > $firstBuyOrder->getPrice() * (1 + $priceDecPercent * 4 / 100)
 					|| $lastSellOrder !== null
 				)
 			) {
@@ -303,6 +303,7 @@ class Martin implements TradingStrategyInterface
 			]);
 		}
 	}
+
 
 	/**
 	 * @param Money $money
