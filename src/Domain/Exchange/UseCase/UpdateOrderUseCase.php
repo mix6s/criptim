@@ -137,7 +137,7 @@ class UpdateOrderUseCase
 			$this->botTradingSessionAccountRepository->save($baseCurrencyAccount);
 		}
 
-		if ($quoteTotal->isZero()) {
+		if (!$quoteTotal->isZero()) {
 			$quoteCurrencyAccount->change($quoteTotal);
 			$quoteSessionAccountTransaction = new BotTradingSessionAccountTransaction(
 				$this->idFactory->getBotTradingSessionAccountTransactionId(),
