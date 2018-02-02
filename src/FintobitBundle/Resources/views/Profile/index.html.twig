@@ -1,0 +1,102 @@
+{% extends '@App/Investor/layout.html.twig' %}
+
+{% block body %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Balance: {{ balance|moneyFormat }}</li>
+                    <li>Deposits: {{ deposits|moneyFormat }}</li>
+                    <li>Cashouts: {{ cashouts|moneyFormat }}</li>
+                    <li>Profitability: {{ profitability|number_format(2) }}% </li>
+                </ul>
+
+            </div>
+        </div>
+        <div>
+            <script src="{{ asset('backend/js/Chart.bundle.js') }}"></script>
+            <script src="{{ asset('backend/js/utils.js') }}"></script>
+            <script src="{{ asset('backend/js/jquery.min.js') }}"></script>
+            <script src="{{ asset('backend/js/underscore-min.js') }}"></script>
+            <div style="width:75%;">
+                <canvas id="canvas"></canvas>
+            </div>
+            <script>
+                function loadHistory() {
+                    var chartData = [];
+                    $.ajax({
+                        type: "GET",
+                        url: "/inv/history.json",
+                        success: function (data) {
+                            if (data) {
+                                var labels = [];
+                                var dataset = [];
+                                _.each(data, function(e) {
+                                    labels.push(e.date);
+                                    dataset.push(e.balance);
+                                });
+                                var config = getConfig(labels, dataset);
+                                drawChart(config);
+                            }
+                        }
+                    });
+                }
+
+                function getConfig(labels, dataset) {
+                    return {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Balance change during month",
+                                display: false,
+                                fill: false,
+                                backgroundColor: window.chartColors.blue,
+                                borderColor: window.chartColors.blue,
+                                data: dataset
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            hover: {
+                                mode: 'nearest',
+                                intersect: true
+                            },
+                            scales: {
+                                xAxes: [{
+                                    display: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'day'
+                                    }
+                                }],
+                                yAxes: [{
+                                    display: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'BTC'
+                                    }
+                                }]
+                            }
+                        }
+                    };
+                }
+
+                function drawChart(config) {
+                    var ctx = document.getElementById("canvas").getContext("2d");
+                    window.myLine = new Chart(ctx, config);
+                }
+
+                $(function () {
+                    loadHistory();
+                });
+
+            </script>
+        </div>
+    </div>
+{% endblock %}

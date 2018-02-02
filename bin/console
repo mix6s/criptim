@@ -25,6 +25,8 @@ if ($debug) {
     Debug::enable();
 }
 
-$kernel = new AppKernel($env, $debug);
+$appType = $_SERVER['APP_TYPE'] ?? 'console';
+
+$kernel = new AppKernel($env, $debug, $appType);
 $application = new Application($kernel);
 $application->run($input);
