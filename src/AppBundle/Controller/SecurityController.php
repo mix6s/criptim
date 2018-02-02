@@ -5,7 +5,6 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
 use AppBundle\Form\Type\RegistrationFormType;
-use Domain\Repository\PlayerRepositoryInterface;
 use Domain\UseCase\Request\CreateUserRequest;
 use FOS\UserBundle\Event\FilterUserResponseEvent;
 use FOS\UserBundle\Event\FormEvent;

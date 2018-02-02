@@ -1,4 +1,4 @@
-{% extends '@App/Info/info_layout.html.twig' %}
+{% extends '@App/Investor/layout.html.twig' %}
 
 {% block body %}
     <div class="container">
@@ -27,7 +27,7 @@
                     var chartData = [];
                     $.ajax({
                         type: "GET",
-                        url: "/info/history.json",
+                        url: "/inv/history.json",
                         success: function (data) {
                             if (data) {
                                 var labels = [];

@@ -27,7 +27,13 @@
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <h3>Profile info</h3>
+            <h3>
+                {% if layout_title is defined %}
+                    {{ layout_title }}
+                {% else %}
+                    Welcome
+                {% endif %}
+            </h3>
         </div>
     </div>
 </nav>
@@ -38,8 +44,7 @@
         {% endfor %}
     {% endfor %}
 </div>
-{% block body %}
-{% endblock %}
+
 
 {% block javascripts %}
     <script src="{{ asset('backend/js/jquery.min.js') }}"></script>
@@ -49,5 +54,9 @@
     <script src="{{ asset('backend/js/bootstrap-editable.js') }}"></script>
     <script src="{{ asset('backend/js/editable-typeahed.js') }}"></script>
 {% endblock %}
+
+{% block body %}
+{% endblock %}
+
 </body>
 </html>

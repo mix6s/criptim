@@ -27,7 +27,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class User extends \FOS\UserBundle\Model\User
 {
-	const ROLE_ADMIN = 'ROLE_ADMIN';
+	public const ROLE_ADMIN = 'ROLE_ADMIN';
+
+	public const ROLE_INVESTOR = 'ROLE_INVESTOR';
 
 	/**
 	 * @ORM\Id

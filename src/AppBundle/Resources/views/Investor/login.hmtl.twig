@@ -1,0 +1,35 @@
+{% extends '@App/Investor/layout.html.twig' %}
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <form action="{{ path("fos_user_security_check") }}" method="post">
+                {% if csrf_token %}
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}"/>
+                {% endif %}
+                {% if error %}
+                    <div class="form-group">
+                        <div class="form-message form-message--error">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="form-group">
+                    <label>
+                        <span class="">Электронная почта</span>
+                    </label>
+                    <input class="form-control" id="email" type="text" name="_username" placeholder="example@gmail.com"
+                           value="{{ last_username }}" required="required">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <span class="">Пароль</span>
+                    </label>
+                    <input class="form-control" id="pass-1" name="_password" type="password" required="required">
+                </div>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <a href="{{ path('investor.registration') }}" class="btn btn-primary">Зарегистрироваться</a>
+            </form>
+
+        </div>
+    </div>
+{% endblock %}

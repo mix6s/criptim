@@ -27,75 +27,71 @@ class ProfitabilityCalculator
 		\DateTimeInterface $toDt
 	): float
 	{
+		$currency = new Currency('BTC');
+		$deposits = $this
+			->userExchangeAccountTransactionRepository
+			->findByUserIdCurrencyTypeFromDtToDt(
+				$userId,
+				$currency,
+				'deposit',
+				$fromDt,
+				$toDt
+			);
 
-		try {
-			// todo: resolve case when passed arguments causing to fail
-			// should probably check for data, otherwise return null
-
-			$currency = new Currency('BTC');
-			$depositsSum = new Money(0, new Currency('BTC'));
-			$depositsMultipliedPerSecondsInSystemSum = new Money(0, new Currency('BTC'));
-
-			$lastTransactionForForDate = $this
-				->userExchangeAccountTransactionRepository
-				->findLastByUserIdCurrencyDate(
-					$userId,
-					$currency,
-					$fromDt
-				);
-
-			$lastTransactionForToDate = $this
-				->userExchangeAccountTransactionRepository
-				->findLastByUserIdCurrencyDate(
-					$userId,
-					$currency,
-					$toDt
-				);
-
-			if ($lastTransactionForForDate === null || $lastTransactionForToDate === null) {
-				throw new \DomainException('have nothing start');
-			}
-			$startBalance = $lastTransactionForForDate->getBalance();
-			$lastBalance = $lastTransactionForToDate->getBalance();
-
-			$deposits = $this
-				->userExchangeAccountTransactionRepository
-				->findByUserIdCurrencyTypeFromDtToDt(
-					$userId,
-					$currency,
-					'deposit',
-					$fromDt,
-					$toDt
-				);
-
-			foreach ($deposits as $deposit) {
-				$depositsSum = $depositsSum
-					->add($deposit->getMoney());
-
-				$depositSecondsInSystem = $toDt->getTimestamp() - $deposit->getDt()->getTimestamp();
-
-				$depositMultipliedPerSecondsInSystem = $deposit->getMoney()->multiply($depositSecondsInSystem);
-
-				$depositsMultipliedPerSecondsInSystemSum = $depositsMultipliedPerSecondsInSystemSum
-					->add($depositMultipliedPerSecondsInSystem);
-			}
-
-			$numerator = $lastBalance
-				->subtract($startBalance)
-				->subtract($depositsSum)
-				->multiply(100)
-			;
-
-			$periodSeconds = $toDt->getTimestamp() - $fromDt->getTimestamp();
-
-			$startBalanceMultipliedByPeriodSeconds = $startBalance->multiply($periodSeconds);
-			$denominator = $depositsMultipliedPerSecondsInSystemSum->add($startBalanceMultipliedByPeriodSeconds);
-
-			return $numerator->ratioOf($denominator);
-
-		} catch (\Exception $e) {
-			return 0.0;
+		if (\count($deposits) === 0) {
+			return 0;
 		}
+		dump($deposits);
+		$depositsSum = new Money(0, $currency);
+		$depositsMultipliedPerSecondsInSystemSum = new Money(0, $currency);
+
+		$lastTransactionForForDate = $this
+			->userExchangeAccountTransactionRepository
+			->findLastByUserIdCurrencyDate(
+				$userId,
+				$currency,
+				$fromDt
+			);
+
+		$lastTransactionForToDate = $this
+			->userExchangeAccountTransactionRepository
+			->findLastByUserIdCurrencyDate(
+				$userId,
+				$currency,
+				$toDt
+			);
+
+		if ($lastTransactionForForDate === null || $lastTransactionForToDate === null) {
+			//
+			return 0;
+		}
+		$startBalance = $lastTransactionForForDate->getBalance();
+		$lastBalance = $lastTransactionForToDate->getBalance();
+
+
+		foreach ($deposits as $deposit) {
+			$depositsSum = $depositsSum
+				->add($deposit->getMoney());
+
+			$depositSecondsInSystem = $toDt->getTimestamp() - $deposit->getDt()->getTimestamp();
+
+			$depositMultipliedPerSecondsInSystem = $deposit->getMoney()->multiply($depositSecondsInSystem);
+
+			$depositsMultipliedPerSecondsInSystemSum = $depositsMultipliedPerSecondsInSystemSum
+				->add($depositMultipliedPerSecondsInSystem);
+		}
+
+		$numerator = $lastBalance
+			->subtract($startBalance)
+			->subtract($depositsSum)
+			->multiply(100);
+
+		$periodSeconds = $toDt->getTimestamp() - $fromDt->getTimestamp();
+
+		$startBalanceMultipliedByPeriodSeconds = $startBalance->multiply($periodSeconds);
+		$denominator = $depositsMultipliedPerSecondsInSystemSum->add($startBalanceMultipliedByPeriodSeconds);
+
+		return $numerator->ratioOf($denominator);
 
 	}
 }
