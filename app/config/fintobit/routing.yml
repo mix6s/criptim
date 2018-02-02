@@ -1,3 +1,7 @@
+fintobit:
+    resource: '@FintobitBundle/Controller/'
+    type: annotation
+
 fos_user_security_logout:
     path:     /logout
     defaults: { _controller: FOSUserBundle:Security:logout }
@@ -18,14 +22,6 @@ fos_user_resetting_reset:
     path:     /restore/{token}
     defaults: { _controller: FOSUserBundle:Resetting:reset }
 
-fos_user_profile_show:
-    path:     /profile
-    defaults: { _controller: AppBundle:Profile:current }
-
 fos_user_security_check:
     path:     /login_check
     defaults: { _controller: FOSUserBundle:Security:check }
-
-fintobit.registration:
-    path:     /registration
-    defaults: { _controller: FintobitBundle:Auth:registration }

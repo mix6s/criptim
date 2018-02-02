@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintobit\Controller;
+namespace FintobitBundle\Controller;
 
 use AppBundle\Entity\User;
 use Domain\ValueObject\UserId;
@@ -11,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
  * Class ProfileController
- * @package AppBundle\Controller
+ * @package Fintobit\Controller
  */
 class ProfileController extends Controller
 {
@@ -23,12 +23,12 @@ class ProfileController extends Controller
 	{
 		$user = $this->getUser();
 		if (!$user instanceof UserInterface) {
-			return $this->redirectToRoute('investor.login');
+			return $this->redirectToRoute('fintobit.auth.login');
 		}
 		/** @var User $user */
 		$userId = $user->getDomainUserId();
 		if (!$userId instanceof UserId) {
-			return $this->redirectToRoute('investor.login');
+			return $this->redirectToRoute('fintobit.auth.login');
 		}
 		$fromDate = new \DateTimeImmutable('now - 1 month');
 		$toDate = new \DateTimeImmutable('now');
@@ -44,7 +44,7 @@ class ProfileController extends Controller
 			'history' => json_encode($result),
 			'layout_title' => 'Профиль пользователя'
 		];
-		return $this->render('@App/Investor/index.html.twig', $context);
+		return $this->render('@Fintobit/Profile/index.html.twig', $context);
 	}
 
 	/**

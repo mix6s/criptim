@@ -1,9 +1,5 @@
 app:
-    resource: '@AppBundle/Controller/'
-    type: annotation
-
-criptim.web:
-    resource: '@'
+    resource: '@CriptimBundle/Controller/'
     type: annotation
 
 fos_user_security_logout:
@@ -33,11 +29,3 @@ fos_user_profile_show:
 fos_user_security_check:
     path:     /login_check
     defaults: { _controller: FOSUserBundle:Security:check }
-
-registration:
-    path:     /registration
-    defaults: { _controller: AppBundle:Security:registration }
-
-#login:
-#    path:     /login
-#    defaults: { _controller: AppBundle:Security:login }

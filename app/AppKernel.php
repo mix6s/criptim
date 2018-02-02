@@ -42,7 +42,7 @@ class AppKernel extends Kernel
 		}
 
 		if ($this->appType === self::APP_TYPE_FINTOBIT) {
-			$bundles[] = new FintobitBundle\FintobitBundle();
+			$bundles[] = new \FintobitBundle\FintobitBundle();
 		}
 
 		if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
