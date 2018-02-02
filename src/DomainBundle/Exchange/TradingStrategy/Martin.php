@@ -24,6 +24,7 @@ use Domain\Exchange\UseCase\GetBotTradingSessionBalancesUseCase;
 use Domain\Exchange\UseCase\Request\CancelOrderRequest;
 use Domain\Exchange\UseCase\Request\CreateOrderRequest;
 use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
+use Domain\Exchange\UseCase\Response\GetBotTradingSessionBalancesResponse;
 use Domain\Exchange\ValueObject\TradingStrategyId;
 use Domain\Exchange\ValueObject\TradingStrategySettings;
 use Domain\Policy\DomainCurrenciesPolicy;
@@ -32,6 +33,7 @@ use Money\Currency;
 use Money\CurrencyPair;
 use Money\Money;
 use Money\Number;
+use Psr\Log\LoggerInterface;
 
 class Martin implements TradingStrategyInterface
 {
@@ -79,6 +81,10 @@ class Martin implements TradingStrategyInterface
 	 * @var MoneyFromFloatPolicy
 	 */
 	private $moneyFromFloatPolicy;
+	/**
+	 * @var LoggerInterface
+	 */
+	private $logger;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
@@ -88,7 +94,8 @@ class Martin implements TradingStrategyInterface
 		ExchangeRepositoryInterface $exchangeRepository,
 		CreateOrderUseCase $createOrderUseCase,
 		OrderRepositoryInterface $orderRepository,
-		CancelOrderUseCase $cancelOrderUseCase
+		CancelOrderUseCase $cancelOrderUseCase,
+		LoggerInterface $logger
 	) {
 		$this->id = new TradingStrategyId(self::ID);
 		$this->botTradingSessionAccountRepository = $botTradingSessionAccountRepository;
@@ -102,6 +109,7 @@ class Martin implements TradingStrategyInterface
 		$this->currencies = new DomainCurrenciesPolicy();
 		$this->cancelOrderUseCase = $cancelOrderUseCase;
 		$this->moneyFromFloatPolicy = new MoneyFromFloatPolicy();
+		$this->logger = $logger;
 	}
 
 	public function getId(): TradingStrategyId
@@ -189,27 +197,42 @@ class Martin implements TradingStrategyInterface
 				}
 				$cancelOrderRequest->setOrderId($order->getId());
 				$this->cancelOrderUseCase->execute($cancelOrderRequest);
+				$this->logger->info(sprintf('Session #%s: cancel sell order', (string)$session->getId()), [
+					'orderId' => (string)$cancelOrderRequest->getOrderId(),
+					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+				]);
 			}
 			$balancesRequest->setCurrency($baseCurrency);
 			$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 			$balancesRequest->setCurrency($quoteCurrency);
 			$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+			$this->logger->info(sprintf('Session #%s: update balance', (string)$session->getId()), [
+				'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+				'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+			]);
 
+			$sellAmount = $baseCurrencyBalances->getAvailableBalance();
 			$quoteTotal = $quoteCurrencyBalances->getStartBalance()
-				->subtract($quoteCurrencyBalances->getAvailableBalance())
-				->subtract($quoteCurrencyBalances->getInOrdersBalance());
+				->subtract($quoteCurrencyBalances->getAccountBalance());
 			$sellPrice = $this->round(
 				$quoteTotal
 					->multiply(1 + $profitPercent / 100)
-					->divide($this->formatter->format($baseCurrencyBalances->getAccountBalance())),
+					->divide($this->formatter->format($sellAmount)),
 				$priceTickSize
 			);
-			$sellAmount = $baseCurrencyBalances->getAvailableBalance();
 			if ($sellAmount->greaterThanOrEqual($amountInc)) {
 				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
 				$createOrderRequest->setPrice($this->formatter->format($sellPrice));
 				$createOrderRequest->setType('sell');
 				$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+				$this->logger->info(sprintf('Session #%s: create sell order', (string)$session->getId()), [
+					'orderId' => (string)$lastSellOrder->getId(),
+					'amount' => $sellAmount,
+					'price' => $sellPrice,
+					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+				]);
 			}
 		} else {
 			if (
@@ -219,13 +242,24 @@ class Martin implements TradingStrategyInterface
 					$currentPrice > $firstBuyOrder->getPrice() * (1 + $priceDecPercent * 3 / 100)
 				)
 			) {
-				if ($lastSellOrder !== null) {
-					$session->end();
-				}
 				$activeOrders = $this->orderRepository->findActive($session->getId());
 				foreach ($activeOrders as $order) {
 					$cancelOrderRequest->setOrderId($order->getId());
 					$this->cancelOrderUseCase->execute($cancelOrderRequest);
+					$this->logger->info(sprintf('Session #%s: cancel order', (string)$session->getId()), [
+						'orderId' => (string)$cancelOrderRequest->getOrderId(),
+						'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+						'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+					]);
+				}
+
+				if ($lastSellOrder !== null) {
+					$session->end();
+					$this->logger->info(sprintf('Session #%s: end session', (string)$session->getId()), [
+						'orderId' => (string)$lastSellOrder->getId(),
+						'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+						'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+					]);
 				}
 				return;
 			}
@@ -259,7 +293,13 @@ class Martin implements TradingStrategyInterface
 			$createOrderRequest->setType('buy');
 			$createOrderRequest->setPrice($buyPrice);
 			$createOrderRequest->setAmount($this->formatter->format($buyAmount));
-			$this->createOrderUseCase->execute($createOrderRequest);
+			$lastBuyOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+			$this->logger->info(sprintf('Session #%s: create buy order', (string)$session->getId()), [
+				'orderId' => (string)$lastBuyOrder->getId(),
+				'buyNum' => $buyNum,
+				'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+				'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+			]);
 		}
 	}
 
@@ -289,5 +329,16 @@ class Martin implements TradingStrategyInterface
 	{
 		return new Money(floor($money->getAmount() / $rounding->getAmount()) * $rounding->getAmount(),
 			$money->getCurrency());
+	}
+
+	private function balancesAsArray(GetBotTradingSessionBalancesResponse $response)
+	{
+		return [
+			'currency' => $response->getBotTradingSessionAccount()->getCurrency()->getCode(),
+			'start' => $response->getStartBalance()->getAmount(),
+			'account' => $response->getAccountBalance()->getAmount(),
+			'inOrder' => $response->getInOrdersBalance()->getAmount(),
+			'available' => $response->getAccountBalance()->getAmount(),
+		];
 	}
 }
