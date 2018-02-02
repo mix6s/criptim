@@ -41,7 +41,6 @@ class ProfitabilityCalculator
 		if (\count($deposits) === 0) {
 			return 0;
 		}
-		dump($deposits);
 		$depositsSum = new Money(0, $currency);
 		$depositsMultipliedPerSecondsInSystemSum = new Money(0, $currency);
 
