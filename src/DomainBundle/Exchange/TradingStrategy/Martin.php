@@ -240,6 +240,7 @@ class Martin implements TradingStrategyInterface
 				&& $firstBuyOrder !== null
 				&& (
 					$currentPrice > $firstBuyOrder->getPrice() * (1 + $priceDecPercent * 3 / 100)
+					|| $lastSellOrder !== null
 				)
 			) {
 				$activeOrders = $this->orderRepository->findActive($session->getId());
