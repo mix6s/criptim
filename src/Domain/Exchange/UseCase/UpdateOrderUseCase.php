@@ -81,18 +81,11 @@ class UpdateOrderUseCase
 	{
 		$exchangeOrder = $request->getExchangeOrder();
 		$order = $this->orderRepository->findById($exchangeOrder->getId());
-		if ($exchangeOrder->getStatus() === null) {
-			$order->updateFrom($exchangeOrder);
-			$this->orderRepository->save($order);
-			return new UpdateOrderResponse();
-		}
-		if ($order->getStatus() === $exchangeOrder->getStatus()) {
-			$order->updateFrom($exchangeOrder);
-			$this->orderRepository->save($order);
-			return new UpdateOrderResponse();
-		}
-		if (!in_array($exchangeOrder->getStatus(), [Order::STATUS_FILLED, Order::STATUS_CANCELED])) {
-			$order->updateFrom($exchangeOrder);
+
+		$oldExecAmount = $order->getExecAmount();
+		$order->updateFrom($exchangeOrder);
+		$diff = $order->getExecAmount() - $oldExecAmount;
+		if ($diff === 0) {
 			$this->orderRepository->save($order);
 			return new UpdateOrderResponse();
 		}
@@ -115,12 +108,12 @@ class UpdateOrderUseCase
 
 		$quoteTotal = $this->moneyFromFloatPolicy
 			->getMoney($quoteCurrencyAccount->getCurrency(), $order->getPrice())
-			->multiply($order->getExecAmount())
+			->multiply($diff)
 			->multiply(1 + $exchange->getFee())
 			->multiply($order->getType() === 'buy' ? -1 : 1);
 
 		$baseTotal = $this->moneyFromFloatPolicy
-			->getMoney($baseCurrencyAccount->getCurrency(), $order->getExecAmount())
+			->getMoney($baseCurrencyAccount->getCurrency(), $diff)
 			->multiply($order->getType() === 'buy' ? 1 : -1);
 
 		if (!$baseTotal->isZero()) {
