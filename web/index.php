@@ -5,21 +5,16 @@ use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\HttpFoundation\Request;
 
 require __DIR__ . '/../vendor/autoload.php';
-if (PHP_VERSION_ID < 70000) {
-	include_once __DIR__ . '/../var/bootstrap.php.cache';
-}
 
 $dotenv = new Dotenv();
 $dotenv->load(__DIR__ . '/../.env');
 
 $env = $_SERVER['ENV'] ?? 'prod';
+$appType = $_SERVER['APP_TYPE'] ?? 'console';
 if ($env == 'dev') {
 	Debug::enable();
 }
-$kernel = new AppKernel($env, $env == 'dev');
-if (PHP_VERSION_ID < 70000) {
-	$kernel->loadClassCache();
-}
+$kernel = new AppKernel($env, $env == 'dev', $appType);
 
 $request = Request::createFromGlobals();
 $response = $kernel->handle($request);

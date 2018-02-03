@@ -16,20 +16,21 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Class AfterRegistrationListner
+ * Class AfterRegistrationListener
  * @package AppBundle\EventListner
  */
-class AfterRegistrationListner implements EventSubscriberInterface
+class AfterRegistrationListener implements EventSubscriberInterface
 {
 	private $router;
-
 	/**
-	 * AfterRegistrationListner constructor.
-	 * @param UrlGeneratorInterface $router
+	 * @var string
 	 */
-	public function __construct(UrlGeneratorInterface $router)
+	private $defaultRoute;
+
+	public function __construct(UrlGeneratorInterface $router, string $defaultRoute = 'homepage')
 	{
 		$this->router = $router;
+		$this->defaultRoute = $defaultRoute;
 	}
 
 	/**
@@ -49,7 +50,7 @@ class AfterRegistrationListner implements EventSubscriberInterface
 	{
 		$url = $event->getRequest()->getSession()->get('_security.main.target_path');
 		if (empty($url)) {
-			$url = $this->router->generate('homepage');
+			$url = $this->router->generate($this->defaultRoute);
 		} else {
 			$event->getRequest()->getSession()->remove('_security.main.target_path');
 		}

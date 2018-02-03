@@ -7,11 +7,13 @@ use Domain\ValueObject\UserId;
 use FOS\UserBundle\Model\UserInterface;
 use Money\Currency;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
  * Class ProfileController
  * @package Fintobit\Controller
+ * @Security("has_role('ROLE_INVESTOR')")
  */
 class ProfileController extends Controller
 {
@@ -21,14 +23,11 @@ class ProfileController extends Controller
 	 */
 	public function profileAction()
 	{
-		$user = $this->getUser();
-		if (!$user instanceof UserInterface) {
-			return $this->redirectToRoute('fintobit.auth.login');
-		}
 		/** @var User $user */
+		$user = $this->getUser();
 		$userId = $user->getDomainUserId();
-		if (!$userId instanceof UserId) {
-			return $this->redirectToRoute('fintobit.auth.login');
+		if ($userId === null) {
+			throw $this->createNotFoundException();
 		}
 		$fromDate = new \DateTimeImmutable('now - 1 month');
 		$toDate = new \DateTimeImmutable('now');
@@ -52,14 +51,11 @@ class ProfileController extends Controller
 	 */
 	public function balanceHistoryAction()
 	{
-		$user = $this->getUser();
-		if (!$user instanceof UserInterface) {
-			return $this->redirectToRoute('investor.login');
-		}
 		/** @var User $user */
+		$user = $this->getUser();
 		$userId = $user->getDomainUserId();
-		if (!$userId instanceof UserId) {
-			return $this->redirectToRoute('login');
+		if ($userId === null) {
+			throw $this->createNotFoundException();
 		}
 		$fromDt = new \DateTimeImmutable('now - 1 month');
 		$toDt = new \DateTimeImmutable('now');

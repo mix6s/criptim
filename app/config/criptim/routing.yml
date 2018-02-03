@@ -1,4 +1,4 @@
-app:
+criptim:
     resource: '@CriptimBundle/Controller/'
     type: annotation
 
@@ -21,10 +21,6 @@ fos_user_resetting_check_email:
 fos_user_resetting_reset:
     path:     /restore/{token}
     defaults: { _controller: FOSUserBundle:Resetting:reset }
-
-fos_user_profile_show:
-    path:     /profile
-    defaults: { _controller: AppBundle:Profile:current }
 
 fos_user_security_check:
     path:     /login_check

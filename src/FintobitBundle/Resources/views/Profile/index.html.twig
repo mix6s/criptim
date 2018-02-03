@@ -1,6 +1,6 @@
-{% extends '@App/Investor/layout.html.twig' %}
+{% extends '@Fintobit/layout.html.twig' %}
 
-{% block body %}
+{% block content %}
     <div class="container">
 
         <div class="row">
@@ -27,7 +27,7 @@
                     var chartData = [];
                     $.ajax({
                         type: "GET",
-                        url: "/inv/history.json",
+                        url: "{{ path('fintobit.profile.history') }}",
                         success: function (data) {
                             if (data) {
                                 var labels = [];

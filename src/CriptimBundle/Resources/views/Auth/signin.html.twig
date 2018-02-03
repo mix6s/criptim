@@ -1,4 +1,4 @@
-{% extends "@App/layout.html.twig" %}
+{% extends "@Criptim/layout.html.twig" %}
 
 {% block content %}
 
@@ -17,8 +17,8 @@
     </a>
 
     <ul class="tabs js-tabs-container">
-        <li class="tabs-item tabs-item--active"><a href="{{ path('login') }}" class="tabs-item__link" data-tab="authorization">Вход</a></li>
-        <li class="tabs-item"><a href="{{ path('registration') }}" class="tabs-item__link" data-tab="registration">Регистрация</a></li>
+        <li class="tabs-item tabs-item--active"><a href="{{ path('criptim.auth.login') }}" class="tabs-item__link" data-tab="authorization">Вход</a></li>
+        <li class="tabs-item"><a href="{{ path('criptim.auth.registration') }}" class="tabs-item__link" data-tab="registration">Регистрация</a></li>
     </ul>
 
     <div class="tab-content js-tab-content tab-content--active" id="authorization">

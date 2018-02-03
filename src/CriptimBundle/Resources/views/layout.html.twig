@@ -32,7 +32,7 @@
                         </g>
                     </svg>
                 </a>
-                <a href="{{ path('homepage') }}" class="logo logo--header">
+                <a href="{{ path('criptim.homepage') }}" class="logo logo--header">
                     <span class="logo__text logo__text--bold">Crip</span><span
                             class="logo__text logo__text--light">tim</span>
                 </a>
@@ -97,14 +97,14 @@
                     <div class="sidebar-nav">
                         <div class="sidebar-logo">
                             <span class="sidebar-logo__img"></span>
-                            <a href="{{ path('homepage') }}" class="logo">
+                            <a href="{{ path('criptim.homepage') }}" class="logo">
                                 <span class="logo__text logo__text--bold">Crip</span><span
                                         class="logo__text logo__text--light">tim</span>
                             </a>
                         </div>
                         <ul class="main-navigation__list">
                             <li class="main-navigation__item main-navigation__item--active">
-                                <a href="{{ path('homepage') }}" class="main-navigation__link">
+                                <a href="{{ path('criptim.homepage') }}" class="main-navigation__link">
                                     <span class="main-navigation__icon main-navigation__icon--users">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
                                              viewBox="0 0 30 30">
@@ -224,8 +224,8 @@
                         {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                             <a href="{{ path('fos_user_security_logout') }}" class="button button--main">Выйти</a>
                         {% else %}
-                            <a href="{{ path('registration') }}" class="button button--action">Зарегистрироваться</a>
-                            <a href="{{ path('login') }}" class="button button--main">Войти</a>
+                            <a href="{{ path('criptim.auth.registration') }}" class="button button--action">Зарегистрироваться</a>
+                            <a href="{{ path('criptim.auth.login') }}" class="button button--main">Войти</a>
                         {% endif %}
                     </div>
                     <a href="#" class="sidebar-mobile__close js-close-sidebar">

@@ -1,4 +1,4 @@
-{% extends '@App/Investor/layout.html.twig' %}
+{% extends '@Control/layout.html.twig' %}
 {% block body %}
     <div class="container">
         <div class="row">
@@ -27,7 +27,6 @@
                     <input class="form-control" id="pass-1" name="_password" type="password" required="required">
                 </div>
                 <button type="submit" class="btn btn-primary">Войти</button>
-                <a href="{{ path('investor.registration') }}" class="btn btn-primary">Зарегистрироваться</a>
             </form>
 
         </div>

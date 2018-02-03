@@ -43,7 +43,7 @@ WITH dates AS (
       date,
       (SELECT balance
        FROM user_exchange_account_transaction t
-       WHERE t.dt < date
+       WHERE t.dt <= date
              AND t.user_id = :user_id
              AND t.currency = :currency
        ORDER BY t.dt DESC
@@ -51,7 +51,7 @@ WITH dates AS (
     FROM dates
 ) SELECT
     TO_CHAR(date, 'YYYY-MM-DD') AS date,
-    COALESCE((balance ->> 'amount') :: FLOAT / (10 ^ :subunit), 0) as balance
+    COALESCE((balance ->> 'amount') :: FLOAT / (10 ^ :subunit), null) as balance
   FROM transactions;
 QUERY;
 		/** @var \Doctrine\DBAL\Statement $statement */

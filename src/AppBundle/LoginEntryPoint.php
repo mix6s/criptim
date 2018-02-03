@@ -23,14 +23,19 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 class LoginEntryPoint implements AuthenticationEntryPointInterface
 {
 	private $router;
+	/**
+	 * @var string
+	 */
+	private $loginRoute;
 
 	/**
 	 * LoginEntryPoint constructor.
 	 * @param Router $router
 	 */
-	public function __construct(Router $router)
+	public function __construct(Router $router, string $loginRoute)
 	{
 		$this->router = $router;
+		$this->loginRoute = $loginRoute;
 	}
 
 	/**
@@ -54,6 +59,6 @@ class LoginEntryPoint implements AuthenticationEntryPointInterface
 	public function start(Request $request, AuthenticationException $authException = null)
 	{
 		$route = $request->get('_route');
-		return new RedirectResponse($this->router->generate( 'login'));
+		return new RedirectResponse($this->router->generate($this->loginRoute));
 	}
 }

@@ -87,7 +87,7 @@ class AuthController extends Controller
 		}
 
 		return $this->render(
-			'@Fintobit/Auth/registration.hmtl.twig',
+			'@Fintobit/Auth/registration.html.twig',
 			[
 				'form' => $form->createView(),
 				'layout_title' => 'Регистрация'
@@ -130,7 +130,7 @@ class AuthController extends Controller
 			? $this->get('security.csrf.token_manager')->getToken('authenticate')->getValue()
 			: null;
 		return $this->render(
-			'@Fintobit/Auth/login.hmtl.twig',
+			'@Fintobit/Auth/login.html.twig',
 			[
 				'last_username' => $lastUsername,
 				'error' => $error,

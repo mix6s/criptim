@@ -1,4 +1,4 @@
-{% extends '@App/layout.html.twig' %}
+{% extends '@Criptim/layout.html.twig' %}
 
 {% block content %}
     <div class="balance">
@@ -110,7 +110,7 @@
             }
 
             // Get the data
-            d3.json("/balance_history.json", function (error, data) {
+            d3.json("{{ path('criptim.profile.history') }}", function (error, data) {
                 console.log(data);
                 if (error) throw error;
                 draw(data);

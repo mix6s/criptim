@@ -17,7 +17,7 @@ class IndexController extends Controller
 	 */
 	public function indexAction()
 	{
-		return $this->render('@Fintobit/Index/index.html.twig');
+		return $this->forward('FintobitBundle:Profile:profile');
 	}
 
 }

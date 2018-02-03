@@ -26,9 +26,6 @@ framework:
     #translator: { fallbacks: ['%locale%'] }
     translator: ~
     secret: '%secret%'
-    router:
-        resource: '%kernel.project_dir%/app/config/routing.yml'
-        strict_requirements: ~
     form: ~
     csrf_protection: ~
     validation: { enable_annotations: true }
@@ -37,15 +34,18 @@ framework:
         engines: ['twig']
     default_locale: '%locale%'
     trusted_hosts: ~
-    session:
-        # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id
-        handler_id: session.handler.native_file
-        save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
     fragments: ~
     http_method_override: true
     assets: ~
     php_errors:
         log: true
+    router:
+        resource: '%kernel.project_dir%/app/config/%kernel.app_type%/routing.yml'
+        strict_requirements: ~
+    session:
+        # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id
+        handler_id: session.handler.native_file
+        save_path: '%kernel.project_dir%/var/sessions/%kernel.app_type%/%kernel.environment%'
 
 # Twig Configuration
 twig:

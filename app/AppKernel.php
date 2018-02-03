@@ -10,12 +10,12 @@ class AppKernel extends Kernel
 	public const APP_TYPE_CONSOLE = 'console';
 	public const APP_TYPE_CRIPTIM = 'criptim';
 	public const APP_TYPE_FINTOBIT = 'fintobit';
+	public const APP_TYPE_CONTROL = 'control';
 
 	private $appType;
 
-	public function __construct(string $environment, bool $debug)
+	public function __construct(string $environment, bool $debug, string $appType)
 	{
-		$appType = getenv('APP_TYPE');
 		$this->appType = $appType;
 		parent::__construct($environment, $debug);
 	}
@@ -34,16 +34,10 @@ class AppKernel extends Kernel
 			new AppBundle\AppBundle(),
 			new DomainBundle\DomainBundle(),
 			new \ControlBundle\ControlBundle(),
+			new CriptimBundle\CriptimBundle(),
+			new FintobitBundle\FintobitBundle(),
 			new \Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
-        ];
-
-		if ($this->appType === self::APP_TYPE_CRIPTIM) {
-			$bundles[] = new CriptimBundle\CriptimBundle();
-		}
-
-		if ($this->appType === self::APP_TYPE_FINTOBIT) {
-			$bundles[] = new \FintobitBundle\FintobitBundle();
-		}
+		];
 
 		if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
 			$bundles[] = new Symfony\Bundle\DebugBundle\DebugBundle();
@@ -91,6 +85,18 @@ class AppKernel extends Kernel
 	private function getAppType(): string
 	{
 		return $this->appType;
+	}
+
+	/**
+	 * Returns the kernel parameters.
+	 *
+	 * @return array An array of kernel parameters
+	 */
+	protected function getKernelParameters()
+	{
+		return array_merge([
+			'kernel.app_type' => $this->appType,
+		], parent::getKernelParameters());
 	}
 
 	protected function build(ContainerBuilder $container)

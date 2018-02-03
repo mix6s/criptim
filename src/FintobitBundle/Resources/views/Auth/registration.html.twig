@@ -1,5 +1,5 @@
-{% extends '@App/Investor/layout.html.twig' %}
-{% block body %}
+{% extends '@Fintobit/layout.html.twig' %}
+{% block content %}
     <div class="container">
         <div class="row">
             {{ form_start(form) }}
@@ -33,13 +33,13 @@
 
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-                <a href="{{ path('investor.login') }}" class="btn btn-primary">Уже есть аккаунт?</a>
+                <a href="{{ path('fintobit.auth.login') }}" class="btn btn-primary">Уже есть аккаунт?</a>
             </div>
 
             {{ form_end(form) }}
         </div>
         <div class="row">
-            {% include '@App/Investor/autoreg.html.twig' %}
+            {% include '@Fintobit/Auth/autoreg.html.twig' %}
         </div>
     </div>
 {% endblock %}

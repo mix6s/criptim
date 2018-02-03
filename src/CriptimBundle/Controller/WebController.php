@@ -31,25 +31,25 @@ class WebController extends Controller
     {
 	    $user = $this->getUser();
 	    if (!$user instanceof UserInterface) {
-		    return $this->redirectToRoute('login');
+		    return $this->redirectToRoute('criptim.auth.login');
 	    }
     	$context = [];
 	    return $this->render('@Criptim/Web/profile.html.twig', $context);
     }
 
 	/**
-	 * @Route("/balance_history.json", name="balance_history.json")
+	 * @Route("/balance_history.json", name="criptim.profile.history")
 	 */
 	public function balanceHistoryAction()
     {
 	    $user = $this->getUser();
 	    if (!$user instanceof UserInterface) {
-		    return $this->redirectToRoute('login');
+		    return $this->redirectToRoute('criptim.auth.login');
 	    }
 	    /** @var User $user */
 	    $userId = $user->getDomainUserId();
 	    if (!$userId instanceof UserId) {
-		    return $this->redirectToRoute('login');
+		    return $this->redirectToRoute('criptim.auth.login');
 	    }
 	    $fromDt = new \DateTimeImmutable('now - 1 month');
 	    $toDt = new \DateTimeImmutable('now');
