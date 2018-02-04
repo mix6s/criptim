@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 class WebController extends Controller
 {
     /**
-     * @Route("/", name="criptim.homepage")
+     * @Route("/", name="criptim.index")
      */
     public function indexAction(Request $request)
     {

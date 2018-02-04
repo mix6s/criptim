@@ -12,6 +12,8 @@ namespace ControlBundle\Form\Type;
 use Domain\Exchange\Entity\ExchangeInterface;
 use Domain\Exchange\Entity\TradingStrategyInterface;
 use Domain\Exchange\UseCase\Request\CreateBotRequest;
+use Domain\Exchange\ValueObject\ExchangeId;
+use Domain\Exchange\ValueObject\TradingStrategyId;
 use DomainBundle\Exchange\Repository\ExchangeRepository;
 use DomainBundle\Exchange\Repository\TradingStrategyRepository;
 use Symfony\Component\Form\AbstractType;
@@ -56,6 +58,9 @@ class CreateBotRequestFormType extends AbstractType
 							return $exchange->getId();
 						}, $this->exchangeRepository->findAll());
 					}),
+					'choice_value' => function (ExchangeId $id = null) {
+						return $id ? (string)$id : '';
+					},
 					'label' => 'Exchange'
 				]
 			)
@@ -68,6 +73,9 @@ class CreateBotRequestFormType extends AbstractType
 							return $strategy->getId();
 						}, $this->tradingStrategyRepository->findAll());
 					}),
+					'choice_value' => function (TradingStrategyId $id = null) {
+						return $id ? (string)$id : '';
+					},
 					'label' => 'Strategy'
 				]
 			)

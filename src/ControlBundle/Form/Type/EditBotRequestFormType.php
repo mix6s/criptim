@@ -22,25 +22,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class EditBotRequestFormType extends AbstractType
+class EditBotRequestFormType extends CreateBotRequestFormType
 {
-	/**
-	 * @var ExchangeRepository
-	 */
-	private $exchangeRepository;
-	/**
-	 * @var TradingStrategyRepository
-	 */
-	private $tradingStrategyRepository;
-
-	public function __construct(
-		ExchangeRepository $exchangeRepository,
-		TradingStrategyRepository $tradingStrategyRepository
-	) {
-		$this->exchangeRepository = $exchangeRepository;
-		$this->tradingStrategyRepository = $tradingStrategyRepository;
-	}
-
 	/**
 	 * @param FormBuilderInterface $builder
 	 * @param array $options
@@ -48,58 +31,22 @@ class EditBotRequestFormType extends AbstractType
 	public function buildForm(FormBuilderInterface $builder, array $options)
 	{
 		$builder
-			->add(
-				'botId',
-				IdType::class
-			)
-			->add(
-				'exchangeId',
-				ChoiceType::class,
-				[
-					'choice_loader' => new CallbackChoiceLoader(function () {
-						return array_map(function (ExchangeInterface $exchange) {
-							return $exchange->getId();
-						}, $this->exchangeRepository->findAll());
-					}),
-					'label' => 'Exchange'
-				]
-			)
-			->add(
-				'tradingStrategyId',
-				ChoiceType::class,
-				[
-					'choice_loader' => new CallbackChoiceLoader(function () {
-						return array_map(function (TradingStrategyInterface $strategy) {
-							return $strategy->getId();
-						}, $this->tradingStrategyRepository->findAll());
-					}),
-					'label' => 'Strategy'
-				]
-			)
-			->add(
-				'tradingStrategySettings',
-				TradingStrategySettingsFormType::class,
-				[
-					'label' => 'Strategy settings'
-				]
-			)
-			->add(
-				'status',
-				ChoiceType::class,
-				[
-					'choices' => [
-						'Active' => Bot::STATUS_ACTIVE,
-						'Inactive' => Bot::STATUS_INACTIVE,
-					],
-					'label' => 'Status'
-				]
-			)
-			->add(
-				'Save',
-				SubmitType::class,
-				[
-				]
-			);
+		->add(
+			'botId',
+			IdType::class
+		)
+		->add(
+			'status',
+			ChoiceType::class,
+			[
+				'choices' => [
+					'Active' => Bot::STATUS_ACTIVE,
+					'Inactive' => Bot::STATUS_INACTIVE,
+				],
+				'label' => 'Status'
+			]
+		);
+		parent::buildForm($builder, $options);
 	}
 
 	/**

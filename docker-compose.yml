@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
   app:
@@ -33,6 +33,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: criptim
       TZ: Europe/Moscow
+    volumes:
+      - pgdata:${PGDATA:-/var/lib/postgresql/data}
 
   memcached:
     container_name: criptim.memcached
@@ -45,3 +47,6 @@ services:
     image: node:6.12.0
     volumes:
       - .:/criptim
+
+volumes:
+  pgdata:

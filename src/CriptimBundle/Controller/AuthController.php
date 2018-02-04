@@ -33,7 +33,7 @@ class AuthController extends Controller
 	public function registrationAction(Request $request)
 	{
 		if ($this->getUser()) {
-			return $this->redirectToRoute('criptim.homepage');
+			return $this->redirectToRoute('criptim.index');
 		}
 		/** @var $userManager UserManagerInterface */
 		$userManager = $this->get('fos_user.user_manager');
@@ -61,7 +61,6 @@ class AuthController extends Controller
 				$event = new FormEvent($form, $request);
 				$response = $this->get('UseCase\CreateUserUseCase')->execute(new CreateUserRequest());
 				$user->setDomainUserId($response->getUser()->getId());
-				$user->addRole(User::ROLE_INVESTOR);
 				$dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 				$userManager->updateUser($user);
 				$response = $event->getResponse();
@@ -75,7 +74,7 @@ class AuthController extends Controller
 						new FilterUserResponseEvent($user, $request, $response)
 					);
 
-				return $this->redirectToRoute('criptim.homepage');
+				return $this->redirectToRoute('criptim.index');
 			}
 
 			$event = new FormEvent($form, $request);
@@ -101,7 +100,7 @@ class AuthController extends Controller
 	public function loginAction(Request $request)
 	{
 		if ($this->getUser()) {
-			return $this->redirectToRoute('criptim.homepage');
+			return $this->redirectToRoute('criptim.index');
 		}
 		/** @var $session \Symfony\Component\HttpFoundation\Session\Session */
 		$session = $request->getSession();
