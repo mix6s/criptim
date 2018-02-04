@@ -27,7 +27,6 @@ class ProcessTradingCommand extends ContainerAwareCommand
 			return 0;
 		}
 
-
 		$useCase = $this->getContainer()->get('UseCase\ProcessBotTradingUseCase');
 		$syncUseCase = $this->getContainer()->get('UseCase\SyncExchangeUseCase');
 		$syncRequest = new SyncExchangeRequest();
@@ -57,9 +56,7 @@ class ProcessTradingCommand extends ContainerAwareCommand
 			}
 			sleep(1);
 		}
-
 		$this->release();
-
 	}
 
 	protected function configure()

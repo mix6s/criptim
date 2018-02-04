@@ -44,6 +44,9 @@ RUN sed -i "s/;date.timezone =.*/date.timezone = Europe\/Moscow/" /etc/php/7.1/f
 RUN apt-get update \
     && apt-get install acl
 
+COPY app.cron /etc/cron.d/app.cron
+RUN crontab /etc/cron.d/app.cron
+
 COPY ./docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 

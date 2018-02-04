@@ -87,7 +87,7 @@ class HitBtcExchange implements ExchangeInterface
 				$orderId = '0' . $orderId;
 			}
 		}
-		return $orderId;
+		return implode('_', [$this->getId(), $orderId]);
 	}
 
 
@@ -116,7 +116,7 @@ class HitBtcExchange implements ExchangeInterface
 		if ($method === 'POST') {
 			$options['form_params'] = $data;
 		}
-		$this->logger->info("Api request", [
+		$this->logger->debug("Api request", [
 			'uri' => $uri,
 			'method' => $method,
 			'data' => $options,
@@ -128,7 +128,7 @@ class HitBtcExchange implements ExchangeInterface
 		}
 
 		$body = json_decode($response->getBody(), true);
-		$this->logger->info("Api response", [
+		$this->logger->debug("Api response", [
 			'uri' => $uri,
 			'method' => $method,
 			'data' => $options,
@@ -160,7 +160,8 @@ class HitBtcExchange implements ExchangeInterface
 	 */
 	private function toExchangeOrder(array $data): ExchangeOrder
 	{
-		$orderId = (int)$data['clientOrderId'];
+		$parts = explode('_', $data['clientOrderId']);
+		$orderId = $parts[count($parts) - 1] ?? $parts[0]; //old order ids support
 		return new ExchangeOrder(
 			new OrderId((string)$orderId),
 			$data['side'] ?? null,

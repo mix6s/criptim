@@ -254,6 +254,14 @@ class Martin implements TradingStrategyInterface
 					]);
 				}
 
+				$balancesRequest->setCurrency($baseCurrency);
+				$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+				$balancesRequest->setCurrency($quoteCurrency);
+				$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+
+				if ($baseCurrencyBalances->getAvailableBalance()->greaterThan($minBalance)) {
+					return;
+				}
 				if ($lastSellOrder !== null) {
 					$session->end();
 					$this->logger->info(sprintf('Session #%s: end session', (string)$session->getId()), [
