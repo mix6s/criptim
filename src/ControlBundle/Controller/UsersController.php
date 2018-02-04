@@ -16,12 +16,14 @@ use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\ValueObject\UserId;
 use Money\Currency;
 use Money\Money;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/users")
+ * @Security("has_role('ROLE_CONTROL')")
  */
 class UsersController extends Controller
 {

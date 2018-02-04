@@ -1,0 +1,5 @@
+criptim:
+    resource: ../criptim/routing.yml
+
+fintobit:
+    resource: ../fintobit/routing.yml

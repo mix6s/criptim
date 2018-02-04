@@ -1,0 +1,9 @@
+{% extends '@Fintobit/layout.html.twig' %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <a href="{{ path('fintobit.auth.login') }}" class="btn btn-primary">Войти</a>
+            <a href="{{ path('fintobit.auth.registration') }}" class="btn btn-primary">Зарегистрироваться</a>
+        </div>
+    </div>
+{% endblock %}

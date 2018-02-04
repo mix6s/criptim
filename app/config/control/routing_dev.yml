@@ -1,0 +1,7 @@
+_dev:
+    resource: ../routing_dev.yml
+
+_control:
+    resource: routing.yml
+
+

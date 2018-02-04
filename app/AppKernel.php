@@ -1,12 +1,26 @@
 <?php
 
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Config\Loader\LoaderInterface;
 
 class AppKernel extends Kernel
 {
-	public function registerBundles()
+
+	public const APP_TYPE_CONSOLE = 'console';
+	public const APP_TYPE_CRIPTIM = 'criptim';
+	public const APP_TYPE_FINTOBIT = 'fintobit';
+	public const APP_TYPE_CONTROL = 'control';
+
+	private $appType;
+
+	public function __construct(string $environment, bool $debug, string $appType)
+	{
+		$this->appType = $appType;
+		parent::__construct($environment, $debug);
+	}
+
+	public function registerBundles(): array
 	{
 		$bundles = [
 			new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
@@ -20,8 +34,10 @@ class AppKernel extends Kernel
 			new AppBundle\AppBundle(),
 			new DomainBundle\DomainBundle(),
 			new \ControlBundle\ControlBundle(),
+			new CriptimBundle\CriptimBundle(),
+			new FintobitBundle\FintobitBundle(),
 			new \Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
-        ];
+		];
 
 		if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
 			$bundles[] = new Symfony\Bundle\DebugBundle\DebugBundle();
@@ -49,17 +65,38 @@ class AppKernel extends Kernel
 
 	public function getCacheDir()
 	{
-		return dirname(__DIR__) . '/var/cache/' . $this->getEnvironment();
+		return dirname(__DIR__) . '/var/cache/' . $this->getAppType() . '/' . $this->getEnvironment();
 	}
 
 	public function getLogDir()
 	{
-		return dirname(__DIR__) . '/var/logs';
+		return dirname(__DIR__) . '/var/logs/' . $this->getAppType();
 	}
 
 	public function registerContainerConfiguration(LoaderInterface $loader)
 	{
-		$loader->load($this->getRootDir() . '/config/config_' . $this->getEnvironment() . '.yml');
+		$resourse = $this->getRootDir() .
+			'/config/' . $this->getAppType() .
+			'/config_' . $this->getEnvironment() . '.yml';
+
+		$loader->load($resourse);
+	}
+
+	private function getAppType(): string
+	{
+		return $this->appType;
+	}
+
+	/**
+	 * Returns the kernel parameters.
+	 *
+	 * @return array An array of kernel parameters
+	 */
+	protected function getKernelParameters()
+	{
+		return array_merge([
+			'kernel.app_type' => $this->appType,
+		], parent::getKernelParameters());
 	}
 
 	protected function build(ContainerBuilder $container)

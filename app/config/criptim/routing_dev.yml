@@ -1,0 +1,7 @@
+_dev:
+    resource: ../routing_dev.yml
+
+_criptim:
+    resource: routing.yml
+
+
