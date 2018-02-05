@@ -132,8 +132,8 @@ class HitBtcExchange implements ExchangeInterface
 			'uri' => $uri,
 			'method' => $method,
 			'data' => $options,
-			'raw' => $response->getBody(),
-			'response' => $body
+			'raw' => strpos($uri, 'orderbook') === false ? $response->getBody() : '',
+			'response' => strpos($uri, 'orderbook') === false ? $body : ''
 		]);
 		if (!empty($body['error'])) {
 			throw new DomainException($body['error']['message'] ?? 'HitBtc api error', $body['error']['code'] ?? null);
