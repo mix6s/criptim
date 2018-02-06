@@ -16,7 +16,9 @@ use Domain\Exchange\Entity\ExchangeOrder;
 use Domain\Exchange\Entity\Order;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
+use DomainBundle\Exception\HitBtcApiException;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Log\LoggerInterface;
 
 class HitBtcExchange implements ExchangeInterface
@@ -69,13 +71,25 @@ class HitBtcExchange implements ExchangeInterface
 
 	public function createOrder(Order $order)
 	{
-		$data = $this->apiAuthRequest('POST', '/order', [
+		$data = [
 			'clientOrderId' => $this->getOrderId($order->getId()),
 			'symbol' => $order->getSymbol()->getBaseCurrency() . $order->getSymbol()->getCounterCurrency(),
 			'side' => (string)$order->getType(),
 			'quantity' => $order->getAmount(),
 			'price' => $order->getPrice(),
-		]);
+		];
+		try {
+			$this->apiAuthRequest('POST', '/order', $data);
+		} catch (HitBtcApiException $exception) {
+			$this->logger->warning("HitBtc createOrder exception", [
+				'code' => $exception->getCode(),
+				'message' => $exception->getMessage(),
+				'order_data' => $data
+			]);
+			if (!$exception->getCode() == '20008') {
+				throw $exception;
+			}
+		}
 	}
 
 	private function getOrderId(OrderId $id)
@@ -121,24 +135,28 @@ class HitBtcExchange implements ExchangeInterface
 			'method' => $method,
 			'data' => $options,
 		]);
-		$response = $this->client->request($method, self::API_ENDPOINT . $uri, $options);
-
-		if ($response->getStatusCode() !== 200) {
-			throw new DomainException(sprintf('HitBtc api response error: %s', $response->getReasonPhrase()), $response->getStatusCode());
+		try {
+			$response = $this->client->request($method, self::API_ENDPOINT . $uri, $options);
+			$body = json_decode($response->getBody(), true);
+			$this->logger->debug("Api response", [
+				'uri' => $uri,
+				'method' => $method,
+				'data' => $options,
+				'raw' => $logResponse ? $response->getBody() : '',
+				'response' => $logResponse ? $body : ''
+			]);
+			return $body;
+		} catch (ClientException $exception) {
+			$body = json_decode($exception->getResponse()->getBody(), true);
+			$this->logger->debug("Api error response", [
+				'uri' => $uri,
+				'method' => $method,
+				'data' => $options,
+				'raw' => $logResponse ? $exception->getResponse()->getBody() : '',
+				'response' => $logResponse ? $body : ''
+			]);
+			throw new HitBtcApiException($body['error']['message'] ?? 'HitBtc api error', $body['error']['code'] ?? null);
 		}
-
-		$body = json_decode($response->getBody(), true);
-		$this->logger->debug("Api response", [
-			'uri' => $uri,
-			'method' => $method,
-			'data' => $options,
-			'raw' => $logResponse ? $response->getBody() : '',
-			'response' => $logResponse ? $body : ''
-		]);
-		if (!empty($body['error'])) {
-			throw new DomainException($body['error']['message'] ?? 'HitBtc api error', $body['error']['code'] ?? null);
-		}
-		return $body;
 	}
 
 	/**
