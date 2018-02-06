@@ -116,16 +116,19 @@ class ProcessBotTradingUseCase
 				return;
 			}
 			$session = $this->createSession($request);
+			return;
 		}
 
 		if ($session->getStatus() === BotTradingSession::STATUS_ENDED) {
 			$this->closeSession($session);
+			return;
 		}
 		if ($session->getStatus() === BotTradingSession::STATUS_CLOSED) {
 			if (!$this->isNeedToCreateSession($request)) {
 				return;
 			}
 			$session = $this->createSession($request);
+			return;
 		}
 		if ($session->getStatus() === BotTradingSession::STATUS_ACTIVE) {
 			$this->processSession($session);

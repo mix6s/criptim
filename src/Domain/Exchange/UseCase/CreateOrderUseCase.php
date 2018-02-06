@@ -23,6 +23,7 @@ use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
 use Domain\Exchange\UseCase\Response\CreateOrderResponse;
 use DomainBundle\Exchange\Policy\CryptoMoneyFormatter;
 use Money\Money;
+use Psr\Log\LoggerInterface;
 
 class CreateOrderUseCase
 {
@@ -55,6 +56,10 @@ class CreateOrderUseCase
 	 */
 	private $botTradingSessionAccountTransactionRepository;
 	private $formatter;
+	/**
+	 * @var LoggerInterface
+	 */
+	private $logger;
 
 	public function __construct(
 		ExchangeRepositoryInterface $exchangeRepository,
@@ -62,7 +67,8 @@ class CreateOrderUseCase
 		BotTradingSessionAccountTransactionRepositoryInterface $botTradingSessionAccountTransactionRepository,
 		GetBotTradingSessionBalancesUseCase $getBotTradingSessionBalancesUseCase,
 		IdFactoryInterface $idFactory,
-		OrderRepositoryInterface $orderRepository
+		OrderRepositoryInterface $orderRepository,
+		LoggerInterface $logger
 	)
 	{
 		$this->exchangeRepository = $exchangeRepository;
@@ -73,10 +79,18 @@ class CreateOrderUseCase
 		$this->formatter = new CryptoMoneyFormatter();
 		$this->getBotTradingSessionBalancesUseCase = $getBotTradingSessionBalancesUseCase;
 		$this->botTradingSessionAccountTransactionRepository = $botTradingSessionAccountTransactionRepository;
+		$this->logger = $logger;
 	}
 
 	public function execute(CreateOrderRequest $request): CreateOrderResponse
 	{
+		$this->logger->info('Process CreateOrderRequest', [
+			'amount' => $request->getAmount(),
+			'price' => $request->getPrice(),
+			'type' => $request->getType(),
+			'session_id' => $request->getBotTradingSessionId(),
+			'exchange_id' => $request->getExchangeId()
+		]);
 		$sessionId = $request->getBotTradingSessionId();
 		$exchange = $this->exchangeRepository->findById($request->getExchangeId());
 
@@ -105,6 +119,10 @@ class CreateOrderUseCase
 		}
 
 		if ($balances->getAvailableBalance()->lessThan($total)) {
+			$this->logger->error("Insufficient funds", [
+				'total' => $total->getAmount(),
+				'balance' => $balances->getAvailableBalance()->getAmount()
+			]);
 			throw new DomainException("Insufficient funds");
 		}
 
