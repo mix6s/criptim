@@ -201,7 +201,7 @@ class HitBtcExchange implements ExchangeInterface
 
 	private function getOrderBook(string $symbol)
 	{
-		$data = $this->apiAuthRequest('GET', sprintf('/public/orderbook/%s', $symbol), false);
+		$data = $this->apiAuthRequest('GET', sprintf('/public/orderbook/%s', $symbol), null, false);
 		return $data;
 	}
 
@@ -230,7 +230,7 @@ class HitBtcExchange implements ExchangeInterface
 	private function getSymbolData()
 	{
 		if ($this->symbolData === null) {
-			$this->symbolData = $this->apiAuthRequest('GET', '/public/symbol', false);
+			$this->symbolData = $this->apiAuthRequest('GET', '/public/symbol', null, false);
 		}
 		return $this->symbolData;
 	}
