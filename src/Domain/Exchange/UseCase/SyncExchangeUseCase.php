@@ -62,6 +62,7 @@ class SyncExchangeUseCase
 				try {
 					$exchangeOrder = $exchange->getOrder($order->getId());
 				} catch (EntityNotFoundException $exception) {
+					$exchange->createOrder($order);
 					continue;
 				}
 				$updateOrderRequest->setExchangeOrder($exchangeOrder);
