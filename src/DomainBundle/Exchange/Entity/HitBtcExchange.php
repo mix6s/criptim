@@ -107,7 +107,7 @@ class HitBtcExchange implements ExchangeInterface
 		return 0.1 / 100;
 	}
 
-	private function apiAuthRequest(string $method, string $uri, array $data = null)
+	private function apiAuthRequest(string $method, string $uri, array $data = null, bool $logResponse = true)
 	{
 		$options = [
 			'auth' => [$this->publicKey, $this->privateKey]
@@ -132,8 +132,8 @@ class HitBtcExchange implements ExchangeInterface
 			'uri' => $uri,
 			'method' => $method,
 			'data' => $options,
-			'raw' => strpos($uri, 'orderbook') === false ? $response->getBody() : '',
-			'response' => strpos($uri, 'orderbook') === false ? $body : ''
+			'raw' => $logResponse ? $response->getBody() : '',
+			'response' => $logResponse ? $body : ''
 		]);
 		if (!empty($body['error'])) {
 			throw new DomainException($body['error']['message'] ?? 'HitBtc api error', $body['error']['code'] ?? null);
@@ -201,7 +201,7 @@ class HitBtcExchange implements ExchangeInterface
 
 	private function getOrderBook(string $symbol)
 	{
-		$data = $this->apiAuthRequest('GET', sprintf('/public/orderbook/%s', $symbol));
+		$data = $this->apiAuthRequest('GET', sprintf('/public/orderbook/%s', $symbol), false);
 		return $data;
 	}
 
@@ -230,7 +230,7 @@ class HitBtcExchange implements ExchangeInterface
 	private function getSymbolData()
 	{
 		if ($this->symbolData === null) {
-			$this->symbolData = $this->apiAuthRequest('GET', '/public/symbol');
+			$this->symbolData = $this->apiAuthRequest('GET', '/public/symbol', false);
 		}
 		return $this->symbolData;
 	}
