@@ -23,12 +23,42 @@ class DomainCurrenciesPolicy implements Currencies
 	const ETH = 'ETH';
 	const BNT = 'BNT';
 	const XRP = 'XRP';
+	const DASH = 'DASH';
+	const ZEC = 'ZEC';
+	const XMR = 'XMR';
+	const BCH = 'BCH';
+	const LTC = 'LTC';
+	const TRX = 'TRX';
+	const ETC = 'ETC';
+	const EOS = 'EOS';
+	const XDN = 'XDN';
+	const XEM = 'XEM';
+	const NXT = 'NXT';
+	const BCN = 'BCN';
+	const BTG = 'BTG';
+	const NEO = 'NEO';
+	const LSK = 'LSK';
 
 	const SUPPORT_CURRENCIES = [
 		self::BTC => 8,
 		self::ETH => 8,
 		self::BNT => 8,
 		self::XRP => 8,
+		self::DASH => 8,
+		self::ZEC => 8,
+		self::XMR => 8,
+		self::BCH => 8,
+		self::LTC => 8,
+		self::TRX => 8,
+		self::ETC => 8,
+		self::EOS => 8,
+		self::XDN => 8,
+		self::XEM => 8,
+		self::NXT => 8,
+		self::BCN => 8,
+		self::BTG => 8,
+		self::NEO => 8,
+		self::LSK => 8,
 	];
 
 	protected static $currencies = null;
