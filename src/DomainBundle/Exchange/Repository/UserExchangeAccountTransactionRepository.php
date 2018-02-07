@@ -45,17 +45,23 @@ class UserExchangeAccountTransactionRepository extends EntityRepository implemen
 			->getResult();
 	}
 
+	/**
+	 * @param UserId $userId
+	 * @param Currency $currency
+	 * @param \DateTimeInterface $dt
+	 * @return UserExchangeAccountTransaction[]
+	 */
 	public function findLastByUserIdCurrencyDate(
 		UserId $userId,
 		Currency $currency,
 		\DateTimeInterface $dt
-	): ?UserExchangeAccountTransaction
+	): array
 	{
 		return $this->createNativeNamedQuery('findLastByUserIdCurrencyDate')
 			->setParameter('user_id', $userId)
 			->setParameter('currency', $currency)
 			->setParameter('dt', $dt)
-			->getOneOrNullResult();
+			->getResult();
 	}
 
 	/**

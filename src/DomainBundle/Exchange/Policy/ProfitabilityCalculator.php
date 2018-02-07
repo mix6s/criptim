@@ -19,16 +19,58 @@ class ProfitabilityCalculator
 	)
 	{
 		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
+		$this->formatter = new CryptoMoneyFormatter();
 	}
 
 	public function getProfitabilityByUserIdFromDtToDt(
 		UserId $userId,
+		Currency $currency,
 		\DateTimeInterface $fromDt,
 		\DateTimeInterface $toDt
 	): float
 	{
-		$currency = new Currency('BTC');
-		$deposits = $this
+		$firstDt = null;
+		$now = new \DateTimeImmutable();
+		if ($toDt->getTimestamp() > $now->getTimestamp()) {
+			$toDt = $now;
+		}
+
+		$denominator = new Money(0, $currency);
+
+		$lastTransactionsByExchangeForToDate = $this
+			->userExchangeAccountTransactionRepository
+			->findLastByUserIdCurrencyDate(
+				$userId,
+				$currency,
+				$toDt
+			);
+
+		$endBalance = new Money(0, $currency);
+		foreach ($lastTransactionsByExchangeForToDate as $transaction) {
+			$endBalance = $endBalance->add($transaction->getBalance());
+		}
+
+		$numerator = $endBalance;
+		$lastTransactionsByExchangeForFromDate = $this
+			->userExchangeAccountTransactionRepository
+			->findLastByUserIdCurrencyDate(
+				$userId,
+				$currency,
+				$fromDt
+			);
+
+		foreach ($lastTransactionsByExchangeForFromDate as $transaction) {
+			if ($firstDt === null) {
+				$firstDt = $transaction->getDt();
+			}
+			$numerator = $numerator->subtract($transaction->getBalance());
+			$denominator = $denominator->add($transaction->getBalance()->multiply($toDt->getTimestamp() - $transaction->getDt()->getTimestamp()));
+			if ($transaction->getDt()->getTimestamp() < $firstDt->getTimestamp()) {
+				$firstDt = $transaction->getDt();
+			}
+		}
+
+		$depositTransactions = $this
 			->userExchangeAccountTransactionRepository
 			->findByUserIdCurrencyTypeFromDtToDt(
 				$userId,
@@ -37,60 +79,24 @@ class ProfitabilityCalculator
 				$fromDt,
 				$toDt
 			);
-
-		if (\count($deposits) === 0) {
+		foreach ($depositTransactions as $transaction) {
+			if ($firstDt === null) {
+				$firstDt = $transaction->getDt();
+			}
+			$numerator = $numerator->subtract($transaction->getMoney());
+			$denominator = $denominator->add($transaction->getMoney()->multiply($toDt->getTimestamp() - $transaction->getDt()->getTimestamp()));
+			if ($transaction->getDt()->getTimestamp() < $firstDt->getTimestamp()) {
+				$firstDt = $transaction->getDt();
+			}
+		}
+		if ($denominator->isZero()) {
 			return 0;
 		}
-		$depositsSum = new Money(0, $currency);
-		$depositsMultipliedPerSecondsInSystemSum = new Money(0, $currency);
-
-		$lastTransactionForForDate = $this
-			->userExchangeAccountTransactionRepository
-			->findLastByUserIdCurrencyDate(
-				$userId,
-				$currency,
-				$fromDt
-			);
-
-		$lastTransactionForToDate = $this
-			->userExchangeAccountTransactionRepository
-			->findLastByUserIdCurrencyDate(
-				$userId,
-				$currency,
-				$toDt
-			);
-
-		if ($lastTransactionForForDate === null || $lastTransactionForToDate === null) {
-			//
-			return 0;
+		if ($firstDt === null) {
+			$firstDt = $fromDt;
 		}
-		$startBalance = $lastTransactionForForDate->getBalance();
-		$lastBalance = $lastTransactionForToDate->getBalance();
-
-
-		foreach ($deposits as $deposit) {
-			$depositsSum = $depositsSum
-				->add($deposit->getMoney());
-
-			$depositSecondsInSystem = $toDt->getTimestamp() - $deposit->getDt()->getTimestamp();
-
-			$depositMultipliedPerSecondsInSystem = $deposit->getMoney()->multiply($depositSecondsInSystem);
-
-			$depositsMultipliedPerSecondsInSystemSum = $depositsMultipliedPerSecondsInSystemSum
-				->add($depositMultipliedPerSecondsInSystem);
-		}
-
-		$numerator = $lastBalance
-			->subtract($startBalance)
-			->subtract($depositsSum)
-			->multiply(100);
-
-		$periodSeconds = $toDt->getTimestamp() - $fromDt->getTimestamp();
-
-		$startBalanceMultipliedByPeriodSeconds = $startBalance->multiply($periodSeconds);
-		$denominator = $depositsMultipliedPerSecondsInSystemSum->add($startBalanceMultipliedByPeriodSeconds);
-
-		return $numerator->ratioOf($denominator);
-
+		$interval = $toDt->getTimestamp() - max($firstDt->getTimestamp(), $fromDt->getTimestamp());
+		$result = $numerator->multiply(100)->multiply($interval)->ratioOf($denominator);
+		return $result;
 	}
 }

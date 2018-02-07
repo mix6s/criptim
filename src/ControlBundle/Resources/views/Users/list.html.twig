@@ -9,7 +9,6 @@
                     <tr>
                         <th rowspan="2">ID</th>
                         <th rowspan="2">Username</th>
-                        <th rowspan="2">DomainId</th>
                         <th rowspan="2">Total BTC balance</th>
                         <th colspan="{{ exchanges|length }}">Exchanges BTC balance</th>
                     </tr>
@@ -23,13 +22,10 @@
                     {% for user in users %}
                         <tr>
                             <td>
-                                {{ user.id }}
-                            </td>
-                            <td>
-                                {{ user.username }}
-                            </td>
-                            <td>
                                 {{ user.domainUserId }}
+                            </td>
+                            <td>
+                                <a href="{{ path('control.users.profile', {userId: user.domainUserId}) }}">{{ user.username }}</a>
                             </td>
                             <td>
                                 {{ user.domainUserId|userBalance('BTC')|moneyFormat }}

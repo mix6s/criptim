@@ -39,7 +39,7 @@ class ProfileController extends Controller
 			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
 			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
 			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
-			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $fromDate, $toDate),
+			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $currency, $fromDate, $toDate),
 			'history' => json_encode($result),
 			'layout_title' => 'Профиль пользователя'
 		];

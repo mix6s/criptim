@@ -69,5 +69,40 @@ class UsersController extends Controller
 		]);
 	}
 
+	/**
+	 * @Route("/{userId}/profile", name="control.users.profile")
+	 */
+	public function profileAction($userId)
+	{
+		$userId = new UserId($userId);
+		$fromDate = new \DateTimeImmutable('now - 1 month');
+		$toDate = new \DateTimeImmutable('now');
+		$currency = new Currency('BTC');
+		$result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
+			$userId, $currency, $fromDate, $toDate
+		);
+		$context = [
+			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
+			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
+			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
+			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $currency, $fromDate, $toDate),
+			'history' => json_encode($result),
+			'userId' => $userId
+		];
+		return $this->render('@Control/Users/profile.html.twig', $context);
+	}
 
+	/**
+	 * @Route("/{userId}/profile/history.json", name="control.users.profile.history")
+	 */
+	public function balanceHistoryAction($userId)
+	{
+		$fromDt = new \DateTimeImmutable('now - 1 month');
+		$toDt = new \DateTimeImmutable('now');
+		$currency = new Currency('BTC');
+		$result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
+			new UserId($userId), $currency, $fromDt, $toDt
+		);
+		return $this->json($result);
+	}
 }
