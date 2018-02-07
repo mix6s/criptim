@@ -35,22 +35,21 @@
         "symfony/phpunit-bridge": "^3.0"
     },
     "scripts": {
-        "symfony-scripts": [
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
+        "clear-cache-scripts": [
+            "php bin/console cache:clear --no-warmup --app=console",
+            "php bin/console cache:clear --no-warmup --app=criptim",
+            "php bin/console cache:clear --no-warmup --app=fintobit",
+            "php bin/console cache:clear --no-warmup --app=control"
         ],
         "doctrine-migrations": [
             "php bin/console doctrine:migrations:migrate --no-interaction"
         ],
         "post-install-cmd": [
-            "@symfony-scripts",
+            "@clear-cache-scripts",
             "@doctrine-migrations"
         ],
         "post-update-cmd": [
-            "@symfony-scripts"
+            "@clear-cache-scripts"
         ]
     },
     "config": {

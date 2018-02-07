@@ -3,6 +3,7 @@
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Debug\Debug;
 use Symfony\Component\Dotenv\Dotenv;
 
@@ -19,12 +20,14 @@ $input = new ArgvInput();
 $dotenv = new Dotenv();
 $dotenv->load(__DIR__ . '/../.env');
 $env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: (getenv('ENV') ?: 'dev'));
+$appType = $input->getParameterOption(['--app', '-a'], getenv('APP_TYPE') ?: 'console');
 $debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(['--no-debug', '']) && $env !== 'prod';
 
 if ($debug) {
     Debug::enable();
 }
 
-$kernel = new AppKernel($env, $debug, AppKernel::APP_TYPE_CONSOLE);
+$kernel = new AppKernel($env, $debug, $appType);
 $application = new Application($kernel);
+$application->getDefinition()->addOption(new InputOption('--app', '-a', InputOption::VALUE_OPTIONAL, 'Set console appType'));
 $application->run($input);
