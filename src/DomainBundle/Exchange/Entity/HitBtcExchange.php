@@ -179,7 +179,7 @@ class HitBtcExchange implements ExchangeInterface
 	private function toExchangeOrder(array $data): ExchangeOrder
 	{
 		$parts = explode('_', $data['clientOrderId']);
-		$orderId = $parts[count($parts) - 1] ?? $parts[0]; //old order ids support
+		$orderId = (int)($parts[count($parts) - 1] ?? $parts[0]); //old order ids support
 		return new ExchangeOrder(
 			new OrderId((string)$orderId),
 			$data['side'] ?? null,
