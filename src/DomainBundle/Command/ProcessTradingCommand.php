@@ -9,6 +9,7 @@
 namespace DomainBundle\Command;
 
 
+use Domain\Exception\InsufficientFundsException;
 use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\UseCase\Request\ProcessBotTradingRequest;
 use Domain\Exchange\UseCase\Request\SyncExchangeRequest;
@@ -44,10 +45,13 @@ class ProcessTradingCommand extends ContainerAwareCommand
 						$syncUseCase->execute($syncRequest);
 					});
 					$em->clear();
-					$em->transactional(function () use ($useCase, $botId) {
-						$processRequest = new ProcessBotTradingRequest($botId);
-						$useCase->execute($processRequest);
-					});
+					try {
+						$em->transactional(function () use ($useCase, $botId) {
+							$processRequest = new ProcessBotTradingRequest($botId);
+							$useCase->execute($processRequest);
+						});
+					} catch (InsufficientFundsException $exception) {
+					}
 					$em->clear();
 				}
 			} catch (\Throwable $exception) {

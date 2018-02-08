@@ -10,6 +10,7 @@ namespace Domain\Exchange\UseCase;
 
 
 use Domain\Exception\DomainException;
+use Domain\Exception\InsufficientFundsException;
 use Domain\Exchange\Entity\BotTradingSessionAccountTransaction;
 use Domain\Exchange\Entity\Order;
 use Domain\Exchange\Factory\IdFactoryInterface;
@@ -123,7 +124,7 @@ class CreateOrderUseCase
 				'total' => $total->getAmount(),
 				'balance' => $balances->getAvailableBalance()->getAmount()
 			]);
-			throw new DomainException("Insufficient funds");
+			throw new InsufficientFundsException();
 		}
 
 		$orderId = $this->idFactory->getOrderId();;
