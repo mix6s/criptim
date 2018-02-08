@@ -165,6 +165,7 @@ class HitBtcExchange implements ExchangeInterface
 	public function getActiveOrders(): array
 	{
 		$data = $this->apiAuthRequest('GET', '/order');
+		$this->logger->debug("Active Orders", $data);
 		$orders = [];
 		foreach ($data as $item) {
 			$orders[] = $this->toExchangeOrder($item);
