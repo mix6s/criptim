@@ -236,9 +236,9 @@ class ProcessBotTradingUseCase
 
 	private function createSession(ProcessBotTradingRequest $request): BotTradingSession
 	{
-		$id = $this->idFactory->getBotTradingSessionId();
+		$sessionId = $this->idFactory->getBotTradingSessionId();
 		$bot = $this->botRepository->findById($request->getBotId());
-		$session = new BotTradingSession($id, $request->getBotId(), $bot->getExchangeId(), $bot->getTradingStrategyId(), $bot->getTradingStrategySettings());
+
 		$botAccounts = $this->botExchangeAccountRepository->findByBotIdExchangeId($bot->getId(), $bot->getExchangeId());
 		foreach ($botAccounts as $botAccount) {
 			if ($botAccount->getBalance()->isZero()) {
@@ -264,16 +264,16 @@ class ProcessBotTradingUseCase
 
 			try {
 				$sessionAccount = $this->botTradingSessionAccountRepository->findByBotTradingSessionIdCurrency(
-					$session->getId(),
+					$sessionId,
 					$inMoney->getCurrency()
 				);
 			} catch (EntityNotFoundException $exception) {
-				$sessionAccount = new BotTradingSessionAccount($session->getId(), $inMoney->getCurrency());
+				$sessionAccount = new BotTradingSessionAccount($sessionId, $inMoney->getCurrency());
 			}
 			$sessionAccount->change($inMoney->absolute());
 			$sessionAccountTransaction = new BotTradingSessionAccountTransaction(
 				$this->idFactory->getBotTradingSessionAccountTransactionId(),
-				$session->getId(),
+				$sessionId,
 				$inMoney->getCurrency(),
 				$inMoney->absolute(),
 				$sessionAccount->getBalance(),
@@ -282,6 +282,7 @@ class ProcessBotTradingUseCase
 			$this->botTradingSessionAccountTransactionRepository->save($sessionAccountTransaction);
 			$this->botTradingSessionAccountRepository->save($sessionAccount);
 		}
+		$session = new BotTradingSession($sessionId, $request->getBotId(), $bot->getExchangeId(), $bot->getTradingStrategyId(), $bot->getTradingStrategySettings());
 		$this->botTradingSessionRepository->save($session);
 		return $session;
 	}
