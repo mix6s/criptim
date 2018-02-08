@@ -50,9 +50,10 @@ class ProcessTradingCommand extends ContainerAwareCommand
 							$processRequest = new ProcessBotTradingRequest($botId);
 							$useCase->execute($processRequest);
 						});
+						$em->clear();
 					} catch (InsufficientFundsException $exception) {
 					}
-					$em->clear();
+
 				}
 			} catch (\Throwable $exception) {
 				$this->release();
