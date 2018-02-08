@@ -34,25 +34,28 @@ class BalanceHistory
 		$query = <<<QUERY
 WITH dates AS (
     SELECT generate_series(
-               :from_dt :: TIMESTAMP,
-               :to_dt :: TIMESTAMP,
+               date_trunc('day', :from_dt :: TIMESTAMP),
+               date_trunc('day', :to_dt :: TIMESTAMP),
                '1 day' :: INTERVAL
            ) AS date
-), transactions AS (
-    SELECT
-      date,
-      (SELECT balance
-       FROM user_exchange_account_transaction t
-       WHERE t.dt <= date
-             AND t.user_id = :user_id
-             AND t.currency = :currency
-       ORDER BY t.dt DESC
-       LIMIT 1) AS balance
-    FROM dates
-) SELECT
-    TO_CHAR(date, 'YYYY-MM-DD') AS date,
-    COALESCE((balance ->> 'amount') :: FLOAT / (10 ^ :subunit), null) as balance
-  FROM transactions;
+),
+    transactions AS (
+      SELECT
+        date,
+        (SELECT SUM(balance)
+         FROM (
+                (SELECT DISTINCT ON (t.exchange_id) (balance ->> 'amount') :: FLOAT AS balance
+                 FROM user_exchange_account_transaction t
+                 WHERE date_trunc('day', t.dt) <= date
+                       AND t.user_id = :user_id
+                       AND t.currency = :currency
+                 ORDER BY t.exchange_id, t.dt DESC)
+              ) AS t) AS balance
+      FROM dates
+  ) SELECT
+      TO_CHAR(date, 'YYYY-MM-DD')         AS date,
+      COALESCE(balance / (10 ^ :subunit), NULL) AS balance
+    FROM transactions;
 QUERY;
 		/** @var \Doctrine\DBAL\Statement $statement */
 		$statement = $this->managerRegistry->getConnection()->prepare($query);
