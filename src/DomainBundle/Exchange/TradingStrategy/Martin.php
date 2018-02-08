@@ -10,6 +10,7 @@ namespace DomainBundle\Exchange\TradingStrategy;
 
 
 use Domain\Exception\EntityNotFoundException;
+use Domain\Exception\InsufficientFundsException;
 use Domain\Exchange\Entity\BotTradingSession;
 use Domain\Exchange\Entity\TradingStrategyInterface;
 use Domain\Exchange\Policy\MoneyFromFloatPolicy;
@@ -225,8 +226,13 @@ class Martin implements TradingStrategyInterface
 				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
 				$createOrderRequest->setPrice($this->formatter->format($sellPrice));
 				$createOrderRequest->setType('sell');
-				$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
-				$this->logger->info(sprintf('Session #%s: create sell order', (string)$session->getId()), [
+				try {
+					$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+				} catch (InsufficientFundsException $exception) {
+					$this->logger->warning(sprintf('Session #%s: sell order error Insufficient Funds Exception', (string)$session->getId()));
+					return;
+				}
+				$this->logger->info(sprintf('Session #%s: sell order created', (string)$session->getId()), [
 					'orderId' => (string)$lastSellOrder->getId(),
 					'amount' => $sellAmount,
 					'price' => $sellPrice,
@@ -302,8 +308,13 @@ class Martin implements TradingStrategyInterface
 			$createOrderRequest->setType('buy');
 			$createOrderRequest->setPrice($buyPrice);
 			$createOrderRequest->setAmount($this->formatter->format($buyAmount));
-			$lastBuyOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
-			$this->logger->info(sprintf('Session #%s: create buy order', (string)$session->getId()), [
+			try {
+				$lastBuyOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+			} catch (InsufficientFundsException $exception) {
+				$this->logger->warning(sprintf('Session #%s: buy order error Insufficient Funds Exception', (string)$session->getId()));
+				return;
+			}
+			$this->logger->info(sprintf('Session #%s: buy order created', (string)$session->getId()), [
 				'orderId' => (string)$lastBuyOrder->getId(),
 				'buyNum' => $buyNum,
 				'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
