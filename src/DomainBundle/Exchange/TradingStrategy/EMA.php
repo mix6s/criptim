@@ -4,20 +4,91 @@
 namespace DomainBundle\Exchange\TradingStrategy;
 
 
+use Domain\Exception\DomainException;
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\BotTradingSession;
 use Domain\Exchange\Entity\TradingStrategyInterface;
+use Domain\Exchange\Repository\BotRepositoryInterface;
+use Domain\Exchange\Repository\BotTradingSessionAccountRepositoryInterface;
+use Domain\Exchange\Repository\BotTradingSessionRepositoryInterface;
+use Domain\Exchange\Repository\ExchangeRepositoryInterface;
+use Domain\Exchange\Repository\OrderRepositoryInterface;
+use Domain\Exchange\UseCase\CancelOrderUseCase;
+use Domain\Exchange\UseCase\CreateOrderUseCase;
+use Domain\Exchange\UseCase\GetBotTradingSessionBalancesUseCase;
+use Domain\Exchange\UseCase\Request\CancelOrderRequest;
+use Domain\Exchange\UseCase\Request\CreateOrderRequest;
+use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
+use Domain\Exchange\UseCase\Response\GetBotTradingSessionBalancesResponse;
 use Domain\Exchange\ValueObject\TradingStrategyId;
 use Domain\Exchange\ValueObject\TradingStrategySettings;
+use Money\Currency;
+use Money\CurrencyPair;
+use Psr\Log\LoggerInterface;
 
 class EMA implements TradingStrategyInterface
 {
 	const ID = 'ema';
 	private $id;
+	/**
+	 * @var BotTradingSessionRepositoryInterface
+	 */
+	private $botTradingSessionRepository;
+	/**
+	 * @var BotTradingSessionAccountRepositoryInterface
+	 */
+	private $botTradingSessionAccountRepository;
+	/**
+	 * @var GetBotTradingSessionBalancesUseCase
+	 */
+	private $getBotTradingSessionBalancesUseCase;
+	/**
+	 * @var BotRepositoryInterface
+	 */
+	private $botRepository;
+	/**
+	 * @var ExchangeRepositoryInterface
+	 */
+	private $exchangeRepository;
+	/**
+	 * @var CreateOrderUseCase
+	 */
+	private $createOrderUseCase;
+	/**
+	 * @var OrderRepositoryInterface
+	 */
+	private $orderRepository;
+	/**
+	 * @var CancelOrderUseCase
+	 */
+	private $cancelOrderUseCase;
+	/**
+	 * @var LoggerInterface
+	 */
+	private $logger;
 
-	public function __construct()
+	public function __construct(
+		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
+		BotTradingSessionAccountRepositoryInterface $botTradingSessionAccountRepository,
+		GetBotTradingSessionBalancesUseCase $getBotTradingSessionBalancesUseCase,
+		BotRepositoryInterface $botRepository,
+		ExchangeRepositoryInterface $exchangeRepository,
+		CreateOrderUseCase $createOrderUseCase,
+		OrderRepositoryInterface $orderRepository,
+		CancelOrderUseCase $cancelOrderUseCase,
+		LoggerInterface $logger
+	)
 	{
 		$this->id = new TradingStrategyId(self::ID);
-
+		$this->botTradingSessionRepository = $botTradingSessionRepository;
+		$this->botTradingSessionAccountRepository = $botTradingSessionAccountRepository;
+		$this->getBotTradingSessionBalancesUseCase = $getBotTradingSessionBalancesUseCase;
+		$this->botRepository = $botRepository;
+		$this->exchangeRepository = $exchangeRepository;
+		$this->createOrderUseCase = $createOrderUseCase;
+		$this->orderRepository = $orderRepository;
+		$this->cancelOrderUseCase = $cancelOrderUseCase;
+		$this->logger = $logger;
 	}
 
 	public function getId(): TradingStrategyId
@@ -27,11 +98,72 @@ class EMA implements TradingStrategyInterface
 
 	public function isNeedToStartTrading(TradingStrategySettings $settings): bool
 	{
-
+		$settings = $settings->getData();
+		$period = new \DateInterval($settings['period']);
+		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
+		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
+		$state = $this->getState($period, $baseCurrency, $quoteCurrency);
+		return $state->signalIsLong();
 	}
 
 	public function processTrading(BotTradingSession $session)
 	{
+		$botId = $session->getBotId();
+		$bot = $this->botRepository->findById($botId);
+		$exchange = $this->exchangeRepository->findById($bot->getExchangeId());
+
+		$settings = $session->getTradingStrategySettings()->getData();
+		$period = new \DateInterval($settings['period']);
+		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
+		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
+		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
+		$state = $this->getState($period, $baseCurrency, $quoteCurrency);
+
+		$createOrderRequest = new CreateOrderRequest();
+		$createOrderRequest->setBotTradingSessionId($session->getId());
+		$createOrderRequest->setExchangeId($exchange->getId());
+		$createOrderRequest->setSymbol(new CurrencyPair($baseCurrency, $quoteCurrency, 0));
+		$cancelOrderRequest = new CancelOrderRequest();
+
+		$balancesRequest = new GetBotTradingSessionBalancesRequest();
+		$balancesRequest->setBotTradingSessionId($session->getId());
+
+		$balancesRequest->setCurrency($baseCurrency);
+		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+		$balancesRequest->setCurrency($quoteCurrency);
+		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+		switch ($state->getSignal()) {
+			case EmaState::SIGNAL_LONG:
+				break;
+			case EmaState::SIGNAL_SHORT:
+				break;
+			case EmaState::SIGNAL_NONE:
+				break;
+			default:
+				throw new DomainException(sprintf('Unknown signal %s', $state->getSignal()));
+				break;
+		}
+
+		$balancesRequest->setCurrency($baseCurrency);
+		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+		$balancesRequest->setCurrency($quoteCurrency);
+		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+
+		try {
+			$lastSellOrder = $this->orderRepository->findLastSell($session->getId());
+			if (!$baseCurrencyBalances->getAccountBalance()->isZero()) {
+				return;
+			}
+		} catch (EntityNotFoundException $exception) {
+			return;
+		}
+		$session->end();
+		$this->logger->info(sprintf('Session #%s: end session', (string)$session->getId()), [
+			'orderId' => (string)$lastSellOrder->getId(),
+			'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+			'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+		]);
+
 		/**
 		 *	1. Get signal from candles ()
 
@@ -68,5 +200,21 @@ class EMA implements TradingStrategyInterface
 
 		 * 	6. If base amount is zero and last sell session order is filled (we sell all amount) => end session
 		 */
+	}
+
+	private function getState(\DateInterval $period, Currency $baseCurrency, Currency $quoteCurrency): EmaState
+	{
+		return new EmaState(EmaState::SIGNAL_LONG);
+	}
+
+	private function balancesAsArray(GetBotTradingSessionBalancesResponse $response)
+	{
+		return [
+			'currency' => $response->getBotTradingSessionAccount()->getCurrency()->getCode(),
+			'start' => $response->getStartBalance()->getAmount(),
+			'account' => $response->getAccountBalance()->getAmount(),
+			'inOrder' => $response->getInOrdersBalance()->getAmount(),
+			'available' => $response->getAccountBalance()->getAmount(),
+		];
 	}
 }
