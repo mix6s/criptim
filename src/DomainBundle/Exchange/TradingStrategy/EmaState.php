@@ -35,4 +35,18 @@ class EmaState
 	{
 		return $this->signal;
 	}
+
+	public function getShortValue(): float
+	{
+
+	}
+
+	public function getLongValue(): float
+	{
+
+	}
+
+	public function getPrevShortValue(): float
+	{
+	}
 }

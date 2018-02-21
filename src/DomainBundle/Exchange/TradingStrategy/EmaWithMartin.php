@@ -26,9 +26,12 @@ use Money\Currency;
 use Money\CurrencyPair;
 use Psr\Log\LoggerInterface;
 
-class EMA implements TradingStrategyInterface
+class EmaWithMartin implements TradingStrategyInterface
 {
-	const ID = 'ema';
+	const ID = 'ema_with_martin';
+	/**
+	 * @var TradingStrategyId
+	 */
 	private $id;
 	/**
 	 * @var BotTradingSessionRepositoryInterface
@@ -66,6 +69,10 @@ class EMA implements TradingStrategyInterface
 	 * @var LoggerInterface
 	 */
 	private $logger;
+	/**
+	 * @var Martin
+	 */
+	private $martin;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
@@ -76,7 +83,8 @@ class EMA implements TradingStrategyInterface
 		CreateOrderUseCase $createOrderUseCase,
 		OrderRepositoryInterface $orderRepository,
 		CancelOrderUseCase $cancelOrderUseCase,
-		LoggerInterface $logger
+		LoggerInterface $logger,
+		Martin $martin
 	)
 	{
 		$this->id = new TradingStrategyId(self::ID);
@@ -89,6 +97,7 @@ class EMA implements TradingStrategyInterface
 		$this->orderRepository = $orderRepository;
 		$this->cancelOrderUseCase = $cancelOrderUseCase;
 		$this->logger = $logger;
+		$this->martin = $martin;
 	}
 
 	public function getId(): TradingStrategyId
@@ -114,6 +123,8 @@ class EMA implements TradingStrategyInterface
 
 		$settings = $session->getTradingStrategySettings()->getData();
 		$period = new \DateInterval($settings['period']);
+		$short = $settings['short'];
+		$long = $settings['long'];
 		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
 		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
 		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
@@ -132,12 +143,29 @@ class EMA implements TradingStrategyInterface
 		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 		$balancesRequest->setCurrency($quoteCurrency);
 		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+
+		$bidPrice = $exchange->getBid($symbolString);
+		$askPrice = $exchange->getAsk($symbolString);
+
 		switch ($state->getSignal()) {
 			case EmaState::SIGNAL_LONG:
 				break;
 			case EmaState::SIGNAL_SHORT:
 				break;
 			case EmaState::SIGNAL_NONE:
+				if ($state->getShortValue() < $state->getLongValue()) {
+					$this->martin->processTrading($session);
+					break;
+				}
+				if ($state->getShortValue() >= $state->getPrevShortValue()) {
+					break;
+				}
+				/**
+				5. If signal = 0
+				and exist buy trade
+				and bid price > buy price * (1 +  opt_profit_percent / 100.0)
+				and short go down => sell buy bid price
+				 */
 				break;
 			default:
 				throw new DomainException(sprintf('Unknown signal %s', $state->getSignal()));

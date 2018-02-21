@@ -154,7 +154,7 @@ class Martin implements TradingStrategyInterface
 		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 
 		$bidPrice = $exchange->getBid($symbolString);
-		$askPrice = $exchange->getBid($symbolString);
+		$askPrice = $exchange->getAsk($symbolString);
 		$currentPrice = $askPrice;
 
 		try {
