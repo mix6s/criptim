@@ -49,4 +49,8 @@ class EmaState
 	public function getPrevShortValue(): float
 	{
 	}
+
+	public function getTimestamp(): \DateTimeImmutable
+	{
+	}
 }

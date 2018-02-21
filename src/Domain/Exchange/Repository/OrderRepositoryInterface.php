@@ -26,6 +26,12 @@ interface OrderRepositoryInterface
 	public function findActive(BotTradingSessionId $sessionId): array;
 
 	/**
+	 * @param BotTradingSessionId $sessionId
+	 * @return Order[]
+	 */
+	public function findBySessionIdAndType(BotTradingSessionId $sessionId, string $type): array;
+
+	/**
 	 * @param OrderId $orderId
 	 * @return Order
 	 * @throws EntityNotFoundException
