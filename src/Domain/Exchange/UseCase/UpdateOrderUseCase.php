@@ -109,7 +109,7 @@ class UpdateOrderUseCase
 		$quoteTotal = $this->moneyFromFloatPolicy
 			->getMoney($quoteCurrencyAccount->getCurrency(), $order->getPrice())
 			->multiply($diff)
-			->multiply(1 + $exchange->getFee())
+			->multiply(1 + $exchange->getFee() * ($order->getType() === 'buy' ? 1 : -1))
 			->multiply($order->getType() === 'buy' ? -1 : 1);
 
 		$baseTotal = $this->moneyFromFloatPolicy
