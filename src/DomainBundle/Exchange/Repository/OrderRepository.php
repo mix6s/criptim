@@ -159,4 +159,22 @@ class OrderRepository extends EntityRepository implements OrderRepositoryInterfa
 			->getQuery()
 			->getSingleScalarResult();
 	}
+
+	/**
+	 * @param BotTradingSessionId $sessionId
+	 * @return Order[]
+	 */
+	public function findBySessionIdAndType(BotTradingSessionId $sessionId, string $type): array
+	{
+		return $this->getEntityManager()->createQueryBuilder()
+			->select('o')
+			->from('Domain\Exchange\Entity\Order', 'o')
+			->where('o.botTradingSessionId = :id')
+			->andWhere('o.type = :type')
+			->setParameter('id', $sessionId)
+			->setParameter('type', $type)
+			->orderBy('o.id', 'DESC')
+			->getQuery()
+			->getResult();
+	}
 }

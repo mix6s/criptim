@@ -123,8 +123,13 @@ class EmaWithMartin implements TradingStrategyInterface
 		$period = new \DateInterval($settings['period']);
 		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
 		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
-		$state = $this->getState($period, $baseCurrency, $quoteCurrency);
-		return $state->signalIsLong();
+		$short = $settings['short'];
+		$long = $settings['long'];
+		$state = $this->getState($period, $baseCurrency, $quoteCurrency, $short, $long);
+		if ($state->signalIsLong()) {
+			return true;
+		}
+		return false;
 	}
 
 	public function processTrading(BotTradingSession $session)
@@ -144,7 +149,7 @@ class EmaWithMartin implements TradingStrategyInterface
 		$minBalance = new Money(0, $baseCurrency);
 		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
 		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
-		$state = $this->getState($period, $baseCurrency, $quoteCurrency);
+		$state = $this->getState($period, $baseCurrency, $quoteCurrency, $short, $long);
 
 		$createOrderRequest = new CreateOrderRequest();
 		$createOrderRequest->setBotTradingSessionId($session->getId());
@@ -163,7 +168,6 @@ class EmaWithMartin implements TradingStrategyInterface
 
 		$bidPrice = $exchange->getBid($symbolString);
 		$askPrice = $exchange->getAsk($symbolString);
-
 
 		switch ($state->getSignal()) {
 			case EmaState::SIGNAL_LONG:
@@ -330,7 +334,7 @@ class EmaWithMartin implements TradingStrategyInterface
 		 */
 	}
 
-	private function getState(\DateInterval $period, Currency $baseCurrency, Currency $quoteCurrency): EmaState
+	private function getState(\DateInterval $period, Currency $baseCurrency, Currency $quoteCurrency, int $short, int $long): EmaState
 	{
 		return new EmaState(EmaState::SIGNAL_LONG);
 	}
