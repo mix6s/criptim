@@ -22,6 +22,7 @@ use Domain\Exchange\UseCase\Request\CancelOrderRequest;
 use Domain\Exchange\UseCase\Request\CreateOrderRequest;
 use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
 use Domain\Exchange\UseCase\Response\GetBotTradingSessionBalancesResponse;
+use Domain\Exchange\ValueObject\BotTradingSessionId;
 use Domain\Exchange\ValueObject\TradingStrategyId;
 use Domain\Exchange\ValueObject\TradingStrategySettings;
 use Domain\Policy\DomainCurrenciesPolicy;
@@ -140,6 +141,7 @@ class EmaWithMartin implements TradingStrategyInterface
 
 		$settings = $session->getTradingStrategySettings()->getData();
 		$period = new \DateInterval($settings['period']);
+		$orderRecreateSeconds = $settings['order_recreate'] ?? 30;
 		$short = $settings['short'];
 		$long = $settings['long'];
 		$goDownProfitPercent = $settings['go_down_profit_percent'] ?? 0.4;
@@ -171,14 +173,24 @@ class EmaWithMartin implements TradingStrategyInterface
 
 		switch ($state->getSignal()) {
 			case EmaState::SIGNAL_LONG:
-				/**
-				4. If signal = 1 => Buy by buy price where buy price:
-				t = time.time()
-				delta_t = float(self.options['interval']) * 60.
-				delta_price = bid_price - self.strategy.get_short()
-				buy_price = (t - self.strategy.get_timestamp() - delta_t) / (delta_t / delta_price) + self.strategy.get_short()
-				self.buy(session, buy_price)
-				 */
+				if (!$this->isTimeToRecreateActiveOrder($session->getId(), 'buy', $orderRecreateSeconds)) {
+					return;
+				}
+				$activeOrders = $this->orderRepository->findActive($session->getId());
+				foreach ($activeOrders as $order) {
+					$cancelOrderRequest->setOrderId($order->getId());
+					$this->cancelOrderUseCase->execute($cancelOrderRequest);
+					$this->logger->info(sprintf('SessionEma #%s: cancel order', (string)$session->getId()), [
+						'orderId' => (string)$cancelOrderRequest->getOrderId(),
+						'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+						'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+					]);
+				}
+
+				$balancesRequest->setCurrency($baseCurrency);
+				$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+				$balancesRequest->setCurrency($quoteCurrency);
+				$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 
 				$now = new \DateTimeImmutable();
 				$secondsPeriod = (new \DateTimeImmutable('@0'))->add($period)->getTimestamp();
@@ -194,7 +206,7 @@ class EmaWithMartin implements TradingStrategyInterface
 					->divide($buyPrice);
 				$buyAmount = $this->round($amount, $amountInc);
 
-				if ($buyAmount->isZero()) {
+				if ($buyAmount->lessThan($amountInc)) {
 					return;
 				}
 
@@ -214,33 +226,22 @@ class EmaWithMartin implements TradingStrategyInterface
 				]);
 				return;
 			case EmaState::SIGNAL_SHORT:
-				break;
-			case EmaState::SIGNAL_NONE:
-				if ($state->getShortValue() < $state->getLongValue()) {
-					$this->martin->processTrading($session);
+				$activeOrders = $this->orderRepository->findActive($session->getId());
+				$lastSellOrder = null;
+				foreach ($activeOrders as $order) {
+					if ($order->getType() !== 'sell') {
+						continue;
+					}
+					if (!$lastSellOrder) {
+						$lastSellOrder = $order;
+					}
+					if ($lastSellOrder->getCreatedAt()->getTimestamp() <= $order->getCreatedAt()->getTimestamp()) {
+						$lastSellOrder = $order;
+					}
+				}
+				if ($lastSellOrder && (time() - $lastSellOrder->getCreatedAt()->getTimestamp()) < $orderRecreateSeconds) {
 					return;
 				}
-
-				/**
-				5. If signal = 0
-				and exist buy trade
-				and short go down => sell buy bid price
-				and bid price > buy price * (1 +  opt_profit_percent / 100.0)
-
-				last_buy_trade = self.session_manager.find_session_last_trade(session, 'buy')
-				if last_buy_trade is not None:
-				buy_price = float(last_buy_trade['price'])
-				if bid_price > buy_price + buy_price * 0.4 / 100.0 and self.strategy.short_go_down():
-				amount = self.sell(session, bid_price)
-				if amount is not None:
-				self.log_tg("Short go down, selling")
-				 */
-
-				if ($state->getShortValue() >= $state->getPrevShortValue()) {
-					break;
-				}
-
-				$activeOrders = $this->orderRepository->findActive($session->getId());
 				foreach ($activeOrders as $order) {
 					$cancelOrderRequest->setOrderId($order->getId());
 					$this->cancelOrderUseCase->execute($cancelOrderRequest);
@@ -251,11 +252,45 @@ class EmaWithMartin implements TradingStrategyInterface
 					]);
 				}
 
+				$balancesRequest->setCurrency($baseCurrency);
+				$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+				$balancesRequest->setCurrency($quoteCurrency);
+				$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 
 				$sellAmount = $baseCurrencyBalances->getAvailableBalance();
 				if ($sellAmount->lessThan($amountInc)) {
 					return;
 				}
+
+				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
+				$createOrderRequest->setPrice($askPrice);
+				$createOrderRequest->setType('sell');
+				try {
+					$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+				} catch (InsufficientFundsException $exception) {
+					$this->logger->warning(sprintf('SessionEma #%s: sell order error Insufficient Funds Exception', (string)$session->getId()));
+					return;
+				}
+				$this->logger->info(sprintf('SessionEma #%s: sell order created', (string)$session->getId()), [
+					'orderId' => (string)$lastSellOrder->getId(),
+					'amount' => $sellAmount,
+					'price' => $askPrice,
+					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+				]);
+
+
+				break;
+			case EmaState::SIGNAL_NONE:
+				if ($state->getShortValue() < $state->getLongValue()) {
+					$this->martin->processTrading($session);
+					return;
+				}
+
+				if ($state->getShortValue() >= $state->getPrevShortValue()) {
+					break;
+				}
+
 				$amountSum = 0;
 				$total = 0;
 				$buyOrders = $this->orderRepository->findBySessionIdAndType($session->getId(), 'buy');
@@ -271,6 +306,59 @@ class EmaWithMartin implements TradingStrategyInterface
 				if ($sellPrice->greaterThanOrEqual($bidMoney)) {
 					return;
 				}
+
+				$activeOrders = $this->orderRepository->findActive($session->getId());
+				$lastSellOrder = null;
+				foreach ($activeOrders as $order) {
+					if ($order->getType() !== 'sell') {
+						continue;
+					}
+					if (!$lastSellOrder) {
+						$lastSellOrder = $order;
+					}
+					if ($lastSellOrder->getCreatedAt()->getTimestamp() <= $order->getCreatedAt()->getTimestamp()) {
+						$lastSellOrder = $order;
+					}
+				}
+				if ($lastSellOrder && (time() - $lastSellOrder->getCreatedAt()->getTimestamp()) < $orderRecreateSeconds) {
+					return;
+				}
+				foreach ($activeOrders as $order) {
+					$cancelOrderRequest->setOrderId($order->getId());
+					$this->cancelOrderUseCase->execute($cancelOrderRequest);
+					$this->logger->info(sprintf('SessionEma #%s: cancel order', (string)$session->getId()), [
+						'orderId' => (string)$cancelOrderRequest->getOrderId(),
+						'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+						'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+					]);
+				}
+
+				$balancesRequest->setCurrency($baseCurrency);
+				$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+				$balancesRequest->setCurrency($quoteCurrency);
+				$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+
+				$sellAmount = $baseCurrencyBalances->getAvailableBalance();
+				if ($sellAmount->lessThan($amountInc)) {
+					return;
+				}
+
+				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
+				$createOrderRequest->setPrice($this->formatter->format($bidMoney));
+				$createOrderRequest->setType('sell');
+				try {
+					$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
+				} catch (InsufficientFundsException $exception) {
+					$this->logger->warning(sprintf('SessionEma #%s: sell order error Insufficient Funds Exception', (string)$session->getId()));
+					return;
+				}
+				$this->logger->info(sprintf('SessionEma #%s: sell order created', (string)$session->getId()), [
+					'orderId' => (string)$lastSellOrder->getId(),
+					'amount' => $sellAmount,
+					'price' => $askPrice,
+					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+				]);
 				break;
 			default:
 				throw new DomainException(sprintf('Unknown signal %s', $state->getSignal()));
@@ -332,6 +420,27 @@ class EmaWithMartin implements TradingStrategyInterface
 
 		 * 	6. If base amount is zero and last sell session order is filled (we sell all amount) => end session
 		 */
+	}
+
+	private function isTimeToRecreateActiveOrder(BotTradingSessionId $id, string $orderType, int $orderRecreateSeconds)
+	{
+		$activeOrders = $this->orderRepository->findActive($id);
+		$lastSellOrder = null;
+		foreach ($activeOrders as $order) {
+			if ($order->getType() !== $orderType) {
+				continue;
+			}
+			if (!$lastSellOrder) {
+				$lastSellOrder = $order;
+			}
+			if ($lastSellOrder->getCreatedAt()->getTimestamp() <= $order->getCreatedAt()->getTimestamp()) {
+				$lastSellOrder = $order;
+			}
+		}
+		if ($lastSellOrder && (time() - $lastSellOrder->getCreatedAt()->getTimestamp()) < $orderRecreateSeconds) {
+			return false;
+		}
+		return true;
 	}
 
 	private function getState(\DateInterval $period, Currency $baseCurrency, Currency $quoteCurrency, int $short, int $long): EmaState
