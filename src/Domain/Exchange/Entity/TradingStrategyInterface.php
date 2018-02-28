@@ -16,7 +16,7 @@ interface TradingStrategyInterface
 {
 	public function getId(): TradingStrategyId;
 
-	public function isNeedToStartTrading(TradingStrategySettings $settings): bool;
+	public function isNeedToStartTrading(Bot $bot): bool;
 
 	public function processTrading(BotTradingSession $session);
 }

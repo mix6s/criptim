@@ -12,6 +12,8 @@ namespace Domain\Exchange\Entity;
 use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
+use Money\Currency;
+use Money\CurrencyPair;
 
 interface ExchangeInterface
 {
@@ -34,7 +36,7 @@ interface ExchangeInterface
 
 	public function getPriceTickSize(string $symbol): float;
 	public function getAmountIncrement(string $symbol): float;
-
+	public function getCandles(Currency $base, Currency $quote, \DateInterval $period, int $count);
 
 	/**
 	 * @return ExchangeOrder[]

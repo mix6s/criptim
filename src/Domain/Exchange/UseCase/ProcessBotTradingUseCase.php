@@ -294,6 +294,6 @@ class ProcessBotTradingUseCase
 			return false;
 		}
 		$tradingStrategy = $this->tradingStrategyRepository->findById($bot->getTradingStrategyId());
-		return $tradingStrategy->isNeedToStartTrading($bot->getTradingStrategySettings());
+		return $tradingStrategy->isNeedToStartTrading($bot);
 	}
 }

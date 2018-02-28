@@ -11,6 +11,7 @@ namespace DomainBundle\Exchange\TradingStrategy;
 
 use Domain\Exception\EntityNotFoundException;
 use Domain\Exception\InsufficientFundsException;
+use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\Entity\BotTradingSession;
 use Domain\Exchange\Entity\TradingStrategyInterface;
 use Domain\Exchange\Policy\MoneyFromFloatPolicy;
@@ -118,7 +119,7 @@ class Martin implements TradingStrategyInterface
 		return $this->id;
 	}
 
-	public function isNeedToStartTrading(TradingStrategySettings $settings): bool
+	public function isNeedToStartTrading(Bot $bot): bool
 	{
 		return true;
 	}
@@ -135,6 +136,7 @@ class Martin implements TradingStrategyInterface
 		$priceDecPercent = $settings['price_dec_percent'] ?? 0.1;
 		$initAmountPercent = $settings['init_amount_percent'] ?? 1.3;
 		$amountIncPercent = $settings['amount_inc_percent'] ?? 5;
+		$buyDelaySeconds = $settings['buy_delay_seconds'] ?? 360;
 		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
 		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
 		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
@@ -281,6 +283,9 @@ class Martin implements TradingStrategyInterface
 		}
 
 		if ($buyOrdersCount < $buyOrderLimit) {
+			if ($lastBuyOrder && (time() - $lastBuyOrder->getUpdatedAt()->getTimestamp()) < $buyDelaySeconds) {
+				return;
+			}
 			$filledBuyOrdersCount = $this->orderRepository->countFilledBuyOrders($session->getId());
 			$buyNum = $filledBuyOrdersCount + 1;
 			$price = $lastBuyOrder !== null ? $lastBuyOrder->getPrice() : ($currentPrice * (1 - $priceDecPercent / 100));

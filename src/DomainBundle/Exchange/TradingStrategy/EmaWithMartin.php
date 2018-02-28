@@ -7,7 +7,9 @@ namespace DomainBundle\Exchange\TradingStrategy;
 use Domain\Exception\DomainException;
 use Domain\Exception\EntityNotFoundException;
 use Domain\Exception\InsufficientFundsException;
+use Domain\Exchange\Entity\Bot;
 use Domain\Exchange\Entity\BotTradingSession;
+use Domain\Exchange\Entity\ExchangeInterface;
 use Domain\Exchange\Entity\TradingStrategyInterface;
 use Domain\Exchange\Policy\MoneyFromFloatPolicy;
 use Domain\Exchange\Repository\BotRepositoryInterface;
@@ -118,16 +120,20 @@ class EmaWithMartin implements TradingStrategyInterface
 		return $this->id;
 	}
 
-	public function isNeedToStartTrading(TradingStrategySettings $settings): bool
+	public function isNeedToStartTrading(Bot $bot): bool
 	{
-		$settings = $settings->getData();
+		$settings = $bot->getTradingStrategySettings()->getData();
 		$period = new \DateInterval($settings['period']);
 		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
 		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
 		$short = $settings['short'];
 		$long = $settings['long'];
-		$state = $this->getState($period, $baseCurrency, $quoteCurrency, $short, $long);
+		$exchange = $this->exchangeRepository->findById($bot->getExchangeId());
+		$state = $this->getState($exchange, $period, $baseCurrency, $quoteCurrency, $short, $long);
 		if ($state->signalIsLong()) {
+			return true;
+		}
+		if ($state->signalIsNone() && $state->getShortValue() < $state->getLongValue()) {
 			return true;
 		}
 		return false;
@@ -151,7 +157,14 @@ class EmaWithMartin implements TradingStrategyInterface
 		$minBalance = new Money(0, $baseCurrency);
 		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
 		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
-		$state = $this->getState($period, $baseCurrency, $quoteCurrency, $short, $long);
+		$state = $this->getState($exchange, $period, $baseCurrency, $quoteCurrency, $short, $long);
+		$this->logger->info(sprintf('SessionEma #%s: state data', (string)$session->getId()), [
+			'signal' => $state->getSignal(),
+			'short' => $state->getShortValue(),
+			'long' => $state->getLongValue(),
+			'prev_short' => $state->getPrevShortValue(),
+			'timestamp' => $state->getTimestamp()->format(DATE_RFC3339),
+		]);
 
 		$createOrderRequest = new CreateOrderRequest();
 		$createOrderRequest->setBotTradingSessionId($session->getId());
@@ -240,7 +253,7 @@ class EmaWithMartin implements TradingStrategyInterface
 					}
 				}
 				if ($lastSellOrder && (time() - $lastSellOrder->getCreatedAt()->getTimestamp()) < $orderRecreateSeconds) {
-					return;
+					break;
 				}
 				foreach ($activeOrders as $order) {
 					$cancelOrderRequest->setOrderId($order->getId());
@@ -259,7 +272,7 @@ class EmaWithMartin implements TradingStrategyInterface
 
 				$sellAmount = $baseCurrencyBalances->getAvailableBalance();
 				if ($sellAmount->lessThan($amountInc)) {
-					return;
+					break;
 				}
 
 				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
@@ -269,7 +282,7 @@ class EmaWithMartin implements TradingStrategyInterface
 					$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
 				} catch (InsufficientFundsException $exception) {
 					$this->logger->warning(sprintf('SessionEma #%s: sell order error Insufficient Funds Exception', (string)$session->getId()));
-					return;
+					break;
 				}
 				$this->logger->info(sprintf('SessionEma #%s: sell order created', (string)$session->getId()), [
 					'orderId' => (string)$lastSellOrder->getId(),
@@ -304,7 +317,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				$sellPrice = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $total)->divide($amountSum)->multiply(1 + $goDownProfitPercent / 100);
 				$bidMoney = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $bidPrice);
 				if ($sellPrice->greaterThanOrEqual($bidMoney)) {
-					return;
+					break;
 				}
 
 				$activeOrders = $this->orderRepository->findActive($session->getId());
@@ -321,7 +334,7 @@ class EmaWithMartin implements TradingStrategyInterface
 					}
 				}
 				if ($lastSellOrder && (time() - $lastSellOrder->getCreatedAt()->getTimestamp()) < $orderRecreateSeconds) {
-					return;
+					break;
 				}
 				foreach ($activeOrders as $order) {
 					$cancelOrderRequest->setOrderId($order->getId());
@@ -340,7 +353,7 @@ class EmaWithMartin implements TradingStrategyInterface
 
 				$sellAmount = $baseCurrencyBalances->getAvailableBalance();
 				if ($sellAmount->lessThan($amountInc)) {
-					return;
+					break;
 				}
 
 				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
@@ -350,7 +363,7 @@ class EmaWithMartin implements TradingStrategyInterface
 					$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
 				} catch (InsufficientFundsException $exception) {
 					$this->logger->warning(sprintf('SessionEma #%s: sell order error Insufficient Funds Exception', (string)$session->getId()));
-					return;
+					break;
 				}
 				$this->logger->info(sprintf('SessionEma #%s: sell order created', (string)$session->getId()), [
 					'orderId' => (string)$lastSellOrder->getId(),
@@ -384,42 +397,6 @@ class EmaWithMartin implements TradingStrategyInterface
 			'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
 			'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
 		]);
-
-		/**
-		 *	1. Get signal from candles ()
-
-		    signal = 0
-			if (short_ema_value > long_ema_value) and (prev_short_ema < prev_long_ema):
-			signal = 1
-			elif (short_ema_value < long_ema_value) and (prev_short_ema > prev_long_ema):
-			signal = -1
-			if short_ema_value < long_ema_value:
-			signal = -1
-
-		 *	2. Cancel all active orders
-		 * 	3. If signal = -1 => Sell all by ask price
-		 * 	4. If signal = 1 => Buy by buy price where buy price:
-			t = time.time()
-			delta_t = float(self.options['interval']) * 60.
-			delta_price = bid_price - self.strategy.get_short()
-			buy_price = (t - self.strategy.get_timestamp() - delta_t) / (delta_t / delta_price) + self.strategy.get_short()
-			self.buy(session, buy_price)
-
-		 *	5. If signal = 0
-		 * 	and exist buy trade
-		 * 	and bid price > buy price * (1 +  opt_profit_percent / 100.0)
-		 * 	and short go down => sell buy bid price
-
-		 	last_buy_trade = self.session_manager.find_session_last_trade(session, 'buy')
-			if last_buy_trade is not None:
-			buy_price = float(last_buy_trade['price'])
-			if bid_price > buy_price + buy_price * 0.4 / 100.0 and self.strategy.short_go_down():
-			amount = self.sell(session, bid_price)
-			if amount is not None:
-			self.log_tg("Short go down, selling")
-
-		 * 	6. If base amount is zero and last sell session order is filled (we sell all amount) => end session
-		 */
 	}
 
 	private function isTimeToRecreateActiveOrder(BotTradingSessionId $id, string $orderType, int $orderRecreateSeconds)
@@ -443,9 +420,76 @@ class EmaWithMartin implements TradingStrategyInterface
 		return true;
 	}
 
-	private function getState(\DateInterval $period, Currency $baseCurrency, Currency $quoteCurrency, int $short, int $long): EmaState
+	private function getState(ExchangeInterface $exchange, \DateInterval $period, Currency $baseCurrency, Currency $quoteCurrency, int $short, int $long): EmaState
 	{
-		return new EmaState(EmaState::SIGNAL_LONG);
+		$candles = $exchange->getCandles($baseCurrency, $quoteCurrency, $period, $long * 2 + 1);
+		$data = [
+			'prices' => [],
+			'timestamps' => []
+		];
+
+		$count = 0;
+		foreach ($candles as $candle) {
+			$count++;
+			if ($count >= count($candles)) {
+				break;
+			}
+			$data['prices'][] = (float)$candle['close'];
+			$data['timestamps'][] = new \DateTimeImmutable($candle['timestamp']);
+		}
+		$index = 0;
+		$shortSmaValue = 0;
+        $longSmaValue = 0;
+        $shortEmaValue = 0;
+        $longEmaValue = 0;
+		$prevShortEma = 0;
+        $prevLongEma = 0;
+        $shortEma = [];
+        $longEma = [];
+		$shortSma = [];
+		$longSma = [];
+		$signal = 0;
+		foreach ($data['timestamps'] as $timestamp) {
+			if ($index >= $short) {
+				$prevShortEma = $shortEmaValue;
+				if ($prevShortEma == 0) {
+					$prevShortEma = $shortSmaValue;
+				}
+				$shortEmaValue = $this->EMA(array_slice($data['prices'], $index - $short + 1, $short), $prevShortEma);
+			}
+
+			if ($index >= $long) {
+				$prevLongEma = $longEmaValue;
+				if ($prevLongEma == 0) {
+					$prevLongEma = $longSmaValue;
+				}
+				$longEmaValue = $this->EMA(array_slice($data['prices'], $index - $long + 1, $long), $prevLongEma);
+			}
+
+			$shortEma[] = $shortEmaValue;
+			$longEma[] = $longEmaValue;
+
+			if ($index >= $short - 1) {
+				$shortSmaValue = $this->SMA(array_slice($data['prices'], $index - $short + 1, $short));
+			}
+			if ($index >= $long - 1) {
+				$longSmaValue = $this->SMA(array_slice($data['prices'], $index - $long + 1, $long));
+			}
+			$shortSma[] = $shortSmaValue;
+			$longSma[] = $longSmaValue;
+
+			$signal = EmaState::SIGNAL_NONE;
+			if ($shortEmaValue > $longEmaValue && $prevShortEma < $prevLongEma) {
+				$signal = EmaState::SIGNAL_LONG;
+			} elseif ($shortEmaValue < $longEmaValue && $prevShortEma > $prevLongEma) {
+				$signal = EmaState::SIGNAL_SHORT;
+			}
+			if ($shortEmaValue < $longEmaValue) {
+				//$signal = EmaState::SIGNAL_SHORT;
+			}
+			$index++;
+		}
+		return new EmaState($signal, $shortEmaValue, $longEmaValue, $prevShortEma, $prevLongEma, $data['timestamps'][count($data['timestamps']) - 1]);
 	}
 
 	private function balancesAsArray(GetBotTradingSessionBalancesResponse $response)
@@ -463,5 +507,18 @@ class EmaWithMartin implements TradingStrategyInterface
 	{
 		return new Money(floor($money->getAmount() / $rounding->getAmount()) * $rounding->getAmount(),
 			$money->getCurrency());
+	}
+
+	private function SMA(array $prices)
+	{
+		$totalClosing = array_sum($prices);
+        return $totalClosing / count($prices);
+	}
+
+	private function EMA(array $prices, $prevEma)
+	{
+		$period = count($prices);
+        $constant = (2 / ($period + 1));
+        return ($prices[$period - 1] * $constant) + ($prevEma * (1 - $constant));
 	}
 }

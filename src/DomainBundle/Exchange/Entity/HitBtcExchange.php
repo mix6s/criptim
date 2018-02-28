@@ -19,6 +19,7 @@ use Domain\Exchange\ValueObject\OrderId;
 use DomainBundle\Exception\HitBtcApiException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use Money\Currency;
 use Psr\Log\LoggerInterface;
 
 class HitBtcExchange implements ExchangeInterface
@@ -251,5 +252,37 @@ class HitBtcExchange implements ExchangeInterface
 			$this->symbolData = $this->apiAuthRequest('GET', '/public/symbol', null, false);
 		}
 		return $this->symbolData;
+	}
+
+	public function getCandles(Currency $base, Currency $quote, \DateInterval $period, int $limit)
+	{
+		$exchangePeriod = $this->resolvePeriodFromInterval($period);
+		$data = $this->apiAuthRequest('GET', sprintf('/public/candles/%s?period=%s&limit=%s', $base->getCode() . $quote->getCode(), $exchangePeriod, $limit), null, false);
+		return $data;
+	}
+
+	private function resolvePeriodFromInterval(\DateInterval $interval)
+	{
+		$secondsPeriod = (new \DateTimeImmutable('@0'))->add($interval)->getTimestamp();
+		switch ($secondsPeriod) {
+			case 60:
+				return 'M1';
+			case 60 * 5:
+				return 'M5';
+			case 60 * 15:
+				return 'M15';
+			case 60 * 30:
+				return 'M30';
+			case 60 * 60:
+				return 'H1';
+			case 60 * 60 * 4:
+				return 'H4';
+			case 60 * 60 * 24:
+				return 'D1';
+			case 60 * 60 * 24 * 7:
+				return 'D7';
+			default:
+				throw new DomainException('Unknown period');
+		}
 	}
 }
