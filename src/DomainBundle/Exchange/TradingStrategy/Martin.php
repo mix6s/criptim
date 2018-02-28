@@ -282,34 +282,50 @@ class Martin implements TradingStrategyInterface
 			}
 		}
 
+
+		if ($lastBuyOrder && (time() - $lastBuyOrder->getUpdatedAt()->getTimestamp()) < $buyDelaySeconds) {
+			return;
+		}
+		$filledBuyOrdersCount = $this->orderRepository->countFilledBuyOrders($session->getId());
+		$buyNum = $filledBuyOrdersCount + 1;
+		$price = $lastBuyOrder !== null ? $lastBuyOrder->getPrice() : ($currentPrice * (1 - $priceDecPercent / 100));
+		$buyPrice = $price * (1 - $priceDecPercent / 100);
+		$isPriceBelowBuyPrice = false;
+		if ($buyPrice > $currentPrice) {
+			$isPriceBelowBuyPrice = true;
+			$buyPrice = $currentPrice;
+		}
+		$buyPrice = $this->formatter->format(
+			$this->round($this->moneyFromFloatPolicy->getMoney($quoteCurrency, $buyPrice), $priceTickSize)
+		);
+		$initAmount = (new Money($quoteCurrencyBalances->getAvailableBalance()->getAmount(), $baseCurrency))
+			->divide(100)
+			->multiply($initAmountPercent)
+			->divide($buyPrice);
+		$amount = $firstBuyOrder !== null
+			? $this->moneyFromFloatPolicy->getMoney($baseCurrency, $firstBuyOrder->getAmount())
+			: $initAmount;
+		$buyAmount = $this->round($amount, $amountInc)
+			->multiply(1 + $amountIncPercent * $buyNum / 100);
+		if ($buyAmount->lessThan($amountInc)) {
+			$buyAmount = $amountInc;
+		}
+		$activeBuyOrder = null;
+		foreach ($activeOrders as $order) {
+			if ($order->getType() != 'buy') {
+				continue;
+			}
+			if ($order->getAmount() != $this->formatter->format($buyAmount)) {
+				$cancelOrderRequest->setOrderId($order->getId());
+				$this->cancelOrderUseCase->execute($cancelOrderRequest);
+				$this->logger->info(sprintf('Session #%s: cancel incorrect buy order', (string)$session->getId()), [
+					'orderId' => (string)$cancelOrderRequest->getOrderId(),
+					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+				]);
+			}
+		}
 		if ($buyOrdersCount < $buyOrderLimit) {
-			if ($lastBuyOrder && (time() - $lastBuyOrder->getUpdatedAt()->getTimestamp()) < $buyDelaySeconds) {
-				return;
-			}
-			$filledBuyOrdersCount = $this->orderRepository->countFilledBuyOrders($session->getId());
-			$buyNum = $filledBuyOrdersCount + 1;
-			$price = $lastBuyOrder !== null ? $lastBuyOrder->getPrice() : ($currentPrice * (1 - $priceDecPercent / 100));
-			$buyPrice = $price * (1 - $priceDecPercent / 100);
-			$isPriceBelowBuyPrice = false;
-			if ($buyPrice > $currentPrice) {
-				$isPriceBelowBuyPrice = true;
-				$buyPrice = $currentPrice;
-			}
-			$buyPrice = $this->formatter->format(
-				$this->round($this->moneyFromFloatPolicy->getMoney($quoteCurrency, $buyPrice), $priceTickSize)
-			);
-			$initAmount = (new Money($quoteCurrencyBalances->getAvailableBalance()->getAmount(), $baseCurrency))
-				->divide(100)
-				->multiply($initAmountPercent)
-				->divide($buyPrice);
-			$amount = $firstBuyOrder !== null
-				? $this->moneyFromFloatPolicy->getMoney($baseCurrency, $firstBuyOrder->getAmount())
-				: $initAmount;
-			$buyAmount = $this->round($amount, $amountInc)
-				->multiply(1 + $amountIncPercent * $buyNum / 100);
-			if ($buyAmount->lessThan($amountInc)) {
-				$buyAmount = $amountInc;
-			}
 			$createOrderRequest->setType('buy');
 			$createOrderRequest->setPrice($buyPrice);
 			$createOrderRequest->setAmount($this->formatter->format($buyAmount));
