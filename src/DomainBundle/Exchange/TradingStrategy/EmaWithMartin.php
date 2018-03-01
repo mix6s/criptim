@@ -130,6 +130,13 @@ class EmaWithMartin implements TradingStrategyInterface
 		$long = $settings['long'];
 		$exchange = $this->exchangeRepository->findById($bot->getExchangeId());
 		$state = $this->getState($exchange, $period, $baseCurrency, $quoteCurrency, $short, $long);
+		$this->logger->info(sprintf('Bot #%s: state data', (string)$bot->getId()), [
+			'signal' => $state->getSignal(),
+			'short' => $state->getShortValue(),
+			'long' => $state->getLongValue(),
+			'prev_short' => $state->getPrevShortValue(),
+			'timestamp' => $state->getTimestamp()->format(DATE_RFC3339),
+		]);
 		if ($state->signalIsLong()) {
 			return true;
 		}
