@@ -301,8 +301,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				}
 
 				if ($state->getShortValue() >= $state->getPrevShortValue()) {
-					$this->martin->processTrading($session);
-					return;
+					break;
 				}
 
 				$amountSum = 0;
