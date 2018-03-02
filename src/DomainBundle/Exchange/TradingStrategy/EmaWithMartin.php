@@ -215,7 +215,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				$now = new \DateTimeImmutable();
 				$secondsPeriod = (new \DateTimeImmutable('@0'))->add($period)->getTimestamp();
 				$secondsDelta = $now->getTimestamp() - $state->getTimestamp()->getTimestamp() - $secondsPeriod;
-				$priceDelta = $bidPrice - $state->getShortValue();
+				$priceDelta = $askPrice - $state->getShortValue();
 				$buyPriceFloat = $state->getShortValue() + $secondsDelta / ($secondsPeriod / $priceDelta);
 
 				$buyPrice = $this->formatter->format(
