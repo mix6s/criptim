@@ -130,6 +130,13 @@ class EmaWithMartin implements TradingStrategyInterface
 		$long = $settings['long'];
 		$exchange = $this->exchangeRepository->findById($bot->getExchangeId());
 		$state = $this->getState($exchange, $period, $baseCurrency, $quoteCurrency, $short, $long);
+		$this->logger->info(sprintf('Bot #%s: state data', (string)$bot->getId()), [
+			'signal' => $state->getSignal(),
+			'short' => $state->getShortValue(),
+			'long' => $state->getLongValue(),
+			'prev_short' => $state->getPrevShortValue(),
+			'timestamp' => $state->getTimestamp()->format(DATE_RFC3339),
+		]);
 		if ($state->signalIsLong()) {
 			return true;
 		}
@@ -208,7 +215,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				$now = new \DateTimeImmutable();
 				$secondsPeriod = (new \DateTimeImmutable('@0'))->add($period)->getTimestamp();
 				$secondsDelta = $now->getTimestamp() - $state->getTimestamp()->getTimestamp() - $secondsPeriod;
-				$priceDelta = $bidPrice - $state->getShortValue();
+				$priceDelta = $askPrice - $state->getShortValue();
 				$buyPriceFloat = $state->getShortValue() + $secondsDelta / ($secondsPeriod / $priceDelta);
 
 				$buyPrice = $this->formatter->format(
@@ -276,7 +283,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				}
 
 				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
-				$createOrderRequest->setPrice($askPrice);
+				$createOrderRequest->setPrice($bidPrice);
 				$createOrderRequest->setType('sell');
 				try {
 					$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
@@ -287,7 +294,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				$this->logger->info(sprintf('SessionEma #%s: sell order created', (string)$session->getId()), [
 					'orderId' => (string)$lastSellOrder->getId(),
 					'amount' => $sellAmount,
-					'price' => $askPrice,
+					'price' => $bidPrice,
 					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
 					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
 				]);
@@ -301,8 +308,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				}
 
 				if ($state->getShortValue() >= $state->getPrevShortValue()) {
-					$this->martin->processTrading($session);
-					return;
+					break;
 				}
 
 				$amountSum = 0;
@@ -369,7 +375,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				$this->logger->info(sprintf('SessionEma #%s: sell order created', (string)$session->getId()), [
 					'orderId' => (string)$lastSellOrder->getId(),
 					'amount' => $sellAmount,
-					'price' => $askPrice,
+					'price' => $this->formatter->format($bidMoney),
 					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
 					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
 				]);
