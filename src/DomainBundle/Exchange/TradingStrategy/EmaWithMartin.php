@@ -283,7 +283,8 @@ class EmaWithMartin implements TradingStrategyInterface
 				}
 
 				$createOrderRequest->setAmount($this->formatter->format($sellAmount));
-				$createOrderRequest->setPrice($bidPrice);
+				$sellPrice = $bidPrice * (1 - 0.001);
+				$createOrderRequest->setPrice($sellPrice);
 				$createOrderRequest->setType('sell');
 				try {
 					$lastSellOrder = $this->createOrderUseCase->execute($createOrderRequest)->getOrder();
@@ -294,7 +295,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				$this->logger->info(sprintf('SessionEma #%s: sell order created', (string)$session->getId()), [
 					'orderId' => (string)$lastSellOrder->getId(),
 					'amount' => $sellAmount,
-					'price' => $bidPrice,
+					'price' => $sellPrice,
 					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
 					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
 				]);
