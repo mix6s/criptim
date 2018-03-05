@@ -386,17 +386,26 @@ class EmaWithMartin implements TradingStrategyInterface
 				break;
 		}
 
+		try {
+			$lastSellOrder = $this->orderRepository->findLastSell($session->getId());
+		} catch (EntityNotFoundException $exception) {
+			return;
+		}
+		$activeOrders = $this->orderRepository->findActive($session->getId());
+		foreach ($activeOrders as $order) {
+			$cancelOrderRequest->setOrderId($order->getId());
+			$this->cancelOrderUseCase->execute($cancelOrderRequest);
+			$this->logger->info(sprintf('SessionEma #%s: cancel order', (string)$session->getId()), [
+				'orderId' => (string)$cancelOrderRequest->getOrderId(),
+				'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+				'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+			]);
+		}
 		$balancesRequest->setCurrency($baseCurrency);
 		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
 		$balancesRequest->setCurrency($quoteCurrency);
 		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
-
-		try {
-			$lastSellOrder = $this->orderRepository->findLastSell($session->getId());
-			if (!$baseCurrencyBalances->getAccountBalance()->isZero()) {
-				return;
-			}
-		} catch (EntityNotFoundException $exception) {
+		if (!$baseCurrencyBalances->getAccountBalance()->isZero()) {
 			return;
 		}
 		$session->end();
