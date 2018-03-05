@@ -25,7 +25,7 @@ services:
         arguments: ['@ORM\UserRepository', '@ExchangeRepository', '@ORM\UserAccountRepository', '@Exchange\IdFactory', '@ORM\BotExchangeAccountRepository', '@ORM\UserAccountTransactionRepository', '@ORM\BotExchangeAccountTransactionRepository', '@ORM\BotRepository', '@UseCase\GetBotExchangeAccountUseCase', '@UseCase\GetUserAccountUseCase']
     UseCase\ProcessBotTradingUseCase:
         class: Domain\Exchange\UseCase\ProcessBotTradingUseCase
-        arguments: ['@ORM\BotTradingSessionRepository', '@Exchange\IdFactory', '@TradingStrategyRepository', '@ORM\BotExchangeAccountRepository', '@ORM\BotExchangeAccountTransactionRepository', '@ORM\BotTradingSessionAccountRepository', '@ORM\BotTradingSessionAccountTransactionRepository', '@ORM\BotRepository', '@ORM\UserExchangeAccountRepository', '@ORM\UserExchangeAccountTransactionRepository', '@UseCase\GetBotExchangeAccountUseCase']
+        arguments: ['@ORM\BotTradingSessionRepository', '@Exchange\IdFactory', '@TradingStrategyRepository', '@ORM\BotExchangeAccountRepository', '@ORM\BotExchangeAccountTransactionRepository', '@ORM\BotTradingSessionAccountRepository', '@ORM\BotTradingSessionAccountTransactionRepository', '@ORM\BotRepository', '@ORM\UserAccountRepository', '@ORM\UserAccountTransactionRepository', '@UseCase\GetBotExchangeAccountUseCase']
     UseCase\CreateOrderUseCase:
         class: Domain\Exchange\UseCase\CreateOrderUseCase
         arguments: ['@ExchangeRepository', '@ORM\BotTradingSessionAccountRepository', '@ORM\BotTradingSessionAccountTransactionRepository', '@UseCase\GetBotTradingSessionBalancesUseCase', '@Exchange\IdFactory', '@ORM\OrderRepository', '@logger']
