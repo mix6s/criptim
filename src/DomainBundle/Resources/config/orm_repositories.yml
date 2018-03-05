@@ -58,3 +58,15 @@ services:
         factory: ['@doctrine.orm.default_entity_manager', getRepository]
         arguments:
             - Domain\Exchange\Entity\Order
+
+    ORM\UserAccountTransactionRepository:
+        class: DomainBundle\Repository\UserAccountTransactionRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Entity\UserAccountTransaction
+
+    ORM\UserAccountRepository:
+        class: DomainBundle\Repository\UserAccountRepository
+        factory: ['@doctrine.orm.default_entity_manager', getRepository]
+        arguments:
+            - Domain\Entity\UserAccount

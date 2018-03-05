@@ -42,15 +42,12 @@ WITH dates AS (
     transactions AS (
       SELECT
         date,
-        (SELECT SUM(balance)
-         FROM (
-                (SELECT DISTINCT ON (t.exchange_id) (balance ->> 'amount') :: FLOAT AS balance
-                 FROM user_exchange_account_transaction t
-                 WHERE date_trunc('day', t.dt) <= date
-                       AND t.user_id = :user_id
-                       AND t.currency = :currency
-                 ORDER BY t.exchange_id, t.dt DESC)
-              ) AS t) AS balance
+        (SELECT (balance ->> 'amount') :: FLOAT AS balance
+		 FROM user_account_transaction t
+		 WHERE date_trunc('day', t.dt) <= date
+			   AND t.user_id = :user_id
+			   AND t.currency = :currency
+		 ORDER BY t.id DESC LIMIT 1) AS balance
       FROM dates
   ) SELECT
       TO_CHAR(date, 'YYYY-MM-DD')         AS date,

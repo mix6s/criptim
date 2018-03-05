@@ -9,11 +9,8 @@
 namespace Domain\Exchange\UseCase;
 
 
-use Domain\Exception\DomainException;
-use Domain\Exception\EntityNotFoundException;
-use Domain\Exchange\Entity\BotExchangeAccount;
+use Domain\Entity\UserAccountTransaction;
 use Domain\Exchange\Entity\BotExchangeAccountTransaction;
-use Domain\Exchange\Entity\UserExchangeAccount;
 use Domain\Exchange\Entity\UserExchangeAccountTransaction;
 use Domain\Exchange\Factory\IdFactoryInterface;
 use Domain\Exchange\Policy\MoneyFromFloatPolicy;
@@ -21,15 +18,15 @@ use Domain\Exchange\Policy\MoneyFromFloatPolicyInterface;
 use Domain\Exchange\Repository\BotExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\BotExchangeAccountTransactionRepositoryInterface;
 use Domain\Exchange\Repository\BotRepositoryInterface;
-use Domain\Exchange\Repository\ExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\ExchangeRepositoryInterface;
-use Domain\Exchange\Repository\UserExchangeAccountRepositoryInterface;
-use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
 use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
-use Domain\Exchange\UseCase\Request\GetUserExchangeAccountRequest;
 use Domain\Exchange\UseCase\Request\UserDepositMoneyRequest;
 use Domain\Exchange\UseCase\Response\UserDepositMoneyResponse;
+use Domain\Repository\UserAccountRepositoryInterface;
+use Domain\Repository\UserAccountTransactionRepositoryInterface;
 use Domain\Repository\UserRepositoryInterface;
+use Domain\UseCase\GetUserAccountUseCase;
+use Domain\UseCase\Request\GetUserAccountRequest;
 use Money\Money;
 
 class UserDepositMoneyUseCase
@@ -43,9 +40,9 @@ class UserDepositMoneyUseCase
 	 */
 	private $exchangeRepository;
 	/**
-	 * @var UserExchangeAccountRepositoryInterface
+	 * @var UserAccountRepositoryInterface
 	 */
-	private $userExchangeAccountRepository;
+	private $userAccountRepository;
 	/**
 	 * @var IdFactoryInterface
 	 */
@@ -55,9 +52,9 @@ class UserDepositMoneyUseCase
 	 */
 	private $botExchangeAccountRepository;
 	/**
-	 * @var UserExchangeAccountTransactionRepositoryInterface
+	 * @var UserAccountTransactionRepositoryInterface
 	 */
-	private $userExchangeAccountTransactionRepository;
+	private $userAccountTransactionRepository;
 	/**
 	 * @var BotRepositoryInterface
 	 */
@@ -75,33 +72,33 @@ class UserDepositMoneyUseCase
 	 */
 	private $getBotExchangeAccountUserCase;
 	/**
-	 * @var GetUserExchangeAccountUseCase
+	 * @var GetUserAccountUseCase
 	 */
-	private $getUserExchangeAccountUseCase;
+	private $getUserAccountUseCase;
 
 	public function __construct(
 		UserRepositoryInterface $userRepository,
 		ExchangeRepositoryInterface $exchangeRepository,
-		UserExchangeAccountRepositoryInterface $userExchangeAccountRepository,
+		UserAccountRepositoryInterface $userAccountRepository,
 		IdFactoryInterface $idFactory,
 		BotExchangeAccountRepositoryInterface $botExchangeAccountRepository,
-		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository,
+		UserAccountTransactionRepositoryInterface $userAccountTransactionRepository,
 		BotExchangeAccountTransactionRepositoryInterface $botExchangeAccountTransactionRepository,
 		BotRepositoryInterface $botRepository,
 		GetBotExchangeAccountUseCase $getBotExchangeAccountUserCase,
-		GetUserExchangeAccountUseCase $getUserExchangeAccountUseCase
+		GetUserAccountUseCase $getUserAccountUseCase
 	) {
 		$this->userRepository = $userRepository;
 		$this->exchangeRepository = $exchangeRepository;
-		$this->userExchangeAccountRepository = $userExchangeAccountRepository;
+		$this->userAccountRepository = $userAccountRepository;
 		$this->idFactory = $idFactory;
 		$this->botExchangeAccountRepository = $botExchangeAccountRepository;
-		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
+		$this->userAccountTransactionRepository = $userAccountTransactionRepository;
 		$this->botRepository = $botRepository;
 		$this->botExchangeAccountTransactionRepository = $botExchangeAccountTransactionRepository;
 		$this->moneyFromFloatPolicy = new MoneyFromFloatPolicy();
 		$this->getBotExchangeAccountUserCase = $getBotExchangeAccountUserCase;
-		$this->getUserExchangeAccountUseCase = $getUserExchangeAccountUseCase;
+		$this->getUserAccountUseCase = $getUserAccountUseCase;
 	}
 
 	public function execute(UserDepositMoneyRequest $request): UserDepositMoneyResponse
@@ -110,25 +107,23 @@ class UserDepositMoneyUseCase
 		$exchange = $this->exchangeRepository->findById($request->getExchangeId());
 		$money = $this->moneyFromFloatPolicy->getMoney($request->getCurrency(), $request->getAmount());
 
-		$getUserExchangeAccountRequest = new GetUserExchangeAccountRequest();
+		$getUserExchangeAccountRequest = new GetUserAccountRequest();
 		$getUserExchangeAccountRequest->setUserId($user->getId());
 		$getUserExchangeAccountRequest->setCurrency($money->getCurrency());
-		$getUserExchangeAccountRequest->setExchangeId($exchange->getId());
-		$userAccount = $this->getUserExchangeAccountUseCase->execute($getUserExchangeAccountRequest)->getUserExchangeAccount();
+		$userAccount = $this->getUserAccountUseCase->execute($getUserExchangeAccountRequest)->getUserAccount();
 		$userAccount->change($money);
 
-		$transactionId = $this->idFactory->getUserExchangeAccountTransactionId();
-		$transaction = new UserExchangeAccountTransaction(
+		$transactionId = $this->idFactory->getUserAccountTransactionId();
+		$transaction = new UserAccountTransaction(
 			$transactionId,
 			$user->getId(),
-			$exchange->getId(),
 			$money->getCurrency(),
 			$money,
 			$userAccount->getBalance(),
-			UserExchangeAccountTransaction::TYPE_DEPOSIT
+			UserAccountTransaction::TYPE_DEPOSIT
 		);
-		$this->userExchangeAccountTransactionRepository->save($transaction);
-		$this->userExchangeAccountRepository->save($userAccount);
+		$this->userAccountTransactionRepository->save($transaction);
+		$this->userAccountRepository->save($userAccount);
 		$bots = $this->botRepository->findByExchangeId($exchange->getId());
 		$botMoney = $money->divide(count($bots), Money::ROUND_DOWN);
 		foreach ($bots as $bot) {

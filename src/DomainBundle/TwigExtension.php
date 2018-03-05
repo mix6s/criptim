@@ -8,6 +8,7 @@ use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
 use Domain\Exchange\UseCase\Request\GetBotTradingSessionBalancesRequest;
 use Domain\Exchange\UseCase\Request\GetUserExchangeAccountRequest;
 use Domain\Exchange\ValueObject\ExchangeId;
+use Domain\UseCase\Request\GetUserAccountRequest;
 use Domain\ValueObject\UserId;
 use DomainBundle\Exchange\Policy\CryptoMoneyFormatter;
 use Money\Currency;
@@ -41,7 +42,6 @@ class TwigExtension extends \Twig_Extension
 		return [
 			new \Twig_SimpleFilter('botBalance', [$this, 'botBalanceFilter']),
 			new \Twig_SimpleFilter('botSessionBalances', [$this, 'botSessionBalancesFilter']),
-			new \Twig_SimpleFilter('userExchangeBalance', [$this, 'userExchangeBalanceFilter']),
 			new \Twig_SimpleFilter('userBalance', [$this, 'userBalanceFilter']),
 			new \Twig_SimpleFilter('moneyFormat', [$this, 'moneyFormatFilter']),
 		];
@@ -73,36 +73,17 @@ class TwigExtension extends \Twig_Extension
 		return $account->getBalance();
 	}
 
-	public function userExchangeBalanceFilter(UserId $userId, ExchangeId $exchangeId, string $currency)
-	{
-		if ($userId->isEmpty()) {
-			return new Money(0, new Currency($currency));
-		}
-		$request = new GetUserExchangeAccountRequest();
-		$request->setCurrency(new Currency($currency));
-		$request->setUserId($userId);
-		$request->setExchangeId($exchangeId);
-		$account = $this->container->get('UseCase\GetUserExchangeAccountUseCase')->execute($request)->getUserExchangeAccount();
-		return $account->getBalance();
-	}
-
 	public function userBalanceFilter(UserId $userId, string $currency)
 	{
 		if ($userId->isEmpty()) {
 			return new Money(0, new Currency($currency));
 		}
-		$exchanges = $this->container->get('ExchangeRepository')->findAll();
-		$balance = new Money(0, new Currency($currency));
-		foreach ($exchanges as $exchange) {
-			$request = new GetUserExchangeAccountRequest();
-			$request->setCurrency(new Currency($currency));
-			$request->setUserId($userId);
-			$request->setExchangeId($exchange->getId());
-			$account = $this->container->get('UseCase\GetUserExchangeAccountUseCase')->execute($request)->getUserExchangeAccount();
-			$balance = $balance->add($account->getBalance());
-		}
+		$request = new GetUserAccountRequest();
+		$request->setCurrency(new Currency($currency));
+		$request->setUserId($userId);
+		$account = $this->container->get('UseCase\GetUserAccountUseCase')->execute($request)->getUserAccount();
 
-		return $balance;
+		return $account->getBalance();
 	}
 
 	public function moneyFormatFilter(Money $money)

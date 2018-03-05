@@ -2,12 +2,12 @@ services:
     ProfitabilityCalculator:
         class: DomainBundle\Exchange\Policy\ProfitabilityCalculator
         arguments:
-          - '@ORM\UserExchangeAccountTransactionRepository'
+          - '@ORM\UserAccountTransactionRepository'
     ProfileData:
         class: DomainBundle\Exchange\Policy\ProfileData
         arguments:
-          - '@ORM\UserExchangeAccountRepository'
-          - '@ORM\UserExchangeAccountTransactionRepository'
+          - '@ORM\UserAccountRepository'
+          - '@ORM\UserAccountTransactionRepository'
     DomainCurrenciesPolicy:
         class: Domain\Policy\DomainCurrenciesPolicy
     BalanceHistory:

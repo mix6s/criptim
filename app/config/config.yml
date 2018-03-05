@@ -86,6 +86,9 @@ doctrine:
             userExchangeAccountTransactionId:
                 class:                DomainBundle\Type\UserExchangeAccountTransactionIdType
                 commented:            true
+            userAccountTransactionId:
+                class:                DomainBundle\Type\UserAccountTransactionIdType
+                commented:            true
             botExchangeAccountTransactionId:
                 class:                DomainBundle\Type\BotExchangeAccountTransactionIdType
                 commented:            true

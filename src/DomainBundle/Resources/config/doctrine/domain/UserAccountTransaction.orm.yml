@@ -1,0 +1,45 @@
+Domain\Entity\UserAccountTransaction:
+    repositoryClass: DomainBundle\Repository\UserAccountTransactionRepository
+    namedNativeQueries:
+        findLastByCurrencyAndDate:
+          name: findLastByCurrencyAndDate
+          resultClass: __CLASS__
+          query: "SELECT DISTINCT ON (user_id) id, user_id, currency, money, balance, type, dt
+          FROM user_account_transaction
+          WHERE currency = :currency AND  dt <= :dt
+          ORDER BY user_id, dt DESC"
+        findLastByUserIdCurrencyAndDate:
+          name: findLastByUserIdCurrencyAndDate
+          resultClass: __CLASS__
+          query: "SELECT id, user_id, currency, money, balance, type, dt
+          FROM user_account_transaction
+          WHERE currency = :currency AND dt <= :dt AND user_id = :user_id
+          ORDER BY dt DESC LIMIT 1"
+        findByUserIdCurrencyFromDtToDt:
+          name: findByUserIdCurrencyFromDtToDt
+          resultClass: __CLASS__
+          query: "SELECT
+                  *
+                  FROM user_account_transaction
+                  WHERE currency = :currency AND user_id = :user_id AND dt > :from_dt AND dt <= :to_dt AND type = :type
+                  ORDER BY dt DESC"
+    type: entity
+    id:
+        id:
+            type: userAccountTransactionId
+            generator: { strategy: NONE }
+            sequenceGenerator:
+                sequenceName: user_account_transaction_id_seq
+    fields:
+        userId:
+            type: userId
+        currency:
+            type: currency
+        money:
+            type: money
+        balance:
+            type: money
+        type:
+            type: string
+        dt:
+            type: dateTimeImmutable

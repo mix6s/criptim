@@ -1,0 +1,11 @@
+Domain\Entity\UserAccount:
+    repositoryClass: DomainBundle\Repository\UserAccountRepository
+    type: entity
+    id:
+        userId:
+            type: userId
+        currency:
+            type: currency
+    fields:
+        balance:
+            type: money

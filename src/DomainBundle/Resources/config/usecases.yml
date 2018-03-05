@@ -14,12 +14,15 @@ services:
     UseCase\GetUserExchangeAccountUseCase:
         class: Domain\Exchange\UseCase\GetUserExchangeAccountUseCase
         arguments: ['@ORM\UserExchangeAccountRepository']
+    UseCase\GetUserAccountUseCase:
+        class: Domain\UseCase\GetUserAccountUseCase
+        arguments: ['@ORM\UserAccountRepository']
     UseCase\GetBotTradingSessionAccountUseCase:
         class: Domain\Exchange\UseCase\GetBotTradingSessionAccountUseCase
         arguments: ['@ORM\BotTradingSessionAccountRepository']
     UseCase\UserDepositMoneyUseCase:
         class: Domain\Exchange\UseCase\UserDepositMoneyUseCase
-        arguments: ['@ORM\UserRepository', '@ExchangeRepository', '@ORM\UserExchangeAccountRepository', '@Exchange\IdFactory', '@ORM\BotExchangeAccountRepository', '@ORM\UserExchangeAccountTransactionRepository', '@ORM\BotExchangeAccountTransactionRepository', '@ORM\BotRepository', '@UseCase\GetBotExchangeAccountUseCase', '@UseCase\GetUserExchangeAccountUseCase']
+        arguments: ['@ORM\UserRepository', '@ExchangeRepository', '@ORM\UserAccountRepository', '@Exchange\IdFactory', '@ORM\BotExchangeAccountRepository', '@ORM\UserAccountTransactionRepository', '@ORM\BotExchangeAccountTransactionRepository', '@ORM\BotRepository', '@UseCase\GetBotExchangeAccountUseCase', '@UseCase\GetUserAccountUseCase']
     UseCase\ProcessBotTradingUseCase:
         class: Domain\Exchange\UseCase\ProcessBotTradingUseCase
         arguments: ['@ORM\BotTradingSessionRepository', '@Exchange\IdFactory', '@TradingStrategyRepository', '@ORM\BotExchangeAccountRepository', '@ORM\BotExchangeAccountTransactionRepository', '@ORM\BotTradingSessionAccountRepository', '@ORM\BotTradingSessionAccountTransactionRepository', '@ORM\BotRepository', '@ORM\UserExchangeAccountRepository', '@ORM\UserExchangeAccountTransactionRepository', '@UseCase\GetBotExchangeAccountUseCase']

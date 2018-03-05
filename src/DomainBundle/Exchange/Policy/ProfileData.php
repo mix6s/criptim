@@ -6,6 +6,8 @@ namespace DomainBundle\Exchange\Policy;
 
 use Domain\Exchange\Repository\UserExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
+use Domain\Repository\UserAccountRepositoryInterface;
+use Domain\Repository\UserAccountTransactionRepositoryInterface;
 use Domain\ValueObject\UserId;
 use Money\Currency;
 use Money\Money;
@@ -13,26 +15,37 @@ use Money\Money;
 class ProfileData
 {
 
-	private $userExchangeAccountRepository;
-	private $userExchangeAccountTransactionRepository;
+	/**
+	 * @var UserAccountRepositoryInterface
+	 */
+	private $userAccountRepository;
+	/**
+	 * @var UserAccountTransactionRepositoryInterface
+	 */
+	private $userAccountTransactionRepository;
 
 	public function __construct(
-		UserExchangeAccountRepositoryInterface $userExchangeAccountRepository,
-		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository
+		UserAccountRepositoryInterface $userAccountRepository,
+		UserAccountTransactionRepositoryInterface $userAccountTransactionRepository
 	)
 	{
-		$this->userExchangeAccountRepository = $userExchangeAccountRepository;
-		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
+
+		$this->userAccountRepository = $userAccountRepository;
+		$this->userAccountTransactionRepository = $userAccountTransactionRepository;
 	}
 
 	public function getBalanceMoneyByUserId(UserId $userId): Money
 	{
-		$balance = new Money(0, new Currency('BTC'));
+		$btcCurrency = new Currency('BTC');
+		$balance = new Money(0, $btcCurrency);
 
-		$userExchangeAccounts = $this->userExchangeAccountRepository->findByUserId($userId);
+		$userAccounts = $this->userAccountRepository->findByUserId($userId);
 
-		foreach ($userExchangeAccounts as $userExchangeAccount) {
-			$balance = $balance->add($userExchangeAccount->getBalance());
+		foreach ($userAccounts as $userAccount) {
+			if (!$userAccount->getCurrency()->equals($btcCurrency)) {
+				continue;
+			}
+			$balance = $balance->add($userAccount->getBalance());
 		}
 
 		return $balance;
@@ -43,13 +56,12 @@ class ProfileData
 		$deposits = new Money(0, new Currency('BTC'));
 
 		$userExchangeAccountTransactionDeposits = $this
-			->userExchangeAccountTransactionRepository
+			->userAccountTransactionRepository
 			->findByUserIdType($userId, 'deposit');
 
 		foreach ($userExchangeAccountTransactionDeposits as $userExchangeAccountTransactionDeposit) {
 			$deposits = $deposits->add($userExchangeAccountTransactionDeposit->getMoney());
 		}
-
 		return $deposits;
 	}
 
@@ -58,7 +70,7 @@ class ProfileData
 		$cashouts = new Money(0, new Currency('BTC'));
 
 		$userExchangeAccountTransactionCashouts = $this
-			->userExchangeAccountTransactionRepository
+			->userAccountTransactionRepository
 			->findByUserIdType($userId, 'cashout');
 
 		foreach ($userExchangeAccountTransactionCashouts as $userExchangeAccountTransactionCashout) {

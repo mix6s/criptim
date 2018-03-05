@@ -35,7 +35,6 @@
                                     <td></td>
                                 {% else %}
                                     <td>
-                                        {{ user.domainUserId|userExchangeBalance(exchange.id, 'BTC')|moneyFormat }}
                                         <a class="btn btn-info btn-xs" href="{{ path('control.users.exchangeDeposit', {userId: user.domainUserId, exchangeId: exchange.id}) }}"><i class="fa fa-plus"></i> Deposit</a>
                                     </td>
                                 {% endif %}

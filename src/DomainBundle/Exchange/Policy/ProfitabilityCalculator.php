@@ -4,22 +4,26 @@
 namespace DomainBundle\Exchange\Policy;
 
 
+use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
+use Domain\Repository\UserAccountTransactionRepositoryInterface;
 use Domain\ValueObject\UserId;
 use Money\Currency;
 use Money\Money;
 
 class ProfitabilityCalculator
 {
-
-	private $userExchangeAccountTransactionRepository;
+	/**
+	 * @var UserAccountTransactionRepositoryInterface
+	 */
+	private $userAccountTransactionRepository;
 
 	public function __construct(
-		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository
+		UserAccountTransactionRepositoryInterface $userAccountTransactionRepository
 	)
 	{
-		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
 		$this->formatter = new CryptoMoneyFormatter();
+		$this->userAccountTransactionRepository = $userAccountTransactionRepository;
 	}
 
 	public function getProfitabilityByUserIdFromDtToDt(
@@ -37,41 +41,42 @@ class ProfitabilityCalculator
 
 		$denominator = new Money(0, $currency);
 
-		$lastTransactionsByExchangeForToDate = $this
-			->userExchangeAccountTransactionRepository
-			->findLastByUserIdCurrencyDate(
-				$userId,
-				$currency,
-				$toDt
-			);
-
-		$endBalance = new Money(0, $currency);
-		foreach ($lastTransactionsByExchangeForToDate as $transaction) {
-			$endBalance = $endBalance->add($transaction->getBalance());
+		try {
+			$lastTransactionForToDate = $this
+				->userAccountTransactionRepository
+				->findLastByUserIdCurrencyDate(
+					$userId,
+					$currency,
+					$toDt
+				);
+			$endBalance = $lastTransactionForToDate->getBalance();
+		} catch (EntityNotFoundException $exception) {
+			$endBalance = new Money(0, $currency);
 		}
 
 		$numerator = $endBalance;
-		$lastTransactionsByExchangeForFromDate = $this
-			->userExchangeAccountTransactionRepository
-			->findLastByUserIdCurrencyDate(
-				$userId,
-				$currency,
-				$fromDt
-			);
 
-		foreach ($lastTransactionsByExchangeForFromDate as $transaction) {
-			if ($firstDt === null) {
-				$firstDt = $transaction->getDt();
-			}
-			$numerator = $numerator->subtract($transaction->getBalance());
-			$denominator = $denominator->add($transaction->getBalance()->multiply($toDt->getTimestamp() - $transaction->getDt()->getTimestamp()));
-			if ($transaction->getDt()->getTimestamp() < $firstDt->getTimestamp()) {
-				$firstDt = $transaction->getDt();
-			}
+		try {
+			$lastTransactionForFromDate = $this
+				->userAccountTransactionRepository
+				->findLastByUserIdCurrencyDate(
+					$userId,
+					$currency,
+					$fromDt
+				);
+			$startBalance = $lastTransactionForFromDate->getBalance();
+			$firstDt = $lastTransactionForFromDate->getDt();
+		} catch (EntityNotFoundException $exception) {
+			$firstDt = $fromDt;
+			$startBalance = new Money(0, $currency);
 		}
 
+
+		$numerator = $numerator->subtract($startBalance);
+		$denominator = $denominator->add($startBalance->multiply($toDt->getTimestamp() - $firstDt->getTimestamp()));
+
 		$depositTransactions = $this
-			->userExchangeAccountTransactionRepository
+			->userAccountTransactionRepository
 			->findByUserIdCurrencyTypeFromDtToDt(
 				$userId,
 				$currency,

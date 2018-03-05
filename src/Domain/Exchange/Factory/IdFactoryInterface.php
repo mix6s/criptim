@@ -16,12 +16,14 @@ use Domain\Exchange\ValueObject\BotTradingSessionId;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
 use Domain\Exchange\ValueObject\UserExchangeAccountTransactionId;
+use Domain\ValueObject\UserAccountTransactionId;
 
 interface IdFactoryInterface
 {
 	public function getBotId(): BotId;
 	public function getBotTradingSessionId(): BotTradingSessionId;
 	public function getUserExchangeAccountTransactionId(): UserExchangeAccountTransactionId;
+	public function getUserAccountTransactionId(): UserAccountTransactionId;
 	public function getBotExchangeAccountTransactionId(): BotExchangeAccountTransactionId;
 	public function getBotTradingSessionAccountTransactionId(): BotTradingSessionAccountTransactionId;
 	public function getOrderId(): OrderId;

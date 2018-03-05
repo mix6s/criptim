@@ -9,6 +9,7 @@
 namespace Domain\Exchange\UseCase;
 
 
+use Domain\Entity\UserAccountTransaction;
 use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\BotExchangeAccount;
 use Domain\Exchange\Entity\BotExchangeAccountTransaction;
@@ -28,6 +29,8 @@ use Domain\Exchange\Repository\UserExchangeAccountRepositoryInterface;
 use Domain\Exchange\Repository\UserExchangeAccountTransactionRepositoryInterface;
 use Domain\Exchange\UseCase\Request\GetBotExchangeAccountRequest;
 use Domain\Exchange\UseCase\Request\ProcessBotTradingRequest;
+use Domain\Repository\UserAccountRepositoryInterface;
+use Domain\Repository\UserAccountTransactionRepositoryInterface;
 use DomainBundle\Exchange\Policy\CryptoMoneyFormatter;
 use Money\Money;
 
@@ -65,19 +68,20 @@ class ProcessBotTradingUseCase
 	 * @var BotTradingSessionAccountTransactionRepositoryInterface
 	 */
 	private $botTradingSessionAccountTransactionRepository;
-	/**
-	 * @var UserExchangeAccountRepositoryInterface
-	 */
-	private $userExchangeAccountRepository;
-	/**
-	 * @var UserExchangeAccountTransactionRepositoryInterface
-	 */
-	private $userExchangeAccountTransactionRepository;
+
 	/**
 	 * @var GetBotExchangeAccountUseCase
 	 */
 	private $getBotExchangeAccountUserCase;
 	private $formatter;
+	/**
+	 * @var UserAccountRepositoryInterface
+	 */
+	private $userAccountRepository;
+	/**
+	 * @var UserAccountTransactionRepositoryInterface
+	 */
+	private $userAccountTransactionRepository;
 
 	public function __construct(
 		BotTradingSessionRepositoryInterface $botTradingSessionRepository,
@@ -88,8 +92,8 @@ class ProcessBotTradingUseCase
 		BotTradingSessionAccountRepositoryInterface $botTradingSessionAccountRepository,
 		BotTradingSessionAccountTransactionRepositoryInterface $botTradingSessionAccountTransactionRepository,
 		BotRepositoryInterface $botRepository,
-	 	UserExchangeAccountRepositoryInterface $userExchangeAccountRepository,
-		UserExchangeAccountTransactionRepositoryInterface $userExchangeAccountTransactionRepository,
+	 	UserAccountRepositoryInterface $userAccountRepository,
+		UserAccountTransactionRepositoryInterface $userAccountTransactionRepository,
 		GetBotExchangeAccountUseCase $getBotExchangeAccountUserCase
 	) {
 		$this->botTradingSessionRepository = $botTradingSessionRepository;
@@ -100,10 +104,10 @@ class ProcessBotTradingUseCase
 		$this->botRepository = $botRepository;
 		$this->botExchangeAccountTransactionRepository = $botExchangeAccountTransactionRepository;
 		$this->botTradingSessionAccountTransactionRepository = $botTradingSessionAccountTransactionRepository;
-		$this->userExchangeAccountRepository = $userExchangeAccountRepository;
-		$this->userExchangeAccountTransactionRepository = $userExchangeAccountTransactionRepository;
 		$this->getBotExchangeAccountUserCase = $getBotExchangeAccountUserCase;
 		$this->formatter = new CryptoMoneyFormatter();
+		$this->userAccountRepository = $userAccountRepository;
+		$this->userAccountTransactionRepository = $userAccountTransactionRepository;
 	}
 
 	public function execute(ProcessBotTradingRequest $request)
@@ -187,8 +191,7 @@ class ProcessBotTradingUseCase
 			if ($diff->isZero()) {
 				continue;
 			}
-			$transactions = $this->userExchangeAccountTransactionRepository->findLastByExchangeIdCurrencyDate(
-				$bot->getExchangeId(),
+			$transactions = $this->userAccountTransactionRepository->findLastByCurrencyAndDate(
 				$diff->getCurrency(),
 				$session->getCreatedAt()
 			);
@@ -202,24 +205,22 @@ class ProcessBotTradingUseCase
 				$multiplier = $transaction->getBalance()->divide($sumAmount, Money::ROUND_DOWN);
 				$multiplierAmount = $this->formatter->format($multiplier);
 				$userDiff = $diff->multiply($multiplierAmount, Money::ROUND_DOWN);
-				$userAccount = $this->userExchangeAccountRepository->findByUserIdExchangeIdCurrency(
+				$userAccount = $this->userAccountRepository->findByUserIdCurrency(
 					$transaction->getUserId(),
-					$transaction->getExchangeId(),
 					$userDiff->getCurrency()
 				);
-				$transactionId = $this->idFactory->getUserExchangeAccountTransactionId();
+				$transactionId = $this->idFactory->getUserAccountTransactionId();
 				$userAccount->change($userDiff);
-				$userAccountTransaction = new UserExchangeAccountTransaction(
+				$userAccountTransaction = new UserAccountTransaction(
 					$transactionId,
 					$transaction->getUserId(),
-					$transaction->getExchangeId(),
 					$userDiff->getCurrency(),
 					$userDiff,
 					$userAccount->getBalance(),
-					UserExchangeAccountTransaction::TYPE_TRADING_DIFF
+					UserAccountTransaction::TYPE_TRADING_DIFF
 				);
-				$this->userExchangeAccountTransactionRepository->save($userAccountTransaction);
-				$this->userExchangeAccountRepository->save($userAccount);
+				$this->userAccountTransactionRepository->save($userAccountTransaction);
+				$this->userAccountRepository->save($userAccount);
 			}
 		}
 		$session->close();

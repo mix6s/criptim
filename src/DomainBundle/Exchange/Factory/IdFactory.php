@@ -17,6 +17,7 @@ use Domain\Exchange\ValueObject\BotTradingSessionAccountTransactionId;
 use Domain\Exchange\ValueObject\BotTradingSessionId;
 use Domain\Exchange\ValueObject\OrderId;
 use Domain\Exchange\ValueObject\UserExchangeAccountTransactionId;
+use Domain\ValueObject\UserAccountTransactionId;
 
 class IdFactory implements IdFactoryInterface
 {
@@ -63,5 +64,10 @@ class IdFactory implements IdFactoryInterface
 	private function getNextId(string $sequence)
 	{
 		return $this->connection->query(sprintf("select nextval('%s')", $sequence))->fetchColumn(0);
+	}
+
+	public function getUserAccountTransactionId(): UserAccountTransactionId
+	{
+		return new UserAccountTransactionId($this->getNextId('user_account_transaction_id_seq'));
 	}
 }
