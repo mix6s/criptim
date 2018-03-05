@@ -299,9 +299,7 @@ class EmaWithMartin implements TradingStrategyInterface
 					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
 					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
 				]);
-
-
-				break;
+				return;
 			case EmaState::SIGNAL_NONE:
 				if ($state->getShortValue() < $state->getLongValue()) {
 					$this->martin->processTrading($session);
@@ -380,7 +378,7 @@ class EmaWithMartin implements TradingStrategyInterface
 					'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
 					'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
 				]);
-				break;
+				return;
 			default:
 				throw new DomainException(sprintf('Unknown signal %s', $state->getSignal()));
 				break;
@@ -391,6 +389,15 @@ class EmaWithMartin implements TradingStrategyInterface
 		} catch (EntityNotFoundException $exception) {
 			return;
 		}
+
+		$balancesRequest->setCurrency($baseCurrency);
+		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+		$balancesRequest->setCurrency($quoteCurrency);
+		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
+		if (!$baseCurrencyBalances->getAccountBalance()->isZero()) {
+			return;
+		}
+
 		$activeOrders = $this->orderRepository->findActive($session->getId());
 		foreach ($activeOrders as $order) {
 			$cancelOrderRequest->setOrderId($order->getId());
@@ -401,13 +408,7 @@ class EmaWithMartin implements TradingStrategyInterface
 				'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
 			]);
 		}
-		$balancesRequest->setCurrency($baseCurrency);
-		$baseCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
-		$balancesRequest->setCurrency($quoteCurrency);
-		$quoteCurrencyBalances = $this->getBotTradingSessionBalancesUseCase->execute($balancesRequest);
-		if (!$baseCurrencyBalances->getAccountBalance()->isZero()) {
-			return;
-		}
+
 		$session->end();
 		$this->logger->info(sprintf('Session #%s: end session', (string)$session->getId()), [
 			'orderId' => (string)$lastSellOrder->getId(),
