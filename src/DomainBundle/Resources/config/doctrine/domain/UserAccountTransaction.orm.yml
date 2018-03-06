@@ -14,7 +14,7 @@ Domain\Entity\UserAccountTransaction:
           query: "SELECT id, user_id, currency, money, balance, type, dt
           FROM user_account_transaction
           WHERE currency = :currency AND dt <= :dt AND user_id = :user_id
-          ORDER BY dt DESC LIMIT 1"
+          ORDER BY id DESC LIMIT 1"
         findByUserIdCurrencyFromDtToDt:
           name: findByUserIdCurrencyFromDtToDt
           resultClass: __CLASS__
