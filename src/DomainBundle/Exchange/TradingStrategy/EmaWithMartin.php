@@ -307,6 +307,16 @@ class EmaWithMartin implements TradingStrategyInterface
 				}
 
 				if ($state->getShortValue() >= $state->getPrevShortValue()) {
+					$activeOrders = $this->orderRepository->findActive($session->getId());
+					foreach ($activeOrders as $order) {
+						$cancelOrderRequest->setOrderId($order->getId());
+						$this->cancelOrderUseCase->execute($cancelOrderRequest);
+						$this->logger->info(sprintf('SessionEma #%s: cancel order', (string)$session->getId()), [
+							'orderId' => (string)$cancelOrderRequest->getOrderId(),
+							'baseBalance' => $this->balancesAsArray($baseCurrencyBalances),
+							'quoteBalance' => $this->balancesAsArray($quoteCurrencyBalances),
+						]);
+					}
 					break;
 				}
 
