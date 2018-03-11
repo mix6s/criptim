@@ -1,0 +1,13 @@
+Domain\Exchange\Entity\LocalToBittrexExchangeOrder:
+    repositoryClass: DomainBundle\Exchange\Repository\LocalToBittrexExchangeOrderRepository
+    type: entity
+    id:
+        id:
+            type: localToBittrexExchangeOrderId
+            generator: { strategy: NONE }
+            sequenceGenerator:
+                sequenceName: local_to_bittrex_exchange_order_id_seq
+        orderId:
+            type: orderId
+        bittrexOrderId:
+            type: bittrexOrderId

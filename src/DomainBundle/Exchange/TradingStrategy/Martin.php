@@ -139,7 +139,7 @@ class Martin implements TradingStrategyInterface
 		$buyDelaySeconds = $settings['buy_delay_seconds'] ?? 360;
 		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
 		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
-		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
+		$symbolString = $exchange->getSymbolForCurrencies($baseCurrency, $quoteCurrency);
 
 		$createOrderRequest = new CreateOrderRequest();
 		$createOrderRequest->setBotTradingSessionId($session->getId());

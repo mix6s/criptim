@@ -116,6 +116,13 @@ doctrine:
             dateTimeImmutable:
                 class:                DomainBundle\Type\DateTimeImmutableType
                 commented:            true
+            localToBittrexExchangeOrderId:
+                class:                DomainBundle\Type\LocalToBittrexExchangeOrderIdType
+                commented:            true
+            bittrexOrderId:
+                class:                DomainBundle\Type\BittrexOrderIdType
+                commented:            true
+
     orm:
         auto_generate_proxy_classes: '%kernel.debug%'
         naming_strategy: doctrine.orm.naming_strategy.underscore

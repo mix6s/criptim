@@ -15,6 +15,7 @@ use Domain\Exchange\ValueObject\BotExchangeAccountTransactionId;
 use Domain\Exchange\ValueObject\BotId;
 use Domain\Exchange\ValueObject\BotTradingSessionAccountTransactionId;
 use Domain\Exchange\ValueObject\BotTradingSessionId;
+use Domain\Exchange\ValueObject\LocalToBittrexExchangeOrderId;
 use Domain\Exchange\ValueObject\OrderId;
 use Domain\Exchange\ValueObject\UserExchangeAccountTransactionId;
 use Domain\ValueObject\UserAccountTransactionId;
@@ -59,6 +60,11 @@ class IdFactory implements IdFactoryInterface
 	public function getOrderId(): OrderId
 	{
 		return new OrderId($this->getNextId('order_id_seq'));
+	}
+
+	public function getLocalToBittrexExchangeOrderId(): LocalToBittrexExchangeOrderId
+	{
+		return new LocalToBittrexExchangeOrderId($this->getNextId('local_to_bittrex_exchange_order_id_seq'));
 	}
 
 	private function getNextId(string $sequence)

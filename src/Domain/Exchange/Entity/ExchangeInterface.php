@@ -10,25 +10,22 @@ namespace Domain\Exchange\Entity;
 
 
 use Domain\Exception\EntityNotFoundException;
+use Domain\Exchange\ValueObject\Candle;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
 use Money\Currency;
-use Money\CurrencyPair;
 
 interface ExchangeInterface
 {
-	/**
-	 * @return ExchangeId
-	 */
 	public function getId(): ExchangeId;
 
 	public function createOrder(Order $order);
 
 	public function cancelOrder(OrderId $orderId): ExchangeOrder;
 
-	public function getSymbol(string $symbol);
+	public function getSymbolForCurrencies(Currency $base, Currency $quote): string;
 
-	public function getFee();
+	public function getFee(): float;
 
 	public function getBid(string $symbol): float;
 
@@ -36,7 +33,15 @@ interface ExchangeInterface
 
 	public function getPriceTickSize(string $symbol): float;
 	public function getAmountIncrement(string $symbol): float;
-	public function getCandles(Currency $base, Currency $quote, \DateInterval $period, int $count);
+
+	/**
+	 * @param Currency $base
+	 * @param Currency $quote
+	 * @param \DateInterval $period
+	 * @param int $count
+	 * @return Candle[]
+	 */
+	public function getCandles(Currency $base, Currency $quote, \DateInterval $period, int $count): array;
 
 	/**
 	 * @return ExchangeOrder[]

@@ -14,6 +14,7 @@ use Domain\Exception\EntityNotFoundException;
 use Domain\Exchange\Entity\ExchangeInterface;
 use Domain\Exchange\Entity\ExchangeOrder;
 use Domain\Exchange\Entity\Order;
+use Domain\Exchange\ValueObject\Candle;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\Exchange\ValueObject\OrderId;
 use DomainBundle\Exception\HitBtcApiException;
@@ -70,6 +71,11 @@ class HitBtcExchange implements ExchangeInterface
 		return $this->id;
 	}
 
+	public function getSymbolForCurrencies(Currency $base, Currency $quote): string
+	{
+		return $base . $quote;
+	}
+
 	public function createOrder(Order $order)
 	{
 		$data = [
@@ -112,12 +118,7 @@ class HitBtcExchange implements ExchangeInterface
 		return $this->toExchangeOrder($data);
 	}
 
-	public function getSymbol(string $symbol)
-	{
-		// TODO: Implement getSymbol() method.
-	}
-
-	public function getFee()
+	public function getFee(): float
 	{
 		return 0.1 / 100;
 	}
@@ -254,11 +255,38 @@ class HitBtcExchange implements ExchangeInterface
 		return $this->symbolData;
 	}
 
-	public function getCandles(Currency $base, Currency $quote, \DateInterval $period, int $limit)
+	public function getCandles(Currency $base, Currency $quote, \DateInterval $period, int $limit): array
 	{
 		$exchangePeriod = $this->resolvePeriodFromInterval($period);
-		$data = $this->apiAuthRequest('GET', sprintf('/public/candles/%s?period=%s&limit=%s', $base->getCode() . $quote->getCode(), $exchangePeriod, $limit), null, false);
-		return $data;
+		$data = $this->apiAuthRequest(
+			'GET',
+			sprintf(
+				'/public/candles/%s?period=%s&limit=%s',
+				$base->getCode() . $quote->getCode(),
+				$exchangePeriod,
+				$limit
+			),
+			null,
+			false
+		);
+		$candles = [];
+		foreach ($data as $item) {
+			/*
+			 *   {
+    "timestamp": "2017-10-20T20:00:00.000Z",
+    "open": "0.050459",
+    "close": "0.050087",
+    "min": "0.050000",
+    "max": "0.050511",
+    "volume": "1326.628",
+    "volumeQuote": "66.555987736"
+  },*/
+			$candles[] = new Candle(
+				(float)$item['close'],
+				new \DateTimeImmutable($item['timestamp'])
+			);
+		}
+		return $candles;
 	}
 
 	private function resolvePeriodFromInterval(\DateInterval $interval)

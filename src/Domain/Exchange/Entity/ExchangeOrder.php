@@ -42,7 +42,15 @@ class ExchangeOrder
 	 */
 	private $status;
 
-	public function __construct(OrderId $id, string $type = null, float $price = null, float $amount = null, float $execAmount = null, string $symbol = null, string $status = null)
+	public function __construct(
+		OrderId $id,
+		string $type = null,
+		float $price = null,
+		float $amount = null,
+		float $execAmount = null,
+		string $symbol = null,
+		string $status = null
+	)
 	{
 
 		$this->id = $id;

@@ -24,3 +24,6 @@ services:
     app.cache:
         class: Symfony\Component\Cache\Adapter\TagAwareAdapter
         arguments: [ '@app.cache.data.adapter', '@app.cache.tags.adapter' ]
+
+    http.client:
+        class: GuzzleHttp\Client

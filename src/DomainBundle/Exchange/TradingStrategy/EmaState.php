@@ -39,7 +39,14 @@ class EmaState
 	 */
 	private $timestamp;
 
-	public function __construct(int $signal, float $short, float $long, float $prevShort, float $prevLong, \DateTimeImmutable $timestamp)
+	public function __construct(
+		int $signal,
+		float $short,
+		float $long,
+		float $prevShort,
+		float $prevLong,
+		\DateTimeImmutable $timestamp
+	)
 	{
 		$this->signal = $signal;
 		$this->short = $short;

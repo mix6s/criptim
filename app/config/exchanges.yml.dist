@@ -3,3 +3,15 @@ services:
         class:   'DomainBundle\Exchange\Entity\HitBtcExchange'
         arguments: ['_test', 'pub', 'private' , '@logger']
         tags: [domain.exchange]
+
+    Exchange\Bittrex_test:
+        class:  'DomainBundle\Exchange\Entity\BittrexExchange'
+        arguments:
+            - '_test'
+            - 'pub'
+            - 'private'
+            - '@logger'
+            - '@http.client'
+            - '@ORM\LocalToBittrexExchangeOrderRepository'
+            - '@Exchange\IdFactory'
+        tags: [domain.exchange]

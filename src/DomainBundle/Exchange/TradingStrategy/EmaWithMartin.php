@@ -160,7 +160,7 @@ class EmaWithMartin implements TradingStrategyInterface
 		$goDownProfitPercent = $settings['go_down_profit_percent'] ?? 0.4;
 		$baseCurrency = new Currency($settings['baseCurrency'] ?? 'XRP');
 		$quoteCurrency = new Currency($settings['quoteCurrency'] ?? 'BTC');
-		$symbolString = $baseCurrency->getCode() . $quoteCurrency->getCode();
+		$symbolString = $exchange->getSymbolForCurrencies($baseCurrency, $quoteCurrency);
 		$minBalance = new Money(0, $baseCurrency);
 		$amountInc = $this->moneyFromFloatPolicy->getMoney($baseCurrency, $exchange->getAmountIncrement($symbolString));
 		$priceTickSize = $this->moneyFromFloatPolicy->getMoney($quoteCurrency, $exchange->getPriceTickSize($symbolString));
@@ -462,8 +462,8 @@ class EmaWithMartin implements TradingStrategyInterface
 			if ($count >= count($candles)) {
 				break;
 			}
-			$data['prices'][] = (float)$candle['close'];
-			$data['timestamps'][] = new \DateTimeImmutable($candle['timestamp']);
+			$data['prices'][] = $candle->getClose();
+			$data['timestamps'][] = $candle->getTimestamp();
 		}
 		$index = 0;
 		$shortSmaValue = 0;
