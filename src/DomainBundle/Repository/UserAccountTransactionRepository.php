@@ -91,7 +91,53 @@ class UserAccountTransactionRepository extends EntityRepository implements UserA
 			[
 				'userId' => $userId,
 				'type' => $type
+			],
+			[
+				'dt' => 'DESC'
 			]
 		);
+	}
+
+	/**
+	 * @param UserId $userId
+	 * @param string $type
+	 * @param \DateTimeInterface $fromDt
+	 * @param \DateTimeInterface $toDt
+	 * @return UserAccountTransaction[]
+	 */
+	public function findByUserIdTypeFromDtToDt(
+		UserId $userId,
+		string $type,
+		\DateTimeInterface $fromDt,
+		\DateTimeInterface $toDt
+	): array
+	{
+		return $this->createNativeNamedQuery('findByUserIdTypeFromDtToDt')
+			->setParameter('user_id', $userId)
+			->setParameter('type', $type)
+			->setParameter('from_dt', $fromDt)
+			->setParameter('to_dt', $toDt)
+			->getResult();
+	}
+
+	/**
+	 * @param UserId $userId
+	 * @param Currency $currency
+	 * @return UserAccountTransaction
+	 * @throws EntityNotFoundException
+	 */
+	public function findFirstByUserIdCurrency(
+		UserId $userId,
+		Currency $currency
+	): UserAccountTransaction
+	{
+		$transaction = $this->createNativeNamedQuery('findFirstByUserIdCurrency')
+			->setParameter('user_id', $userId)
+			->setParameter('currency', $currency)
+			->getOneOrNullResult();
+		if ($transaction === null) {
+			throw new EntityNotFoundException('UserAccountTransaction not found');
+		}
+		return $transaction;
 	}
 }

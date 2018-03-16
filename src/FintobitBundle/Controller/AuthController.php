@@ -2,19 +2,10 @@
 
 namespace FintobitBundle\Controller;
 
-use AppBundle\Entity\User;
-use AppBundle\Form\Type\RegistrationFormType;
-use Domain\UseCase\Request\CreateUserRequest;
-use FOS\UserBundle\Event\FilterUserResponseEvent;
-use FOS\UserBundle\Event\FormEvent;
-use FOS\UserBundle\Event\GetResponseUserEvent;
-use FOS\UserBundle\FOSUserEvents;
-use FOS\UserBundle\Model\UserManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Security;
 
@@ -26,79 +17,11 @@ class AuthController extends Controller
 {
 
 	/**
-	 * @Route("/registration", name="fintobit.auth.registration")
-	 * @param Request $request
-	 * @return \Domain\UseCase\Response\CreateUserResponse|null|RedirectResponse|\Symfony\Component\HttpFoundation\Response
-	 */
-	public function registrationAction(Request $request)
-	{
-		if ($this->getUser()) {
-			return $this->redirectToRoute('fintobit.profile.index');
-		}
-		/** @var $userManager UserManagerInterface */
-		$userManager = $this->get('fos_user.user_manager');
-		/** @var $dispatcher EventDispatcherInterface */
-		$dispatcher = $this->get('event_dispatcher');
-
-		/** @var User $user */
-		$user = $userManager->createUser();
-		$user->setEnabled(true);
-
-		$event = new GetResponseUserEvent($user, $request);
-		$dispatcher->dispatch(FOSUserEvents::REGISTRATION_INITIALIZE, $event);
-
-		if (null !== $event->getResponse()) {
-			return $event->getResponse();
-		}
-
-		$form = $this->createForm(RegistrationFormType::class, $user, [
-			'validation_groups' => ['AppRegistration', 'Default']
-		]);
-		$form->handleRequest($request);
-
-		if ($form->isSubmitted()) {
-			if ($form->isValid()) {
-				$event = new FormEvent($form, $request);
-				$response = $this->get('UseCase\CreateUserUseCase')->execute(new CreateUserRequest());
-				$user->setDomainUserId($response->getUser()->getId());
-				$user->addRole(User::ROLE_INVESTOR);
-				$dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
-				$userManager->updateUser($user);
-				$response = $event->getResponse();
-				if (null === $response) {
-					$url = $this->generateUrl('fos_user_registration_confirmed');
-					$response = new RedirectResponse($url);
-				}
-				$dispatcher
-					->dispatch(
-						FOSUserEvents::REGISTRATION_COMPLETED,
-						new FilterUserResponseEvent($user, $request, $response)
-					);
-
-				return $this->redirectToRoute('fintobit.profile.index');
-			}
-
-			$event = new FormEvent($form, $request);
-			$dispatcher->dispatch(FOSUserEvents::REGISTRATION_FAILURE, $event);
-
-			if (null !== $response = $event->getResponse()) {
-				return $response;
-			}
-		}
-
-		return $this->render(
-			'@Fintobit/Auth/registration.html.twig',
-			[
-				'form' => $form->createView(),
-				'layout_title' => 'Регистрация'
-			]
-		);
-	}
-
-	/**
 	 * @Route("/login", name="fintobit.auth.login")
+	 * @param Request $request
+	 * @return Response
 	 */
-	public function loginAction(Request $request)
+	public function loginAction(Request $request): Response
 	{
 		if ($this->getUser()) {
 			return $this->redirectToRoute('fintobit.profile.index');
@@ -138,5 +61,19 @@ class AuthController extends Controller
 				'layout_title' => 'Авторизация'
 			]
 		);
+	}
+
+	/**
+	 * @Route("restore", name="fintobit.auth.restore")
+	 * @param Request $request
+	 * @return Response
+	 */
+	public function recoverPasswordAction(Request $request): Response
+	{
+		if ($this->getUser()) {
+			return $this->redirectToRoute('fintobit.profile.index');
+		}
+
+		return $this->render('@Fintobit/Auth/recover_password.html.twig');
 	}
 }

@@ -13,6 +13,8 @@ class UserAccountTransaction
 {
 	const TYPE_DEPOSIT = 'deposit';
 	const TYPE_TRADING_DIFF = 'trading_diff';
+	const TYPE_CASHOUT = 'cashout';
+	const TYPE_FEE = 'fee';
 
 	/**
 	 * @var UserAccountTransactionId

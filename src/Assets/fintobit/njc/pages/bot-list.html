@@ -1,0 +1,76 @@
+{% extends "src/Assets/fintobit/njc/layout-admin.html" %}
+
+{% block content %}
+
+<div class="admins-header">
+    <h1 class="admins-header__title">Bots</h1>
+    <button type="submit" class="admins-header__button button button--action">Create new bot</button>
+</div>
+
+<h2 class="admins-header__subtitle">No bots has been created yet</h2>
+
+<div class="table table--bot-info">
+    <div class="row row--heading row--bot-info">
+        <div class="cell cell--bot-info cell--id">ID</div>
+        <div class="cell cell--bot-info cell--status">Status</div>
+        <div class="cell cell--bot-info cell--btc-balance">BTC balance</div>
+        <div class="cell cell--bot-info cell--s-balance">Session balance</div>
+        <div class="cell cell--bot-info cell--o-balance">In orders balance</div>
+        <div class="cell cell--bot-info cell--a-balance">Available balance</div>
+        <div class="cell cell--bot-info cell--exchange">Exchange</div>
+        <div class="cell cell--bot-info cell--strategy">Strategy</div>
+        <div class="cell cell--bot-info cell--settings">Strategy settings</div>
+        <div class="cell cell--bot-info cell--edit"></div>
+
+    </div>
+    <div class="row row--bot-info">
+        <div class="cell cell--bot-info cell--id">1</div>
+        <div class="cell cell--bot-info cell--status text-decoration--red">Inactive</div>
+        <div class="cell cell--bot-info cell--btc-balance">1.00000000 btc</div>
+        <div class="cell cell--bot-info cell--s-balance"></div>
+        <div class="cell cell--bot-info cell--o-balance"></div>
+        <div class="cell cell--bot-info cell--a-balance"></div>
+        <div class="cell cell--bot-info cell--exchange">hitbtc_test</div>
+        <div class="cell cell--bot-info cell--strategy">hitbtc_test</div>
+        <div class="cell cell--bot-info cell--settings">Lorem ipsum dolor.</div>
+        <div class="cell cell--bot-info cell--edit">
+            <a href="" class="bot-edit">
+                <div class="edit-img"></div>
+            </a>
+        </div>
+    </div>
+    <div class="row row--bot-info">
+        <div class="cell cell--bot-info cell--id">2</div>
+        <div class="cell cell--bot-info cell--status text-decoration--green">active</div>
+        <div class="cell cell--bot-info cell--btc-balance">0.00001854 btc</div>
+        <div class="cell cell--bot-info cell--s-balance"></div>
+        <div class="cell cell--bot-info cell--o-balance"></div>
+        <div class="cell cell--bot-info cell--a-balance"></div>
+        <div class="cell cell--bot-info cell--exchange">hitbtc_test</div>
+        <div class="cell cell--bot-info cell--strategy">hitbtc_test</div>
+        <div class="cell cell--bot-info cell--settings">Lorem ipsum dolor.</div>
+        <div class="cell cell--bot-info cell--edit">
+            <a href="" class="bot-edit">
+                <div class="edit-img"></div>
+            </a>
+        </div>
+    </div>
+    <div class="row row--bot-info">
+        <div class="cell cell--bot-info cell--id">3</div>
+        <div class="cell cell--bot-info cell--status text-decoration--green">active</div>
+        <div class="cell cell--bot-info cell--btc-balance">0.09864723 btc</div>
+        <div class="cell cell--bot-info cell--s-balance"></div>
+        <div class="cell cell--bot-info cell--o-balance"></div>
+        <div class="cell cell--bot-info cell--a-balance"></div>
+        <div class="cell cell--bot-info cell--exchange">hitbtc_test</div>
+        <div class="cell cell--bot-info cell--strategy">hitbtc_test</div>
+        <div class="cell cell--bot-info cell--settings">Lorem ipsum dolor.</div>
+        <div class="cell cell--bot-info cell--edit">
+            <a href="" class="bot-edit">
+                <div class="edit-img"></div>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

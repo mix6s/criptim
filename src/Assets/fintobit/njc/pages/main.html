@@ -1,0 +1,218 @@
+{% extends "src/Assets/fintobit/njc/layout.html" %}
+
+{% block content %}
+<div class="balance-block">
+    <div class="balance-block__title">
+        <h1>Balance</h1>
+        <div class="balance-block__current">
+            <span class="value">0.12718859</span> btc
+        </div>
+    </div>
+    <div class="balance-block__info">
+        <div class="balance-block__col">
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All deposits:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value">0.13298231 BTC</div>
+            </div>
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All cashouts:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value">0.00000000 BTC</div>
+            </div>
+        </div>
+        <div class="balance-block__col">
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All commission:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value">0.00003466 BTC</div>
+            </div>
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All profitability:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value text-decoration--green">+2.83%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="month-balance">
+    <div class="month-balance__title">
+        Balance change<br>during month
+    </div>
+    <div class="month-balance__info">
+        <div class="month-balance__col">
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Deposits:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value">0.13298231 BTC</div>
+            </div>
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Cashouts:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value">0.00000000 BTC</div>
+            </div>
+            <div class="month-balance__period-item">
+                <div class="month-balance__info-item--title">Period start balance:</div>
+                <div class="month-balance__info-item--value">0.13298231 BTC</div>
+            </div>
+        </div>
+        <div class="month-balance__col">
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Commission:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value">0.00000334 BTC</div>
+            </div>
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Profability:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value text-decoration--red">+1.94%</div>
+            </div>
+            <div class="month-balance__period-item">
+                <div class="month-balance__info-item--title">Period end balance:</div>
+                <div class="month-balance__info-item--value">0.23359321 BTC</div>
+            </div>
+            <div class="month-balance__period-select">
+                <div class="month-balance__period-title">Choose period:</div>
+                <select class="field-block__select">
+                    <option class="field-block__item">January</option>
+                    <option class="field-block__item">February</option>
+                    <option class="field-block__item">March</option>
+                    <option class="field-block__item">April</option>
+                    <option class="field-block__item">May</option>
+                    <option class="field-block__item">June</option>
+                    <option class="field-block__item">July</option>
+                    <option class="field-block__item">August</option>
+                    <option class="field-block__item">September</option>
+                    <option class="field-block__item">October</option>
+                    <option class="field-block__item">November</option>
+                    <option class="field-block__item">December</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="schedule-block">
+    <div class="schedule-block__wrapper">
+        <div class="schedule-block__axis-y">btc</div>
+        <div class="schedule"></div>
+    </div>
+    <div class="schedule-block__axis-x">Day</div>
+</div>
+
+<div class="portfolio">
+    <h2 class="portfolio__header">Portfolio</h2>
+    <div class="portfolio__wrapper">
+        <div class="portfolio__diagram">
+
+        </div>
+        <div class="portfolio__diagram-legend">
+            <ul class="diagram-legend__list">
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">btc/usdt</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">40%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">bch/btc</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">20%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">eth/btc</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">15%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">dash/btc</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">10%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">xmr/btc</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">5%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">xrp/btc</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">3%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">zec/btc</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">2%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">bch/usdt</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">2%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title">ltc/btc</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">1.5%</div>
+                </li>
+                <li class="diagram-legend__list-item">
+                    <div class="list-style__mark"></div>
+                    <div class="list-item__title text-transform__reset">Other</div>
+                    <div class="list-item__line"></div>
+                    <div class="list-item__value">0.5%</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="trans-history">
+    <h2 class="trans-history__header">Transaction history</h2>
+    <div class="table table--deal-history">
+        <div class="row row--heading row--deal-history">
+            <div class="cell cell--deal-history cell--market text-transform__reset">Market</div>
+            <div class="cell cell--deal-history cell--price text-transform__reset">Price</div>
+            <div class="cell cell--deal-history cell--change text-transform__reset">Change</div>
+        </div>
+        <div class="row row--deal-history row--outcome">
+            <div class="cell cell--deal-history cell--market">btc/usdt</div>
+            <div class="cell cell--deal-history cell--price">11269.40</div>
+            <div class="cell cell--deal-history cell--change">−3.52%</div>
+        </div>
+        <div class="row row--deal-history row--income">
+            <div class="cell cell--deal-history cell--market">bch/btc</div>
+            <div class="cell cell--deal-history cell--price">0.110657</div>
+            <div class="cell cell--deal-history cell--change">+23.01%</div>
+        </div>
+        <div class="row row--deal-history row--income">
+            <div class="cell cell--deal-history cell--market">eth/btc</div>
+            <div class="cell cell--deal-history cell--price">0.075427</div>
+            <div class="cell cell--deal-history cell--change">+4.70%</div>
+        </div>
+        <div class="row row--deal-history row--outcome">
+            <div class="cell cell--deal-history cell--market">dash/btc</div>
+            <div class="cell cell--deal-history cell--price">0.052682</div>
+            <div class="cell cell--deal-history cell--change">−0.78%</div>
+        </div>
+        <div class="row row--deal-history row--income">
+            <div class="cell cell--deal-history cell--market">xmr/btc</div>
+            <div class="cell cell--deal-history cell--price">0.032055</div>
+            <div class="cell cell--deal-history cell--change">+10.45%</div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}

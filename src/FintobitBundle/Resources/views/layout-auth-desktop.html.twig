@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js"> <!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,700,700i&amp;subset=cyrillic"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('build/fintobit/css/style.css') }}">
+</head>
+<body>
+<script src="{{ asset('build/fintobit/js/scripts.min.js') }}"></script>
+<div class="content-wrapper-auth">
+    <div class="content">
+        <div class="content__main-auth">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -33,7 +33,7 @@ gulp.task('build-styles', function () {
 });
 
 gulp.task('build-images', function () {
-    return gulp.src('src/Assets/fintobit/img/**/*')
+    return gulp.src('src/Assets/fintobit/img/*')
         .pipe(imagemin({
             progressive: true,
             svgoPlugins: [{removeViewBox: false}],
@@ -58,6 +58,7 @@ gulp.task('build-scripts', function () {
     return gulp.src([
         'bower_components/jquery/dist/jquery.js',
         'bower_components/underscore/underscore.js',
+        'bower_components/chart.js/dist/Chart.bundle.js',
         'src/Assets/fintobit/js/*.js'
     ])
         .pipe(concat('scripts.js'))
@@ -71,6 +72,7 @@ gulp.task('build-scripts', function () {
 gulp.task('build-clean', function () {
     del('build/fintobit*');
 });
+
 gulp.task('web-clean', function () {
     del('web/build/fintobit*');
 });

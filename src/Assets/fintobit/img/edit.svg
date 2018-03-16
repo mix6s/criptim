@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>CCB05235-02A3-4B96-BF4F-9A842AFEB464</title>
+    <desc>Created with sketchtool.</desc>
+    <defs></defs>
+    <g id="0-components" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icons/edit">
+            <path d="M22.5,14.9664489 L15.9886144,7.5 L9,7.5 C8.17157288,7.5 7.5,8.17157288 7.5,9 L7.5,21 C7.5,21.8284271 8.17157288,22.5 9,22.5 L21,22.5 C21.8284271,22.5 22.5,21.8284271 22.5,21 L22.5,14.9664489 Z" id="Rectangle-2" stroke="#DEDEDE"></path>
+            <polygon id="Rectangle-8" fill="#D8D8D8" transform="translate(18.124326, 12.722703) rotate(-135.000000) translate(-18.124326, -12.722703) " points="16.568945 9.57421527 18.1243256 8.44540673 19.6797062 9.57421527 19.6797062 17 16.568945 17"></polygon>
+            <rect id="Rectangle-9" fill="#D8D8D8" transform="translate(22.767767, 8.366145) rotate(-45.000000) translate(-22.767767, -8.366145) " x="21.767767" y="6.86614469" width="2" height="3"></rect>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,2 @@
+imports:
+    - { resource: '@FintobitBundle/Resources/config/services.yml' }

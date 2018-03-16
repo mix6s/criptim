@@ -1,0 +1,200 @@
+.admins-nav {
+  height: 60px;
+  width: 200px;
+  margin-left: 70px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+  font-weight: 300;
+  &__link {
+    display: block;
+    height: 40px;
+    width: 100px;
+    text-align: center;
+    padding-top: 20px;
+  }
+  &__link:hover {
+    background-color: rgba(173, 176, 186, 0.2)
+  }
+}
+
+.admins-header {
+  width: 1160px;
+  height: 165px;
+  padding: 0 20px;
+  border-bottom: 1px solid #414044;
+  border-top: 1px solid #414044;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  &__title {
+    font-size: 46px;
+    font-weight: 300;
+    margin-bottom: 50px;
+  }
+  &__subtitle {
+    display: none;
+    font-size: 26px;
+    font-weight: 300;
+    margin-left: 20px;
+    margin-top: 25px;
+  }
+
+  &__button {
+    height: 50px;
+    width: 260px;
+  }
+}
+
+//////////////////////////table///////////////////////////////
+
+.table--bot-info {
+  margin-top: 80px;
+  border-bottom: 1px solid #504f55;
+
+  .cell {
+    &--id{
+      width: 41px;
+    }
+    &--status{
+      width: 80px;
+    }
+    &--btc-balance{
+      width: 170px;
+    }
+    &--s-balance{
+      width: 150px;
+    }
+    &--o-balance{
+      width: 160px;
+    }
+    &--a-balance{
+      width: 160px;
+    }
+    &--exchange{
+      width: 100px;
+    }
+    &--strategy{
+      width: 90px;
+    }
+    &--settings{
+      width: 150px;
+    }
+    &--edit{
+      width: 60px;
+    }
+  }
+}
+
+/////////////////////////
+
+.row--heading.row--bot-info {
+  .cell {
+    padding: 10px 0;
+    background-color: rgba(173, 176, 186, 0.2);
+    font-weight: 600;
+
+    &:first-of-type {
+      border-top-left-radius: 4px;
+    }
+
+    &:last-of-type {
+      border-top-right-radius: 4px;
+    }
+  }
+
+  &:last-of-type {
+    .cell {
+      border-bottom: solid 1px #504f55;
+    }
+  }
+}
+
+.cell--bot-info {
+  padding: 5px 0;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 2.36;
+  letter-spacing: normal;
+  text-align: center;
+  border-top: solid 1px #504f55;
+  border-right: solid 1px #504f55;
+
+  &:first-of-type {
+    border-left: solid 1px #504f55;
+  }
+}
+
+///////////////////////////////////////////////////////////////////
+
+.table--user-info {
+  margin-top: 80px;
+  border-bottom: 1px solid #504f55;
+
+  .cell {
+    justify-content: flex-start;
+
+    &--id{
+      width: 60px;
+    }
+    &--username{
+      width: 358px;
+    }
+    &--user-btc-balance{
+      width: 359px;
+    }
+    &--exchange-balance{
+      width: 379px;
+    }
+  }
+}
+
+.row--heading.row--user-info {
+  .cell {
+    padding: 10px 0 0 10px;
+    background-color: rgba(173, 176, 186, 0.2);
+    font-weight: 600;
+
+    &:first-of-type {
+      border-top-left-radius: 4px;
+    }
+
+    &:last-of-type {
+      border-top-right-radius: 4px;
+    }
+  }
+
+  &:last-of-type {
+    .cell {
+      border-bottom: solid 1px #504f55;
+    }
+  }
+}
+
+.cell--user-info {
+  padding: 10px 0 10px 10px;
+
+  width: 100%;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 2.36;
+  letter-spacing: normal;
+  text-align: center;
+  border-top: solid 1px #504f55;
+  border-right: solid 1px #504f55;
+
+  &:first-of-type {
+    border-left: solid 1px #504f55;
+  }
+}
+
+.username-link {
+  text-decoration: underline;
+}
+
+.bot-edit__subtitle {
+  font-size: 26px;
+  font-weight: 300;
+  margin-left: 20px;
+  margin-top: 30px;
+}

@@ -1,0 +1,57 @@
+.popup {
+	position: fixed;
+	top: 200px;
+	right: 8px;
+	left: 50%;
+	transform: translateX(-50%);
+	min-width: 360px;
+	max-width: 560px;
+	background-color: #525359;
+	box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.6);
+	border-radius: 4px;
+	z-index: 20;
+}
+
+.popup {
+	width: 360px;
+}
+
+.popup-heading {
+	padding: 8px 8px 8px 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.popup-heading__title {
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 2.06;
+	color: #ffffff;
+}
+
+.popup-content {
+	padding: 16px;
+}
+
+.popup-content--pro-advantages {
+	padding-top: 11px;
+}
+
+.popup__text-descr {
+	max-height: 262px;
+	padding-right: 29px;
+	overflow-y: scroll;
+	font-size: 12px;
+	line-height: 1.67;
+	color: #ffffff;
+}
+
+//////////////////////
+
+.ch {
+	width: 800px;
+	height: 500px;
+	background-color: #fff;
+}

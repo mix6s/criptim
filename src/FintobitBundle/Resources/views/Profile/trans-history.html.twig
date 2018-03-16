@@ -1,0 +1,34 @@
+<div class="trans-history">
+    <h2 class="trans-history__header">Transaction history</h2>
+    <div class="table table--deal-history">
+        <div class="row row--heading row--deal-history">
+            <div class="cell cell--deal-history cell--market text-transform__reset">Currency</div>
+            <div class="cell cell--deal-history cell--price text-transform__reset">Date</div>
+            <div class="cell cell--deal-history cell--change text-transform__reset">Amount</div>
+        </div>
+        {% if transactions %}
+            {% for transaction in transactions %}
+                {% if transaction.isOutcome %}
+                    <div class="row row--deal-history row--outcome">
+                        <div class="cell cell--deal-history cell--market">{{ transaction.currency }}</div>
+                        <div class="cell cell--deal-history cell--price">{{ transaction.date }}</div>
+                        <div class="cell cell--deal-history cell--change">{{ transaction.amount }}</div>
+                    </div>
+                {% endif %}
+                {% if transaction.isIncome %}
+                    <div class="row row--deal-history row--income">
+                        <div class="cell cell--deal-history cell--market">{{ transaction.currency }}</div>
+                        <div class="cell cell--deal-history cell--price">{{ transaction.date }}</div>
+                        <div class="cell cell--deal-history cell--change">{{ transaction.amount }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="row row--deal-history">
+                <div class="cell cell--deal-history cell--market">—</div>
+                <div class="cell cell--deal-history cell--price">—</div>
+                <div class="cell cell--deal-history cell--change">—</div>
+            </div>
+        {% endif %}
+    </div>
+</div>

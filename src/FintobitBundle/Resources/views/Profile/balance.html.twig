@@ -1,0 +1,34 @@
+<div class="balance-block">
+    <div class="balance-block__title">
+        <h1>Balance</h1>
+        <div class="balance-block__current">
+            <span class="value">{{ balance|fintobitMoneyAmountFormat }}</span> {{ balance|fintobitMoneyCurrencyFormat }}
+        </div>
+    </div>
+    <div class="balance-block__info">
+        <div class="balance-block__col">
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All deposits:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value">{{ deposits|fintobitMoneyWithCurrencyFormat }}</div>
+            </div>
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All cashouts:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value">{{ cashouts|fintobitMoneyWithCurrencyFormat }}</div>
+            </div>
+        </div>
+        <div class="balance-block__col">
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All commission:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value">{{ fee|fintobitMoneyWithCurrencyFormat }}</div>
+            </div>
+            <div class="balance-block__info-item">
+                <div class="balance-block__info-item--title">All profitability:</div>
+                <div class="balance-block__info-item--dotted-line"></div>
+                <div class="balance-block__info-item--value text-decoration--green">{{ profitability|number_format(2) }}%</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -17,22 +17,47 @@ class ProfitabilityCalculator
 	 * @var UserAccountTransactionRepositoryInterface
 	 */
 	private $userAccountTransactionRepository;
+	/**
+	 * @var AnyMomentUserBalanceResolver
+	 */
+	private $anyMomentUserBalanceResolver;
 
 	public function __construct(
-		UserAccountTransactionRepositoryInterface $userAccountTransactionRepository
+		UserAccountTransactionRepositoryInterface $userAccountTransactionRepository,
+		AnyMomentUserBalanceResolver $anyMomentUserBalanceResolver
 	)
 	{
-		$this->formatter = new CryptoMoneyFormatter();
 		$this->userAccountTransactionRepository = $userAccountTransactionRepository;
+		$this->anyMomentUserBalanceResolver = $anyMomentUserBalanceResolver;
 	}
 
-	public function getProfitabilityByUserIdFromDtToDt(
+	public function getProfitabilityByUserIdCurrencyFromDtToDt(
 		UserId $userId,
 		Currency $currency,
 		\DateTimeInterface $fromDt,
 		\DateTimeInterface $toDt
 	): float
 	{
+
+		try {
+			$firstTransaction = $this
+				->userAccountTransactionRepository
+				->findFirstByUserIdCurrency(
+					$userId,
+					$currency
+				);
+
+			$firstTransactionDt = $firstTransaction->getDt();
+			if ($firstTransactionDt > $fromDt) {
+				$fromDt = $firstTransactionDt;
+			}
+			if ($firstTransactionDt > $toDt) {
+				$toDt = $firstTransactionDt;
+			}
+		} catch (EntityNotFoundException $exception) {
+			return 0.0;
+		}
+
 		$firstDt = null;
 		$now = new \DateTimeImmutable();
 		if ($toDt->getTimestamp() > $now->getTimestamp()) {
@@ -41,39 +66,13 @@ class ProfitabilityCalculator
 
 		$denominator = new Money(0, $currency);
 
-		try {
-			$lastTransactionForToDate = $this
-				->userAccountTransactionRepository
-				->findLastByUserIdCurrencyDate(
-					$userId,
-					$currency,
-					$toDt
-				);
-			$endBalance = $lastTransactionForToDate->getBalance();
-		} catch (EntityNotFoundException $exception) {
-			$endBalance = new Money(0, $currency);
-		}
+		$endBalance = $this->anyMomentUserBalanceResolver->getBalanceByUserIdCurrencyDt($userId, $currency, $toDt);
+		$startBalance = $this->anyMomentUserBalanceResolver->getBalanceByUserIdCurrencyDt($userId, $currency, $fromDt);
 
 		$numerator = $endBalance;
 
-		try {
-			$lastTransactionForFromDate = $this
-				->userAccountTransactionRepository
-				->findLastByUserIdCurrencyDate(
-					$userId,
-					$currency,
-					$fromDt
-				);
-			$startBalance = $lastTransactionForFromDate->getBalance();
-			$firstDt = $lastTransactionForFromDate->getDt();
-		} catch (EntityNotFoundException $exception) {
-			$firstDt = $fromDt;
-			$startBalance = new Money(0, $currency);
-		}
-
-
 		$numerator = $numerator->subtract($startBalance);
-		$denominator = $denominator->add($startBalance->multiply($toDt->getTimestamp() - $firstDt->getTimestamp()));
+		$denominator = $denominator->add($startBalance->multiply($toDt->getTimestamp() - $fromDt->getTimestamp()));
 
 		$depositTransactions = $this
 			->userAccountTransactionRepository
@@ -85,23 +84,20 @@ class ProfitabilityCalculator
 				$toDt
 			);
 		foreach ($depositTransactions as $transaction) {
-			if ($firstDt === null) {
-				$firstDt = $transaction->getDt();
-			}
 			$numerator = $numerator->subtract($transaction->getMoney());
-			$denominator = $denominator->add($transaction->getMoney()->multiply($toDt->getTimestamp() - $transaction->getDt()->getTimestamp()));
-			if ($transaction->getDt()->getTimestamp() < $firstDt->getTimestamp()) {
-				$firstDt = $transaction->getDt();
+			$denominator = $denominator->add(
+				$transaction->getMoney()
+					->multiply(
+						$toDt->getTimestamp() - $transaction->getDt()->getTimestamp())
+			);
+			if ($transaction->getDt()->getTimestamp() < $fromDt->getTimestamp()) {
+				$fromDt = $transaction->getDt();
 			}
 		}
 		if ($denominator->isZero()) {
 			return 0;
 		}
-		if ($firstDt === null) {
-			$firstDt = $fromDt;
-		}
-		$interval = $toDt->getTimestamp() - max($firstDt->getTimestamp(), $fromDt->getTimestamp());
-		$result = $numerator->multiply(100)->multiply($interval)->ratioOf($denominator);
-		return $result;
+		$interval = $toDt->getTimestamp() - $fromDt->getTimestamp();
+		return $numerator->multiply(100)->multiply($interval)->ratioOf($denominator);
 	}
 }

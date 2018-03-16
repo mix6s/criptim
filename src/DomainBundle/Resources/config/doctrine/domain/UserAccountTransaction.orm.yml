@@ -8,6 +8,13 @@ Domain\Entity\UserAccountTransaction:
           FROM user_account_transaction
           WHERE currency = :currency AND  dt <= :dt
           ORDER BY user_id, dt DESC"
+        findFirstByUserIdCurrency:
+          name: findFirstByUserIdCurrency
+          resultClass: __CLASS__
+          query: "SELECT id, user_id, currency, money, balance, type, dt
+          FROM user_account_transaction
+          WHERE currency = :currency AND user_id = :user_id
+          ORDER BY id ASC LIMIT 1"
         findLastByUserIdCurrencyAndDate:
           name: findLastByUserIdCurrencyAndDate
           resultClass: __CLASS__
@@ -22,6 +29,14 @@ Domain\Entity\UserAccountTransaction:
                   *
                   FROM user_account_transaction
                   WHERE currency = :currency AND user_id = :user_id AND dt > :from_dt AND dt <= :to_dt AND type = :type
+                  ORDER BY dt DESC"
+        findByUserIdTypeFromDtToDt:
+          name: findByUserIdTypeFromDtToDt
+          resultClass: __CLASS__
+          query: "SELECT
+                  *
+                  FROM user_account_transaction
+                  WHERE user_id = :user_id AND dt > :from_dt AND dt <= :to_dt AND type = :type
                   ORDER BY dt DESC"
     type: entity
     id:

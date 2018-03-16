@@ -1,0 +1,73 @@
+{% extends "src/Assets/fintobit/njc/layout-auth-desktop.html" %}
+
+{% block content %}
+
+
+<div class="desktop-wrapper">
+    <a class="logo" href="#">
+        <div class="main_logo"></div>
+    </a>
+    <div class="tab-content js-tab-content tab-content--active" id="authorization">
+        <form action="" class="auth-form-content" >
+            <div class="form-content">
+                <label class="field-block">
+                    <span class="field-block__title">Email</span>
+                    <input type="text" class="field-block__field" placeholder="workmail@gmail.com" name="email">
+                </label>
+                <label class="field-block field-block--desktop">
+                    <span class="field-block__title field-block__title--password">Password
+                        <a class="recover__link" href="/recover-password.html">Forgot your password?</a>
+                    </span>
+                    <div class="field-block__password-container js-password-container">
+                        <input type="password" class="field-block__field" placeholder="workmail@gmail.com" name="password">
+                        <a href="javascript: void(0);" class="field-block__password-visible js-change-password-visibility">
+
+                        </a>
+                    </div>
+                </label>
+
+                <label class="form-checkbox form-checkbox--desktop">
+                    <input type="checkbox" class="form-checkbox__field">
+                    <span class="form-checkbox__text">
+                        <span class="form-checkbox__descr">Keep me logged in</span>
+                    </span>
+                </label>
+                <button type="submit" class="button button--action form-content__button form-content__button--desktop">Login</button>
+            </div>
+        </form>
+        <div class="invite">
+            <a href="/invite.html" class="invite__link">Don't have an account?</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        initComponents();
+    });
+    function initComponents() {
+        initPasswordTypeSwitcher();
+        initTabsSwithcer();
+    };
+    function initPasswordTypeSwitcher() {
+        if (window.PasswordTypeSwitcher) {
+
+            var params = {
+                container : $('.js-password-container')
+            };
+
+            var passwordSwitcher = new PasswordTypeSwitcher(params);
+        }
+    };
+    function initTabsSwithcer() {
+        if (window.TabsSwitcher) {
+
+            var params = {
+                container : $('.js-tabs-container')
+            };
+
+            var tabSwitcher = new TabsSwitcher(params);
+        }
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15" height="15" viewBox="5 5 25 20">
+    <defs>
+        <path id="a" d="M10 14h15v2H10z"/>
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <path stroke="#737276" d="M10.5 14.5h14v1h-14z"/>
+        <path stroke="#737276" stroke-width="2" d="M15 9l-6 6 6 6"/>
+    </g>
+</svg>

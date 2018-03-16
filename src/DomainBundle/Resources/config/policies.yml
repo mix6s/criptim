@@ -3,15 +3,22 @@ services:
         class: DomainBundle\Exchange\Policy\ProfitabilityCalculator
         arguments:
           - '@ORM\UserAccountTransactionRepository'
+          - '@AnyMomentUserBalanceResolver'
     ProfileData:
         class: DomainBundle\Exchange\Policy\ProfileData
         arguments:
           - '@ORM\UserAccountRepository'
           - '@ORM\UserAccountTransactionRepository'
+          - '@ProfitabilityCalculator'
+          - '@BalanceHistory'
+          - '@AnyMomentUserBalanceResolver'
     DomainCurrenciesPolicy:
         class: Domain\Policy\DomainCurrenciesPolicy
     BalanceHistory:
         class: DomainBundle\Exchange\Policy\BalanceHistory
         arguments:
           - '@doctrine'
-          - '@DomainCurrenciesPolicy'
+    AnyMomentUserBalanceResolver:
+        class: DomainBundle\Exchange\Policy\AnyMomentUserBalanceResolver
+        arguments:
+          - '@ORM\UserAccountTransactionRepository'

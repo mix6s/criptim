@@ -1,0 +1,27 @@
+{% extends "src/Assets/fintobit/njc/layout-auth-desktop.html" %}
+
+{% block content %}
+
+<a class="logo" href="#">
+    <div class="main_logo"></div>
+</a>
+<div class="title title--main title--invite">
+    <span class="title--invite">Receive an invitation</span>
+</div>
+<div class="title title--invite-desc">
+    <span class="title--invite-desc">To participate in the auction you need to get<br>a private invitation, for this you need to enter<br>your valid emai laddress.</span>
+</div>
+<div class="desktop-wrapper">
+    <label class="field-block">
+        <span class="field-block__title">Email</span>
+        <input type="text" class="field-block__field" placeholder="Enter your email address">
+    </label>
+    <a href="#" class="button button--action">Send</a>
+</div>
+<div class="auth__link">
+    <a class="link__auth" href="/auth.html">
+        <div class="back-s"></div>
+        Back to login
+    </a>
+</div>
+{% endblock %}

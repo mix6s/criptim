@@ -5,23 +5,23 @@ namespace DomainBundle\Exchange\Policy;
 
 
 use Doctrine\Common\Persistence\ManagerRegistry;
-use Domain\Policy\DomainCurrenciesPolicy;
 use Domain\ValueObject\UserId;
+use FintobitBundle\Policy\UserMoneyFormatter;
 use Money\Currency;
+use Money\Money;
 
 class BalanceHistory
 {
 
 	private $managerRegistry;
-	private $domainCurrenciesPolicy;
+	private $userMoneyFormatter;
 
 	public function __construct(
-		ManagerRegistry $managerRegistry,
-		DomainCurrenciesPolicy $domainCurrenciesPolicy
+		ManagerRegistry $managerRegistry
 	)
 	{
 		$this->managerRegistry = $managerRegistry;
-		$this->domainCurrenciesPolicy = $domainCurrenciesPolicy;
+		$this->userMoneyFormatter = new UserMoneyFormatter();
 	}
 
 	public function fetchByUserIdCurrencyFromDtToDt(
@@ -50,21 +50,38 @@ WITH dates AS (
 		 ORDER BY t.id DESC LIMIT 1) AS balance
       FROM dates
   ) SELECT
-      TO_CHAR(date, 'YYYY-MM-DD')         AS date,
-      COALESCE(balance / (10 ^ :subunit), NULL) AS balance
+      TO_CHAR(date, 'YYYY-MM-DD')    AS date,
+      TO_CHAR(date, 'DD')            AS day,
+      COALESCE(balance, 0)           AS balance
     FROM transactions;
 QUERY;
+
 		/** @var \Doctrine\DBAL\Statement $statement */
 		$statement = $this->managerRegistry->getConnection()->prepare($query);
 		$fromDtFormat = $fromDt->format('Y-m-d H:i:s');
 		$toDtFormat = $toDt->format('Y-m-d H:i:s');
-		$subunit = $this->domainCurrenciesPolicy->subunitFor($currency);
 		$statement->bindParam('from_dt', $fromDtFormat);
 		$statement->bindParam('to_dt', $toDtFormat);
 		$statement->bindParam('user_id', $userId);
-		$statement->bindParam('subunit', $subunit);
 		$statement->bindParam('currency', $currency);
 		$statement->execute();
-		return $statement->fetchAll();
+		$fetchedData = $statement->fetchAll();
+		$return = [];
+		$now = new \DateTimeImmutable('now');
+		foreach ($fetchedData as $item) {
+			$itemDt = new \DateTimeImmutable($item['date']);
+			$money = new Money($item['balance'], new Currency($currency));
+
+			$balance = $this->userMoneyFormatter->format($money);
+			if ($itemDt > $now) {
+				$balance = null;
+			}
+			$return[] = [
+				'date' => $item['date'],
+				'day' => $item['day'],
+				'balance' => $balance
+			];
+		}
+		return $return;
 	}
 }

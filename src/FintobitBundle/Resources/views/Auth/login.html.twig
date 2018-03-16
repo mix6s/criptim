@@ -1,35 +1,81 @@
-{% extends '@Fintobit/layout.html.twig' %}
+{% extends '@Fintobit/layout-auth-desktop.html.twig' %}
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <form action="{{ path("fos_user_security_check") }}" method="post">
-                {% if csrf_token %}
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}"/>
-                {% endif %}
-                {% if error %}
-                    <div class="form-group">
-                        <div class="form-message form-message--error">
-                            {{ error.messageKey|trans(error.messageData, 'security') }}
+    <div class="desktop-wrapper">
+        <a class="logo" href="{{ path('fintobit.auth.login') }}">
+            <svg width="254px" height="66px" viewBox="0 0 127 33"  xmlns="http://www.w3.org/2000/svg">
+                <g id="symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g id="logo/fin-to-bit">
+                        <g id="logo/sign" transform="translate(2.000000, 7.000000)" fill="#88C154">
+                            <path d="M5.78212593,3.75678911 L9.24408826,9.77084087 L12.4655291,3.75678911 L5.78212593,3.75678911 Z M9.18748775,16.3834861 L15.8708909,16.3834861 L12.4089286,10.3694344 L9.18748775,16.3834861 Z M21.1913391,19.4664769 L4.05071504,19.4664769 L7.53514569,12.9613664 L0.461677801,0.673798343 L17.6021791,0.673798343 L14.1178712,7.17890887 L21.1913391,19.4664769 Z" id="logo-sign"></path>
+                        </g>
+                        <path d="M42.556,13.701 L42.556,16.319 L47.809,16.319 L47.809,18.92 L42.556,18.92 L42.556,23 L39.19,23 L39.19,11.1 L48.523,11.1 L48.523,13.701 L42.556,13.701 Z M49.704,11.1 L53.07,11.1 L53.07,23 L49.704,23 L49.704,11.1 Z M66.389,11.1 L66.389,23 L63.618,23 L58.365,16.659 L58.365,23 L55.067,23 L55.067,11.1 L57.838,11.1 L63.091,17.441 L63.091,11.1 L66.389,11.1 Z M70.902,13.769 L67.247,13.769 L67.247,11.1 L77.906,11.1 L77.906,13.769 L74.268,13.769 L74.268,23 L70.902,23 L70.902,13.769 Z M84.595,23.238 C83.3369937,23.238 82.206505,22.9716693 81.2035,22.439 C80.200495,21.9063307 79.4128362,21.1696714 78.8405,20.229 C78.2681638,19.2883286 77.982,18.2286726 77.982,17.05 C77.982,15.8713274 78.2681638,14.8116714 78.8405,13.871 C79.4128362,12.9303286 80.200495,12.1936693 81.2035,11.661 C82.206505,11.1283307 83.3369937,10.862 84.595,10.862 C85.8530063,10.862 86.983495,11.1283307 87.9865,11.661 C88.989505,12.1936693 89.7771638,12.9303286 90.3495,13.871 C90.9218362,14.8116714 91.208,15.8713274 91.208,17.05 C91.208,18.2286726 90.9218362,19.2883286 90.3495,20.229 C89.7771638,21.1696714 88.989505,21.9063307 87.9865,22.439 C86.983495,22.9716693 85.8530063,23.238 84.595,23.238 Z M84.595,20.45 C85.1956696,20.45 85.7396642,20.3083348 86.227,20.025 C86.7143357,19.7416653 87.0996652,19.3421692 87.383,18.8265 C87.6663347,18.3108308 87.808,17.71867 87.808,17.05 C87.808,16.38133 87.6663347,15.7891692 87.383,15.2735 C87.0996652,14.7578308 86.7143357,14.3583348 86.227,14.075 C85.7396642,13.7916653 85.1956696,13.65 84.595,13.65 C83.9943303,13.65 83.4503357,13.7916653 82.963,14.075 C82.4756642,14.3583348 82.0903347,14.7578308 81.807,15.2735 C81.5236652,15.7891692 81.382,16.38133 81.382,17.05 C81.382,17.71867 81.5236652,18.3108308 81.807,18.8265 C82.0903347,19.3421692 82.4756642,19.7416653 82.963,20.025 C83.4503357,20.3083348 83.9943303,20.45 84.595,20.45 Z M101.722,16.795 C102.402003,17.0330012 102.934665,17.4041641 103.32,17.9085 C103.705335,18.4128359 103.898,19.0219964 103.898,19.736 C103.898,20.7786719 103.478671,21.5833305 102.64,22.15 C101.801329,22.7166695 100.588675,23 99.002,23 L92.576,23 L92.576,11.1 L98.662,11.1 C100.180674,11.1 101.336663,11.3804972 102.13,11.9415 C102.923337,12.5025028 103.32,13.2589952 103.32,14.211 C103.32,14.7776695 103.181168,15.2848311 102.9035,15.7325 C102.625832,16.1801689 102.232003,16.534332 101.722,16.795 Z M95.908,13.531 L95.908,15.826 L98.22,15.826 C99.353339,15.826 99.92,15.4406705 99.92,14.67 C99.92,13.9106629 99.353339,13.531 98.22,13.531 L95.908,13.531 Z M98.73,20.569 C99.9086725,20.569 100.498,20.1666707 100.498,19.362 C100.498,18.5573293 99.9086725,18.155 98.73,18.155 L95.908,18.155 L95.908,20.569 L98.73,20.569 Z M105.249,11.1 L108.615,11.1 L108.615,23 L105.249,23 L105.249,11.1 Z M113.145,13.769 L109.49,13.769 L109.49,11.1 L120.149,11.1 L120.149,13.769 L116.511,13.769 L116.511,23 L113.145,23 L113.145,13.769 Z" id="FINTOBIT" fill="#FFFFFF"></path>
+                    </g>
+                </g>
+            </svg>
+        </a>
+        <div class="tab-content js-tab-content tab-content--active" id="authorization">
+            <form action="{{ path("fos_user_security_check") }}" class="auth-form-content" method="post">
+                <div class="form-content">
+                    {% if csrf_token %}
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}"/>
+                    {% endif %}
+                    <label class="field-block">
+                        <span class="field-block__title">Email</span>
+                        <input class="field-block__field" id="email" type="text" name="_username" placeholder="example@gmail.com"
+                               value="{{ last_username }}" required="required">
+                    </label>
+
+                    <label class="field-block field-block--desktop">
+                    <span class="field-block__title field-block__title--password">Password
+                        <a class="recover__link" href="{{ path('fintobit.auth.restore') }}">Forgot your password?</a>
+                    </span>
+                        <div class="field-block__password-container js-password-container">
+                            <input class="field-block__field" id="pass-1" name="_password" type="password" required="required">
+                            <a href="javascript: void(0);" class="field-block__password-visible js-change-password-visibility">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                                    <g fill="#737276" fill-rule="nonzero">
+                                        <path d="M15.491 9c-4.187 0-7.795 2.384-9.453 5.825a.38.38 0 0 0 0 .332c1.658 3.441 5.266 5.825 9.453 5.825 4.187 0 7.796-2.384 9.454-5.825a.38.38 0 0 0 0-.332C23.287 11.385 19.678 9 15.49 9zm0 10.125c-2.364 0-4.278-1.85-4.278-4.133 0-2.284 1.916-4.133 4.278-4.133 2.365 0 4.279 1.851 4.279 4.133s-1.916 4.133-4.279 4.133z"/>
+                                        <ellipse cx="15.5" cy="14.877" rx="2.5" ry="2.415"/>
+                                    </g>
+                                </svg>
+                            </a>
                         </div>
-                    </div>
-                {% endif %}
-                <div class="form-group">
-                    <label>
-                        <span class="">Электронная почта</span>
                     </label>
-                    <input class="form-control" id="email" type="text" name="_username" placeholder="example@gmail.com"
-                           value="{{ last_username }}" required="required">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <span class="">Пароль</span>
+
+                    <label class="form-checkbox form-checkbox--desktop">
+                        <input type="checkbox" class="form-checkbox__field">
+                        <span class="form-checkbox__text">
+                        <span class="form-checkbox__descr">Keep me logged in</span>
+                    </span>
                     </label>
-                    <input class="form-control" id="pass-1" name="_password" type="password" required="required">
+
+                    <button type="submit" class="button button--action form-content__button form-content__button--desktop">Login</button>
                 </div>
-                <button type="submit" class="btn btn-primary">Войти</button>
-                <a href="{{ path('fintobit.auth.registration') }}" class="btn btn-primary">Зарегистрироваться</a>
             </form>
 
+            <div class="invite">
+                <a href="{{ path('fintobit.invite.index') }}" class="invite__link">Don't have an account?</a>
+            </div>
         </div>
     </div>
+    <script>
+        $(document).ready(function () {
+            initComponents();
+        });
+
+        function initComponents() {
+            initPasswordTypeSwitcher();
+        }
+
+        function initPasswordTypeSwitcher() {
+            if (window.PasswordTypeSwitcher) {
+
+                var params = {
+                    container : $('.js-password-container')
+                };
+
+                new PasswordTypeSwitcher(params);
+            }
+        }
+    </script>
 {% endblock %}

@@ -71,21 +71,24 @@ gulp.task('build-scripts', function () {
 gulp.task('build-clean', function () {
     del('build/criptim*');
 });
+
 gulp.task('web-clean', function () {
-    del('web/build/criptim*');
+    del('web/build/criptim/css/*');
+    del('web/build/criptim/img/*');
+    del('web/build/criptim/js/*');
 });
 
 gulp.task('web-copy-css', function () {
     return gulp.src(['build/criptim/css/*'])
-        .pipe(gulp.dest('web/build/criptim/css'));
+        .pipe(gulp.dest('web/build/criptim/css/'));
 });
 gulp.task('web-copy-img', function () {
     return gulp.src(['build/criptim/img/*'])
-        .pipe(gulp.dest('web/build/criptim/img'));
+        .pipe(gulp.dest('web/build/criptim/img/'));
 });
 gulp.task('web-copy-js', function () {
     return gulp.src(['build/criptim/js/*'])
-        .pipe(gulp.dest('web/build/criptim/js'));
+        .pipe(gulp.dest('web/build/criptim/js/'));
 });
 
 gulp.task('web-copy', function (callback) {

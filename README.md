@@ -23,3 +23,15 @@ CRIPTIM
 4. npm install -g gulp - install gulp
 5. gulp build - to get project build once
 6. gulp serve - to add watcher for src files.
+
+
+If you are using docker-compose:
+
+
+npm install
+docker-compose run node bash
+cd /criptim
+rm -rf node_modules/* bower_components/* build/*
+$npm install
+$node ./node_modules/.bin/bower install --allow-root 
+$node ./node_modules/.bin/gulp build --gulpfile fintobit-gulpfile

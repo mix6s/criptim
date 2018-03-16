@@ -85,7 +85,7 @@ class UsersController extends Controller
 			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
 			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
 			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
-			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $currency, $fromDate, $toDate),
+			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdCurrencyFromDtToDt($userId, $currency, $fromDate, $toDate),
 			'history' => json_encode($result),
 			'userId' => $userId
 		];

@@ -3,12 +3,14 @@
 namespace FintobitBundle\Controller;
 
 use AppBundle\Entity\User;
-use Domain\ValueObject\UserId;
-use FOS\UserBundle\Model\UserInterface;
-use Money\Currency;
+use FintobitBundle\Form\ChoosePeriodForm;
+use FintobitBundle\Form\ChoosePeriodFormData;
+use FintobitBundle\Form\Periods;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ProfileController
@@ -21,7 +23,7 @@ class ProfileController extends Controller
 	/**
 	 * @Route("/profile", name="fintobit.profile.index")
 	 */
-	public function profileAction()
+	public function profileAction(Request $request)
 	{
 		/** @var User $user */
 		$user = $this->getUser();
@@ -29,27 +31,37 @@ class ProfileController extends Controller
 		if ($userId === null) {
 			throw $this->createNotFoundException();
 		}
-		$fromDate = new \DateTimeImmutable('now - 1 month');
-		$toDate = new \DateTimeImmutable('now');
-		$currency = new Currency('BTC');
-		$result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
-			$userId, $currency, $fromDate, $toDate
+		$choosePeriodFormData = new ChoosePeriodFormData();
+		$now = new \DateTimeImmutable('now');
+		$periods = new Periods();
+		$currentPeriod = $periods->resolvePeriodForDateTime($now);
+		$choosePeriodFormData->setPeriod($currentPeriod);
+		$choosePeriodForm = $this->createForm(
+			ChoosePeriodForm::class,
+			$choosePeriodFormData
 		);
+
+		$choosePeriodForm->handleRequest($request);
 		$context = [
 			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
 			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
 			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
-			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdFromDtToDt($userId, $currency, $fromDate, $toDate),
-			'history' => json_encode($result),
-			'layout_title' => 'Профиль пользователя'
+			'fee' => $this->get('ProfileData')->getFeeMoneyByUserId($userId),
+			'profitability' => $this->get('ProfileData')->getProfitabilityByUserId($userId),
+			'transactions' => $this->get('ProfileData')->getTransactionHistory($userId),
+			'form' => $choosePeriodForm->createView(),
+			'currentPeriod' => $currentPeriod
 		];
 		return $this->render('@Fintobit/Profile/index.html.twig', $context);
 	}
 
 	/**
-	 * @Route("/profile/history.json", name="fintobit.profile.history")
+	 * @Route("/profile/period_data.json", name="fintobit.profile.period_data")
+	 * @param Request $request
+	 * @return JsonResponse
+	 * @throws \Exception
 	 */
-	public function balanceHistoryAction()
+	public function balanceChangeDuringPeriodAction(Request $request): JsonResponse
 	{
 		/** @var User $user */
 		$user = $this->getUser();
@@ -57,13 +69,17 @@ class ProfileController extends Controller
 		if ($userId === null) {
 			throw $this->createNotFoundException();
 		}
-		$fromDt = new \DateTimeImmutable('now - 1 month');
-		$toDt = new \DateTimeImmutable('now');
-		$currency = new Currency('BTC');
-		$result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
-			$userId, $currency, $fromDt, $toDt
-		);
-		return $this->json($result);
+		$period = $request->query->get('period');
+		$periods = new Periods();
+		[$fromDt, $toDt] = $periods->resolveDateRangeForPeriod($period);
+		$balanceChangeDuringPeriodAggregate = $this->get('ProfileData')
+			->getPeriodChangeProfileDataAggregateByUserIdFromDtToDt(
+				$userId,
+				$fromDt,
+				$toDt
+			);
+
+		return $this->json($balanceChangeDuringPeriodAggregate);
 	}
 
 }
