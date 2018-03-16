@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 30 30">
+    <defs>
+        <path id="a" d="M20.199 5.206l1.058 1.058a2 2 0 0 1 .25.305l1.089 1.633A1.156 1.156 0 0 1 21.634 10H21a2 2 0 0 1-2-2V5.702a.702.702 0 0 1 1.199-.496z"/>
+        <path id="b" d="M11 13h8v1h-8z"/>
+        <path id="c" d="M11 9h5v1h-5z"/>
+        <path id="d" d="M11 16h8v1h-8z"/>
+        <path id="e" d="M11 19h8v1h-8z"/>
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <path stroke="#DEDEDE" d="M22.5 7.997L20.235 5.9a1.5 1.5 0 0 0-1.019-.4H9A1.5 1.5 0 0 0 7.5 7v16A1.5 1.5 0 0 0 9 24.5h12a1.5 1.5 0 0 0 1.5-1.5V7.997z"/>
+        <use fill="#DEDEDE" xlink:href="#a"/>
+        <path stroke="#DEDEDE" d="M19.845 5.56a.202.202 0 0 0-.345.142V8A1.5 1.5 0 0 0 21 9.5h.634a.656.656 0 0 0 .546-1.02L21.09 6.845a1.5 1.5 0 0 0-.187-.228l-1.059-1.059z"/>
+        <use fill="#D8D8D8" xlink:href="#b"/>
+        <path stroke="#DEDEDE" d="M11.5 13.5h7v1h-7z"/>
+        <use fill="#D8D8D8" xlink:href="#c"/>
+        <path stroke="#DEDEDE" d="M11.5 9.5h4v1h-4z"/>
+        <g>
+            <use fill="#D8D8D8" xlink:href="#d"/>
+            <path stroke="#DEDEDE" d="M11.5 16.5h7v1h-7z"/>
+        </g>
+        <g>
+            <use fill="#D8D8D8" xlink:href="#e"/>
+            <path stroke="#DEDEDE" d="M11.5 19.5h7v1h-7z"/>
+        </g>
+    </g>
+</svg>

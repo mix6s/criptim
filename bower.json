@@ -4,7 +4,8 @@
   "dependencies": {
     "jquery": "~2.2.3",
     "normalize-scss": "~3.0.3",
-    "underscore": "latest"
+    "underscore": "latest",
+    "chart.js": "^2.7.2"
   },
   "private": true
 }

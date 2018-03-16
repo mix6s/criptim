@@ -1,0 +1,40 @@
+.cashier-info {
+	margin-bottom: 13px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.cashier-info__fee {
+	margin-bottom: 8px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.cashier-info__commission {
+	font-size: 14px;
+	line-height: 1.71;
+	color: #ffffff;
+}
+
+.cashier-info__full-sum {
+	font-size: 14px;
+	font-weight: 300;
+	line-height: 1.71;
+	color: #ffffff;
+}
+
+.cashier-info__count {
+	font-size: 24px;
+	font-weight: 600;
+	line-height: 1.38;
+	color: #ffffff;
+}
+
+.cashier-info__sum {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}

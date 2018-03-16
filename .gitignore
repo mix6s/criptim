@@ -1,13 +1,10 @@
-/.idea
-###> symfony/framework-bundle ###
-.env
-/public/bundles/
+/.idea/
+/app/config/exchanges.yml
+/bower_components/
+/build/
+/node_modules/
 /var/
 /vendor/
-###< symfony/framework-bundle ###
-/bin/symfony_requirements
-/node_modules
-/bower_components
-npm-debug.log
 /web/build/
-/app/config/exchanges.yml
+.env
+npm-debug.log

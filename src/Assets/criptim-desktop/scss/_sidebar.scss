@@ -1,0 +1,29 @@
+.sidebar {
+	display: none;
+	flex-shrink: 0;
+}
+
+.sidebar__wrapper {
+	width: 280px;
+	min-height: 100vh;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	background-color: #525359;
+	box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.6);
+}
+
+.sidebar-pro {
+	.button--main {
+		margin: 20px;
+	}
+}
+
+.sidebar-logo__link {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
