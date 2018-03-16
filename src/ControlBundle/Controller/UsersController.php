@@ -10,16 +10,23 @@ namespace ControlBundle\Controller;
 
 
 use AppBundle\Entity\User;
+use AppBundle\Form\Type\RegistrationFormType;
 use ControlBundle\Form\Type\UserDepositMoneyRequestFormType;
 use Domain\Exchange\UseCase\Request\UserDepositMoneyRequest;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\ValueObject\UserId;
 use Money\Currency;
-use Money\Money;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Domain\UseCase\Request\CreateUserRequest;
+use FOS\UserBundle\Event\FormEvent;
+use FOS\UserBundle\Event\GetResponseUserEvent;
+use FOS\UserBundle\FOSUserEvents;
+use FOS\UserBundle\Model\UserManagerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * @Route("/users")
@@ -104,5 +111,71 @@ class UsersController extends Controller
 			new UserId($userId), $currency, $fromDt, $toDt
 		);
 		return $this->json($result);
+	}
+
+	/**
+	 * @Route("/registration", name="control.users.registration")
+	 * @param Request $request
+	 */
+	public function registrationAction(Request $request)
+	{
+		/** @var $userManager UserManagerInterface */
+		$userManager = $this->get('fos_user.user_manager');
+		/** @var $dispatcher EventDispatcherInterface */
+		$dispatcher = $this->get('event_dispatcher');
+
+		/** @var User $user */
+		$user = $userManager->createUser();
+		$user->setEnabled(true);
+
+		$event = new GetResponseUserEvent($user, $request);
+		$dispatcher->dispatch(FOSUserEvents::REGISTRATION_INITIALIZE, $event);
+
+		if (null !== $event->getResponse()) {
+			return $event->getResponse();
+		}
+
+		$form = $this->createForm(RegistrationFormType::class, $user, [
+			'validation_groups' => ['AppRegistration', 'Default']
+		]);
+		$form->handleRequest($request);
+
+		if ($form->isSubmitted()) {
+			if ($form->isValid()) {
+				$event = new FormEvent($form, $request);
+				$response = $this->get('UseCase\CreateUserUseCase')->execute(new CreateUserRequest());
+				$user->setDomainUserId($response->getUser()->getId());
+				$user->addRole(User::ROLE_INVESTOR);
+				$dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+				$userManager->updateUser($user);
+				$response = $event->getResponse();
+				if (null === $response) {
+					$url = $this->generateUrl('control.users.list');
+					$response = new RedirectResponse($url);
+				}
+//				$dispatcher
+//					->dispatch(
+//						FOSUserEvents::REGISTRATION_COMPLETED,
+//						new FilterUserResponseEvent($user, $request, $response)
+//					);
+
+				return $this->redirectToRoute('control.users.list');
+			}
+
+			$event = new FormEvent($form, $request);
+			$dispatcher->dispatch(FOSUserEvents::REGISTRATION_FAILURE, $event);
+
+			if (null !== $response = $event->getResponse()) {
+				return $response;
+			}
+		}
+
+		return $this->render(
+			'@Control/Users/registration.html.twig',
+			[
+				'form' => $form->createView(),
+				'layout_title' => 'Регистрация'
+			]
+		);
 	}
 }
