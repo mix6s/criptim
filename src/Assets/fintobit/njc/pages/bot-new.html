@@ -1,5 +1,32 @@
 {% extends "src/Assets/fintobit/njc/layout-admin.html" %}
 
 {% block content %}
+<div class="admins-header">
+    <h1 class="admins-header__title">
+        <a href="/main.html" class="back-arrow">
+            <div class="back-img"></div>
+        </a>
+        Bots</h1>
+</div>
+
+<h2 class="bot-edit__subtitle">Creating a new bot</h2>
+
+<div class="bot-edit__wrapper">
+    <div class="bot-edit__select-title">Exchange</div>
+    <select class="field-block__select">
+        <option class="field-block__item">hitbtc_test</option>
+        <option class="field-block__item">hitbtc_test</option>
+        <option class="field-block__item">hitbtc_test</option>
+        <option class="field-block__item">hitbtc_test</option>
+    </select>
+    <div class="bot-edit__select-title">Strategy</div>
+    <select class="field-block__select">
+        <option class="field-block__item">Martin</option>
+        <option class="field-block__item">Johny</option>
+        <option class="field-block__item">Serj</option>
+    </select>
+    <div class="bot-edit__select-title">Strategy settings</div>
+    <input type="text" class="field-block__field" placeholder="..." name="Strategy_settings">
+</div>
 
 {% endblock %}

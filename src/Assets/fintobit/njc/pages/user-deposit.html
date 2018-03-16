@@ -1,5 +1,33 @@
 {% extends "src/Assets/fintobit/njc/layout-admin.html" %}
 
 {% block content %}
+<div class="admins-header">
+    <h1 class="admins-header__title">
+        <a href="/main.html" class="back-arrow">
+            <div class="back-img"></div>
+        </a>
+        User</h1>
+</div>
 
+<h2 class="user-edit__subtitle">Add new deposit for dev@dev.ru</h2>
+
+<div class="user-edit__wrapper">
+    <div class="user-edit__select-title">Exchange</div>
+    <select class="field-block__select">
+        <option class="field-block__item">hitbtc_test</option>
+        <option class="field-block__item">hitbtc_test</option>
+        <option class="field-block__item">hitbtc_test</option>
+        <option class="field-block__item">hitbtc_test</option>
+    </select>
+    <div class="user-edit__select-title">Strategy settings</div>
+    <input type="text" class="field-block__field" placeholder="..." name="Strategy_settings">
+    <div class="user-edit__select-title">Currensy</div>
+    <select class="field-block__select">
+        <option class="field-block__item">BTC</option>
+        <option class="field-block__item">ETH</option>
+        <option class="field-block__item">LTC</option>
+        <option class="field-block__item">DASH</option>
+        <option class="field-block__item">Other</option>
+    </select>
+</div>
 {% endblock %}

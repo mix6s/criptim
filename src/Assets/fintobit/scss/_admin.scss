@@ -41,7 +41,6 @@
   }
 
   &__button {
-    height: 50px;
     width: 260px;
   }
 }
@@ -173,7 +172,6 @@
 
 .cell--user-info {
   padding: 10px 0 10px 10px;
-
   width: 100%;
   font-size: 14px;
   font-weight: 300;
@@ -192,9 +190,72 @@
   text-decoration: underline;
 }
 
+.user-deposit__link {
+  background-color: rgba(173, 176, 186, 0.2);
+  border: 1px solid #504f55;
+  padding: 0 20px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+
+}
+
 .bot-edit__subtitle {
   font-size: 26px;
   font-weight: 300;
   margin-left: 20px;
   margin-top: 30px;
+}
+
+.user-edit__subtitle {
+  font-size: 26px;
+  font-weight: 300;
+  margin-left: 20px;
+  margin-top: 30px;
+}
+
+///////////////new bot////////////
+
+.bot-edit__wrapper {
+  width: 360px;
+  margin-left: 20px;
+  margin-top: 50px;
+  .field-block__item {
+    padding: 20px;
+    background: #26262b;
+  }
+  .bot-edit__select-title{
+    font-size: 14px;
+    font-weight: 300;
+    margin-top: 20px;
+  }
+  select {
+    margin-top: 15px;
+  }
+
+  input {
+    margin-top: 15px;
+  }
+}
+
+.user-edit__wrapper {
+  width: 360px;
+  margin-left: 20px;
+  margin-top: 50px;
+  .field-block__item {
+    padding: 20px;
+    background: #26262b;
+  }
+  .user-edit__select-title{
+    font-size: 14px;
+    font-weight: 300;
+    margin-top: 20px;
+  }
+  select {
+    margin-top: 15px;
+  }
+
+  input {
+    margin-top: 15px;
+  }
 }
