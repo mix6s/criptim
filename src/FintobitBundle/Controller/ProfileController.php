@@ -50,7 +50,8 @@ class ProfileController extends Controller
 			'profitability' => $this->get('PublicProfileDataViewer')->getProfitabilityByUserId($userId),
 			'transactions' => $this->get('PublicProfileDataViewer')->getTransactionHistory($userId),
 			'form' => $choosePeriodForm->createView(),
-			'currentPeriod' => $currentPeriod
+			'currentPeriod' => $currentPeriod,
+			'portfolio' => $this->get('PublicProfileDataViewer')->getPortfolio()
 		];
 		return $this->render('@Fintobit/Profile/index.html.twig', $context);
 	}

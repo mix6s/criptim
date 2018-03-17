@@ -6,65 +6,19 @@
         </div>
         <div class="portfolio__diagram-legend">
             <ul class="diagram-legend__list">
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">btc/usdt</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">40%</div>
-                </li>
+                {% for portfolioItem in portfolio %}
+                    <li class="diagram-legend__list-item">
+                        <div class="list-style__mark"></div>
+                        <div class="list-item__title">{{ portfolioItem.currency }}</div>
+                        <div class="list-item__line"></div>
+                        <div class="list-item__value">{{ portfolioItem.percent }}%</div>
+                    </li>
+                {% endfor %}
                 <li class="diagram-legend__list-item">
                     <div class="list-style__mark"></div>
                     <div class="list-item__title">bch/btc</div>
                     <div class="list-item__line"></div>
                     <div class="list-item__value">20%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">eth/btc</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">15%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">dash/btc</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">10%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">xmr/btc</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">5%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">xrp/btc</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">3%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">zec/btc</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">2%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">bch/usdt</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">2%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title">ltc/btc</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">1.5%</div>
-                </li>
-                <li class="diagram-legend__list-item">
-                    <div class="list-style__mark"></div>
-                    <div class="list-item__title text-transform__reset">Other</div>
-                    <div class="list-item__line"></div>
-                    <div class="list-item__value">0.5%</div>
                 </li>
             </ul>
         </div>

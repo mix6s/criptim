@@ -37,6 +37,7 @@ services:
           - '@AdminMoneyFormatter'
           - '@AdminBalanceHistory'
           - '@AnyMomentUserBalanceResolver'
+          - '@doctrine'
 
     PublicProfileDataViewer:
         class: DomainBundle\Exchange\Policy\ProfileData
@@ -47,3 +48,4 @@ services:
           - '@PublicMoneyFormatter'
           - '@PublicBalanceHistory'
           - '@AnyMomentUserBalanceResolver'
+          - '@doctrine'

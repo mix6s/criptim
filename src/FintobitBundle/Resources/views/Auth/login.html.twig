@@ -14,13 +14,10 @@
 
                     <label class="field-block">
                         <span class="field-block__title">Email</span>
-                        <input type="text"
-                               class="field-block__field"
-                               placeholder="workmail@gmail.com"
-                               name="username"
-                               value="{{ last_username }}"
-                        >
+                        <input class="field-block__field" id="email" type="text" name="_username" placeholder="example@gmail.com"
+                               value="{{ last_username }}" required="required">
                     </label>
+
                     <label class="field-block field-block--desktop">
                     <span class="field-block__title field-block__title--password">Password
                         <a class="recover__link" href="{{ path('fintobit.auth.restore') }}">Forgot your password?</a>

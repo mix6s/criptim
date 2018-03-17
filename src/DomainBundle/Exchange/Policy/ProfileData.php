@@ -10,10 +10,10 @@ use Domain\Exception\EntityNotFoundException;
 use Domain\Repository\UserAccountRepositoryInterface;
 use Domain\Repository\UserAccountTransactionRepositoryInterface;
 use Domain\ValueObject\UserId;
-use FintobitBundle\Policy\UserMoneyFormatter;
 use Money\Currency;
 use Money\Money;
 use Money\MoneyFormatter;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 
 class ProfileData
 {
@@ -39,6 +39,10 @@ class ProfileData
 	 * @var AnyMomentUserBalanceResolver
 	 */
 	private $anyMomentUserBalance;
+	/**
+	 * @var ManagerRegistry
+	 */
+	private $managerRegistry;
 
 	public function __construct(
 		UserAccountRepositoryInterface $userAccountRepository,
@@ -46,7 +50,8 @@ class ProfileData
 		ProfitabilityCalculator $profitabilityCalculator,
 		MoneyFormatter $moneyFormatter,
 		BalanceHistory $balanceHistoryPolicy,
-		AnyMomentUserBalanceResolver $anyMomentUserBalance
+		AnyMomentUserBalanceResolver $anyMomentUserBalance,
+		ManagerRegistry $managerRegistry
 	)
 	{
 		$this->moneyFormatter = $moneyFormatter;
@@ -55,6 +60,7 @@ class ProfileData
 		$this->profitabilityCalculator = $profitabilityCalculator;
 		$this->balanceHistoryPolicy = $balanceHistoryPolicy;
 		$this->anyMomentUserBalance = $anyMomentUserBalance;
+		$this->managerRegistry = $managerRegistry;
 	}
 
 	public function getBalanceMoneyByUserId(UserId $userId): Money
@@ -271,21 +277,54 @@ class ProfileData
 		return $carry;
 	}
 
-	public function getPortfolioByUserId(UserId $userId): array
+	public function getPortfolio(): array
 	{
-		// todo: implement portfolio based on:
-//SELECT btsa.balance
-//FROM bot_trading_session_account AS btsa
-//  JOIN bot_trading_session AS bts on bts.id = btsa.bot_trading_session_id
-//WHERE bts.status ='active'
-//
-//UNION ALL
-//
-//SELECT balance
-//FROM bot_exchange_account AS bea
-//JOIN bot AS b ON b.id = bea.bot_id
-//WHERE b.status = 'active'
+		$query = <<<QUERY
+with balances_raw as (
+  SELECT (btsa.balance->>'amount')::BIGINT as amount, btsa.balance->>'currency' as currency
+  FROM bot_trading_session_account AS btsa
+    JOIN bot_trading_session AS bts on bts.id = btsa.bot_trading_session_id
+  WHERE bts.status = 'active'
 
-		return [];
+  UNION ALL
+
+  SELECT (bea.balance->>'amount')::BIGINT as amount, bea.balance->>'currency' as currency
+  FROM bot_exchange_account AS bea
+    JOIN bot AS b ON b.id = bea.bot_id
+  WHERE b.status = 'active'
+), balances_resolved as (
+    select currency, sum(amount) as amount
+    from balances_raw br
+  group by 1
+) select * from balances_resolved;
+QUERY;
+
+		/** @var \Doctrine\DBAL\Statement $statement */
+		$statement = $this->managerRegistry->getConnection()->prepare($query);
+		$statement->execute();
+		$fetchedData = $statement->fetchAll();
+		$return = [];
+		$amountSum = new Money(0, new Currency('BTC'));
+		/** @var Money[] $balances */
+		$balances = [];
+		foreach ($fetchedData as $item) {
+			$currency = new Currency($item['currency']);
+			$amount = $item['amount'];
+			$money = new Money($amount, $currency);
+			$balances[] = $money;
+			$amountSum = $amountSum->add($money);
+		}
+
+		if ($amountSum->isZero()) {
+			return [];
+		}
+
+		foreach ($balances as $balance) {
+			$return[] = [
+				'currency' => $balance->getCurrency(),
+				'percent' => $balance->ratioOf($amountSum) * 100,
+			];
+		}
+		return $return;
 	}
 }
