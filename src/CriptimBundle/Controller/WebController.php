@@ -54,7 +54,7 @@ class WebController extends Controller
 	    $fromDt = new \DateTimeImmutable('now - 1 month');
 	    $toDt = new \DateTimeImmutable('now');
 	    $currency = new Currency('BTC');
-	    $result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
+	    $result = $this->get('PublicBalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
 	    	$userId, $currency, $fromDt, $toDt
 	    );
 	    return $this->json($result);

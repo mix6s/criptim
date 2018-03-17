@@ -15,6 +15,9 @@ use ControlBundle\Form\Type\UserDepositMoneyRequestFormType;
 use Domain\Exchange\UseCase\Request\UserDepositMoneyRequest;
 use Domain\Exchange\ValueObject\ExchangeId;
 use Domain\ValueObject\UserId;
+use FintobitBundle\Form\ChoosePeriodForm;
+use FintobitBundle\Form\ChoosePeriodFormData;
+use FintobitBundle\Form\Periods;
 use Money\Currency;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -78,39 +81,57 @@ class UsersController extends Controller
 
 	/**
 	 * @Route("/{userId}/profile", name="control.users.profile")
+	 * @param Request $request
+	 * @param $userId
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 * @throws \Exception
 	 */
-	public function profileAction($userId)
+	public function profileAction(Request $request, $userId)
 	{
 		$userId = new UserId($userId);
-		$fromDate = new \DateTimeImmutable('now - 1 month');
-		$toDate = new \DateTimeImmutable('now');
-		$currency = new Currency('BTC');
-		$result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
-			$userId, $currency, $fromDate, $toDate
+		$choosePeriodFormData = new ChoosePeriodFormData();
+		$now = new \DateTimeImmutable('now');
+		$periods = new Periods();
+		$currentPeriod = $periods->resolvePeriodForDateTime($now);
+		$choosePeriodFormData->setPeriod($currentPeriod);
+		$choosePeriodForm = $this->createForm(
+			ChoosePeriodForm::class,
+			$choosePeriodFormData
 		);
+
+		$choosePeriodForm->handleRequest($request);
 		$context = [
-			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
-			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
-			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
-			'profitability' => $this->get('ProfitabilityCalculator')->getProfitabilityByUserIdCurrencyFromDtToDt($userId, $currency, $fromDate, $toDate),
-			'history' => json_encode($result),
+			'balance' => $this->get('AdminProfileDataViewer')->getBalanceMoneyByUserId($userId),
+			'deposits' => $this->get('AdminProfileDataViewer')->getDepositsMoneyByUserId($userId),
+			'cashouts' => $this->get('AdminProfileDataViewer')->getCashoutsMoneyByUserId($userId),
+			'fee' => $this->get('AdminProfileDataViewer')->getFeeMoneyByUserId($userId),
+			'profitability' => $this->get('AdminProfileDataViewer')->getProfitabilityByUserId($userId),
+			'transactions' => $this->get('AdminProfileDataViewer')->getTransactionHistory($userId),
+			'form' => $choosePeriodForm->createView(),
+			'currentPeriod' => $currentPeriod,
 			'userId' => $userId
 		];
-		return $this->render('@Control/Users/profile.html.twig', $context);
+
+		return $this->render('@Control/Users/index.html.twig', $context);
 	}
 
 	/**
-	 * @Route("/{userId}/profile/history.json", name="control.users.profile.history")
+	 * @Route("/{userId}/profile/period_data.json", name="control.users.profile.period_data")
 	 */
-	public function balanceHistoryAction($userId)
+	public function balanceHistoryAction(Request $request, $userId)
 	{
-		$fromDt = new \DateTimeImmutable('now - 1 month');
-		$toDt = new \DateTimeImmutable('now');
-		$currency = new Currency('BTC');
-		$result = $this->get('BalanceHistory')->fetchByUserIdCurrencyFromDtToDt(
-			new UserId($userId), $currency, $fromDt, $toDt
-		);
-		return $this->json($result);
+		$userId = new UserId($userId);
+		$period = $request->query->get('period');
+		$periods = new Periods();
+		[$fromDt, $toDt] = $periods->resolveDateRangeForPeriod($period);
+		$balanceChangeDuringPeriodAggregate = $this->get('AdminProfileDataViewer')
+			->getPeriodChangeProfileDataAggregateByUserIdFromDtToDt(
+				$userId,
+				$fromDt,
+				$toDt
+			);
+
+		return $this->json($balanceChangeDuringPeriodAggregate);
 	}
 
 	/**

@@ -1,55 +1,48 @@
 {% extends '@Control/layout.html.twig' %}
 
-{% block body %}
-        <a href="{{ path('control.users.registration') }}">
-            <button>
-                Создать нового пользователя
-            </button>
-        </a>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th rowspan="2">ID</th>
-                        <th rowspan="2">Username</th>
-                        <th rowspan="2">Total BTC balance</th>
-                        <th colspan="{{ exchanges|length }}">Exchanges BTC balance</th>
-                    </tr>
-                    <tr>
-                        {% for exchange in exchanges %}
-                            <th>{{ exchange.id }}</th>
-                        {% endfor %}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for user in users %}
-                        <tr>
-                            <td>
-                                {{ user.domainUserId }}
-                            </td>
-                            <td>
-                                <a href="{{ path('control.users.profile', {userId: user.domainUserId}) }}">{{ user.username }}</a>
-                            </td>
-                            <td>
-                                {{ user.domainUserId|userBalance('BTC')|moneyFormat }}
-                            </td>
-                            {% for exchange in exchanges %}
-                                {% if user.domainUserId is empty %}
-                                    <td></td>
-                                {% else %}
-                                    <td>
-                                        <a class="btn btn-info btn-xs" href="{{ path('control.users.exchangeDeposit', {userId: user.domainUserId, exchangeId: exchange.id}) }}"><i class="fa fa-plus"></i> Deposit</a>
-                                    </td>
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+{% block content %}
+    <div class="admins-header">
+        <h1 class="admins-header__title">Users</h1>
+        <a href="{{ path('control.users.registration') }}" class="admins-header__button button button--action">Create new user</a>
     </div>
+
+    <div class="table table--user-info">
+        <div class="row row--heading row--user-info">
+            <div class="cell cell--user-info cell--id">ID</div>
+            <div class="cell cell--user-info cell--username">Username</div>
+            <div class="cell cell--user-info cell--user-btc-balance">Total BTC balance</div>
+            <div class="cell cell--user-info cell--exchange-balance">Exchange BTC balance</div>
+        </div>
+        {% for user in users %}
+            <div class="row row--user-info">
+                <div class="cell cell--user-info cell--id">
+                    {{ user.domainUserId }}
+                </div>
+                <div class="cell cell--user-info cell--username">
+                    <a href="{{
+                    path(
+                        'control.users.profile',
+                        {
+                            userId: user.domainUserId
+                        }
+                    ) }}" class="username-link">{{ user.username }}</a>
+                </div>
+                <div class="cell cell--user-info cell--user-btc-balance">
+                    {{ user.domainUserId|userBalance('BTC')|moneyFormat }}
+                </div>
+                <div class="cell cell--user-info cell--exchange-balance">
+                    {% for exchange in exchanges %}
+                        {% if user.domainUserId is empty %}
+                        {% else %}
+                            <a class="user-deposit__link"
+                               href="{{ path('control.users.exchangeDeposit', {userId: user.domainUserId, exchangeId: exchange.id}) }}">
+                                Add deposit ({{ exchange.getId() }})
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
 {% endblock %}

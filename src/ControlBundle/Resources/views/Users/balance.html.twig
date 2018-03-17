@@ -2,7 +2,7 @@
     <div class="balance-block__title">
         <h1>Balance</h1>
         <div class="balance-block__current">
-            <span class="value">{{ balance|fintobitMoneyWithCurrencyFormat }}</span>
+            <span class="value">{{ balance|moneyFormat }}</span>
         </div>
     </div>
     <div class="balance-block__info">
@@ -10,19 +10,19 @@
             <div class="balance-block__info-item">
                 <div class="balance-block__info-item--title">All deposits:</div>
                 <div class="balance-block__info-item--dotted-line"></div>
-                <div class="balance-block__info-item--value">{{ deposits|fintobitMoneyWithCurrencyFormat }}</div>
+                <div class="balance-block__info-item--value">{{ deposits|moneyFormat }}</div>
             </div>
             <div class="balance-block__info-item">
                 <div class="balance-block__info-item--title">All cashouts:</div>
                 <div class="balance-block__info-item--dotted-line"></div>
-                <div class="balance-block__info-item--value">{{ cashouts|fintobitMoneyWithCurrencyFormat }}</div>
+                <div class="balance-block__info-item--value">{{ cashouts|moneyFormat }}</div>
             </div>
         </div>
         <div class="balance-block__col">
             <div class="balance-block__info-item">
                 <div class="balance-block__info-item--title">All commission:</div>
                 <div class="balance-block__info-item--dotted-line"></div>
-                <div class="balance-block__info-item--value">{{ fee|fintobitMoneyWithCurrencyFormat }}</div>
+                <div class="balance-block__info-item--value">{{ fee|moneyFormat }}</div>
             </div>
             <div class="balance-block__info-item">
                 <div class="balance-block__info-item--title">All profitability:</div>

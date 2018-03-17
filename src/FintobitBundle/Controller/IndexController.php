@@ -17,7 +17,10 @@ class IndexController extends Controller
 	 */
 	public function indexAction()
 	{
-		return $this->forward('FintobitBundle:Profile:profile');
+		if ($this->getUser()) {
+			return $this->forward('FintobitBundle:Profile:profile');
+		}
+		return $this->forward('FintobitBundle:Auth:login');
 	}
 
 }

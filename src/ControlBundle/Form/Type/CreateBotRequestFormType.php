@@ -61,7 +61,13 @@ class CreateBotRequestFormType extends AbstractType
 					'choice_value' => function (ExchangeId $id = null) {
 						return $id ? (string)$id : '';
 					},
-					'label' => 'Exchange'
+					'attr' => [
+						'class' => 'field-block__select'
+					],
+					'label' => 'Exchange',
+					'choice_attr' => function () {
+						return ['class' => 'field-block__item'];
+					}
 				]
 			)
 			->add(
@@ -76,20 +82,34 @@ class CreateBotRequestFormType extends AbstractType
 					'choice_value' => function (TradingStrategyId $id = null) {
 						return $id ? (string)$id : '';
 					},
-					'label' => 'Strategy'
+					'label' => 'Strategy',
+					'attr' => [
+						'class' => 'field-block__select'
+					],
+					'choice_attr' => function () {
+						return ['class' => 'field-block__item'];
+					}
+
 				]
 			)
 			->add(
 				'tradingStrategySettings',
 				TradingStrategySettingsFormType::class,
 				[
-					'label' => 'Strategy settings'
+					'label' => 'Strategy settings',
+					'attr' => [
+						'class' => 'field-block__field',
+					],
 				]
 			)
 			->add(
 				'Save',
 				SubmitType::class,
 				[
+					'attr' => [
+//						todo: use another method to set style as like admins-header__button
+						'class' => 'admins-header__button button button--action'
+					]
 				]
 			);
 	}

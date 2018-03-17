@@ -27,7 +27,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class BotsController extends Controller
 {
 	/**
-	 * @Route("", name="control.bots.list")
+	 * @Route("/", name="control.bots.list")
 	 */
 	public function listAction(Request $request)
 	{
@@ -82,8 +82,23 @@ class BotsController extends Controller
 			return $this->redirectToRoute('control.bots.list');
 		}
 
-		return $this->render('@Control/Bots/new.html.twig', [
+		return $this->render('@Control/Bots/edit.html.twig', [
+			'bot' => $bot,
 			'form' => $form->createView()
+		]);
+	}
+
+	/**
+	 * @Route("/view/{id}", name="control.bots.view")
+	 * @param $id
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 * @throws \Domain\Exception\EntityNotFoundException
+	 */
+	public function viewAction($id)
+	{
+		$bot = $this->get('ORM\BotRepository')->findById(new BotId($id));
+		return $this->render('@Control/Bots/view.html.twig', [
+			'bot' => $bot,
 		]);
 	}
 }

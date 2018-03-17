@@ -1,0 +1,250 @@
+<div class="month-balance">
+    <div class="month-balance__title">
+        Balance change<br>during month
+    </div>
+    <div class="month-balance__info">
+        <div class="month-balance__col">
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Deposits:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value js-period-deposits">0.000000000000 BTC</div>
+            </div>
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Cashouts:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value js-period-cashouts">0.000000000000 BTC</div>
+            </div>
+            <div class="month-balance__period-item">
+                <div class="month-balance__info-item--title">Period start balance:</div>
+                <div class="month-balance__info-item--value js-period-start-balance">0.000000000000 BTC</div>
+            </div>
+        </div>
+        <div class="month-balance__col">
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Commission:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value js-period-fees">0.000000000000 BTC</div>
+            </div>
+            <div class="month-balance__info-item">
+                <div class="month-balance__info-item--title">Profitability:</div>
+                <div class="month-balance__info-item--dotted-line"></div>
+                <div class="month-balance__info-item--value js-period-profitability">0.00%</div>
+            </div>
+            <div class="month-balance__period-item">
+                <div class="month-balance__info-item--title">Period end balance:</div>
+                <div class="month-balance__info-item--value js-period-end-balance">0.000000000000 BTC</div>
+            </div>
+            {{ form_start(form) }}
+            <div class="month-balance__period-select">
+                <div class="month-balance__period-title">Choose period:</div>
+                {{ form_row(form.period) }}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<div class="schedule-block">
+    <div class="schedule-block__wrapper">
+        <div class="schedule-block__axis-y">btc</div>
+        <div class="schedule">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+    <div class="schedule-block__axis-x">Day</div>
+</div>
+<script>
+
+
+    function loadPeriodData() {
+        var period = jQuery('form').find('select').val();
+        $.ajax({
+            type: "GET",
+            url: "{{ path('control.users.profile.period_data', { userId: userId }) }}",
+            data: {
+                period: period
+            },
+            success: function (data) {
+                resolvePeriodData(data);
+            }
+        });
+    }
+
+    function getConfig(days, balances, dates) {
+        return {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [{
+                    data: balances,
+                    fill: false,
+                    backgroundColor: '#87bf53',
+                    borderColor: '#87bf53',
+                    cubicInterpolationMode: 'monotone',
+                    borderWidth: 2,
+                    lineTension: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    label: false,
+                    mode: 'index',
+                    intersect: false,
+                    cornerRadius: 2,
+                    backgroundColor: '#525358',
+                    borderColor: '#64656b',
+                    borderWidth: 0,
+                    titleFontFamily: 'Montserrat',
+                    footerFontFamily: 'Montserrat',
+                    callbacks: {
+                        title: function (items, data) {
+                            var hoveredItem = items[0];
+                            return dates[hoveredItem.index];
+                        },
+                        label: function () {
+                            return false;
+                        },
+                        footer: function(items, data) {
+                            var hoveredItem = items[0];
+                            return balances[hoveredItem.index];
+                        },
+                    },
+
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            autoSkip: false,
+                        },
+                        display: true,
+                        gridLines: {
+                            color: "#414044",
+                            tickMarkLength: 15
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        gridLines: {
+                            color: "#414044",
+                            zeroLineColor: '#414044',
+                            tickMarkLength: 15
+                        }
+                    }]
+                }
+            }
+        };
+    }
+
+    function drawChart(config) {
+        if (window.myLine) {
+            window.myLine.destroy()
+        }
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myLine = new Chart(ctx, config);
+    }
+
+    function resolvePeriodData(data) {
+        var balanceHistory = data['balanceHistory'] || null;
+        var depositsMoney = data['depositsMoney'] || null;
+        var cashoutsMoney = data['cashoutsMoney'] || null;
+        var feesMoney = data['feesMoney'] || null;
+        var periodStartBalance = data['periodStartBalance'] || null;
+        var periodEndBalance = data['periodEndBalance'] || null;
+        var profitability = data['profitability'] || null;
+
+        resolveBalanceHistory(balanceHistory);
+        resolveDepositsMoney(depositsMoney);
+        resolveCashoutsMoney(cashoutsMoney);
+        resolveFeesMoney(feesMoney);
+        resolvePeriodStartBalance(periodStartBalance);
+        resolvePeriodEndBalance(periodEndBalance);
+        resolveProfitability(profitability);
+    }
+
+    function resolveBalanceHistory(balanceHistory) {
+        if (balanceHistory) {
+            var days = [];
+            var balances = [];
+            var dates = [];
+            _.each(balanceHistory, function(e) {
+                days.push(e['day']);
+                balances.push(e['balance']);
+                dates.push(e['date']);
+            });
+            var config = getConfig(days, balances, dates);
+            drawChart(config);
+        }
+    }
+
+    function resolveDepositsMoney(depositsMoney) {
+        var $valueContainer = $('.js-period-deposits');
+        if (null !== depositsMoney) {
+            $valueContainer.html(depositsMoney)
+        }
+    }
+
+    function resolveCashoutsMoney(cashoutsMoney) {
+        var $valueContainer = $('.js-period-cashouts');
+        if (null !== cashoutsMoney) {
+            $valueContainer.html(cashoutsMoney)
+        }
+    }
+
+    function resolveFeesMoney(feesMoney) {
+        var $valueContainer = $('.js-period-fees');
+        if (null !== feesMoney) {
+            $valueContainer.html(feesMoney)
+        }
+    }
+
+    function resolvePeriodStartBalance(periodStartBalance) {
+        var $valueContainer = $('.js-period-start-balance');
+        if (null !== periodStartBalance) {
+            $valueContainer.html(periodStartBalance)
+        }
+    }
+
+    function resolvePeriodEndBalance(periodEndBalance) {
+        var $valueContainer = $('.js-period-end-balance');
+        if (null !== periodEndBalance) {
+            $valueContainer.html(periodEndBalance)
+        }
+    }
+
+    function resolveProfitability(profitability) {
+        var $valueContainer = $('.js-period-profitability');
+        if (null !== profitability) {
+            var format = profitability['format'];
+            var isPositive = profitability['isPositive'];
+            var isNegative = profitability['isNegative'];
+            $valueContainer.html(format);
+            if (isPositive) {
+                $valueContainer.addClass('text-decoration--green');
+            } else {
+                $valueContainer.removeClass('text-decoration--green');
+            }
+            if (isNegative) {
+                $valueContainer.addClass('text-decoration--red');
+            } else {
+                $valueContainer.removeClass('text-decoration--red');
+            }
+        }
+    }
+
+    $(function () {
+
+        Chart.defaults.global.defaultFontSize = 12;
+        Chart.defaults.global.defaultFontFamily = 'Montserrat';
+        Chart.defaults.global.legend.display = false;
+
+        loadPeriodData();
+        var $formSelector = $('form').find('select');
+        $formSelector.on('change', loadPeriodData)
+    });
+
+</script>

@@ -6,9 +6,12 @@ namespace Domain\DTO;
 
 use FintobitBundle\Policy\UserMoneyFormatter;
 use Money\Money;
+use Money\MoneyFormatter;
 
 class PeriodChangeProfileDataAggregate implements \JsonSerializable
 {
+
+	private $moneyFormatter;
 
 	/**
 	 * @var Money
@@ -30,7 +33,7 @@ class PeriodChangeProfileDataAggregate implements \JsonSerializable
 	 * @var array
 	 */
 	private $balanceHistory;
-	private $moneyFormatter;
+
 	/**
 	 * @var Money
 	 */
@@ -41,6 +44,7 @@ class PeriodChangeProfileDataAggregate implements \JsonSerializable
 	private $periodEndBalance;
 
 	public function __construct(
+		MoneyFormatter $moneyFormatter,
 		Money $depositsMoney,
 		Money $cashoutsMoney,
 		Money $feeMoney,
@@ -50,7 +54,6 @@ class PeriodChangeProfileDataAggregate implements \JsonSerializable
 		array $balanceHistory
 	)
 	{
-		$this->moneyFormatter = new UserMoneyFormatter();
 		$this->depositsMoney = $depositsMoney;
 		$this->cashoutsMoney = $cashoutsMoney;
 		$this->feeMoney = $feeMoney;
@@ -58,6 +61,7 @@ class PeriodChangeProfileDataAggregate implements \JsonSerializable
 		$this->balanceHistory = $balanceHistory;
 		$this->periodStartBalance = $periodStartBalance;
 		$this->periodEndBalance = $periodEndBalance;
+		$this->moneyFormatter = $moneyFormatter;
 	}
 
 	/**
@@ -111,16 +115,31 @@ class PeriodChangeProfileDataAggregate implements \JsonSerializable
 	public function jsonSerialize()
 	{
 		return [
-			'depositsMoney' => $this->moneyFormatter->formatWithCurrency($this->depositsMoney),
-			'cashoutsMoney' => $this->moneyFormatter->formatWithCurrency($this->cashoutsMoney),
-			'feesMoney' => $this->moneyFormatter->formatWithCurrency($this->feeMoney),
+			'depositsMoney' => vsprintf('%s %s', [
+				$this->moneyFormatter->format($this->depositsMoney),
+				$this->depositsMoney->getCurrency()
+			]),
+			'cashoutsMoney' => vsprintf('%s %s', [
+				$this->moneyFormatter->format($this->cashoutsMoney),
+				$this->cashoutsMoney->getCurrency()
+			]),
+			'feesMoney' => vsprintf('%s %s', [
+				$this->moneyFormatter->format($this->feeMoney),
+				$this->feeMoney->getCurrency()
+			]),
 			'profitability' => [
 				'format' => number_format($this->profitability, 2) . '%',
 				'isPositive' => $this->profitability > 0,
 				'isNegative' => $this->profitability < 0
 			],
-			'periodStartBalance' => $this->moneyFormatter->formatWithCurrency($this->periodStartBalance),
-			'periodEndBalance' => $this->moneyFormatter->formatWithCurrency($this->periodEndBalance),
+			'periodStartBalance' => vsprintf('%s %s', [
+				$this->moneyFormatter->format($this->periodStartBalance),
+				$this->periodStartBalance->getCurrency()
+			]),
+			'periodEndBalance' => vsprintf('%s %s', [
+				$this->moneyFormatter->format($this->periodEndBalance),
+				$this->periodEndBalance->getCurrency()
+			]),
 			'balanceHistory' => $this->balanceHistory
 		];
 	}

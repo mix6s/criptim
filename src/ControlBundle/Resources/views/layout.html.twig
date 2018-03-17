@@ -1,72 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js"> <!--<![endif]-->
 
-{% block head %}
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-        <title></title>
-        {% block css %}
-            <link href="{{ asset('backend/css/bootstrap.min.css') }}" rel="stylesheet">
-            <link href="{{ asset('backend/css/font-awesome.min.css') }}" rel="stylesheet">
-            <link href="{{ asset('backend/css/bootstrap-editable.css') }}" rel="stylesheet">
-            <link href="{{ asset('backend/css/common.css') }}" rel="stylesheet">
-        {% endblock %}
-
-        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-        <![endif]-->
-    </head>
-{% endblock %}
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <meta name="theme-color" content="#3E3F43">
+    <meta name="msapplication-navbutton-color" content="#3E3F43">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#3E3F43">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,700,700i&amp;subset=cyrillic"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('build/fintobit/css/style.css') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('build/fintobit/img/16-16.png') }}">
+</head>
 <body>
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href=""></a>
-        </div>
-
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                {% set menuUrls = {
-                'control.index' : 'Criptim',
-                'control.bots.list' : 'Bots',
-                'control.users.list' : 'Users',
-                } %}
-                {% for route, title in menuUrls %}
-                    <li class="{{ route == app.request.get('_route') ? 'active' : '' }}"><a href="{{ url(route) }}">{{ title }}</a></li>
-                {% endfor %}
-            </ul>
+<script href="{{ asset('build/fintobit/js/scripts.min.js') }}"></script>
+<div class="content-wrapper">
+    <div class="content-main">
+        <div class="content__main">
+            <div class="header header--desktop">
+                <div class="header__block">
+                    <a class="logo-header" href="{{ path('control.index') }}">
+                        <div class="main_logo-s"></div>
+                    </a>
+                    {% if app.user %}
+                        <div class="admins-nav">
+                            <a href="{{ path('control.bots.list') }}" class="admins-nav__link">Bots</a>
+                            <a href="{{ path('control.users.list') }}" class="admins-nav__link">Users</a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if app.user %}
+                    <div class="header-settings">
+                        <div class="header-logo">
+                            <div href="#" class="header__user">
+                                <div class="header__user-img"></div>
+                            </div>
+                        </div>
+                        <span href="#" class="header__mail">{{ app.user.username }}</span>
+                        <a href="/change-password.html" class="header__settings">
+                            <div class="settings-img"></div>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            {% block content %}{% endblock %}
         </div>
     </div>
-</nav>
-<div class="container">
-    {% for type, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ type }}" role="alert">{{ message }}</div>
-        {% endfor %}
-    {% endfor %}
 </div>
-{% block body %}
-{% endblock %}
-
-{% block javascripts %}
-    <script src="{{ asset('backend/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('backend/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('backend/js/underscore-min.js') }}"></script>
-    <script src="{{ asset('backend/js/bootstrap3-typeahead.min.js') }}"></script>
-    <script src="{{ asset('backend/js/bootstrap-editable.js') }}"></script>
-    <script src="{{ asset('backend/js/editable-typeahed.js') }}"></script>
-{% endblock %}
 </body>
 </html>

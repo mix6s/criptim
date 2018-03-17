@@ -13,6 +13,7 @@ use Domain\ValueObject\UserId;
 use FintobitBundle\Policy\UserMoneyFormatter;
 use Money\Currency;
 use Money\Money;
+use Money\MoneyFormatter;
 
 class ProfileData
 {
@@ -25,7 +26,7 @@ class ProfileData
 	 * @var UserAccountTransactionRepositoryInterface
 	 */
 	private $userAccountTransactionRepository;
-	private $userMoneyFormatter;
+	private $moneyFormatter;
 	/**
 	 * @var ProfitabilityCalculator
 	 */
@@ -43,11 +44,12 @@ class ProfileData
 		UserAccountRepositoryInterface $userAccountRepository,
 		UserAccountTransactionRepositoryInterface $userAccountTransactionRepository,
 		ProfitabilityCalculator $profitabilityCalculator,
+		MoneyFormatter $moneyFormatter,
 		BalanceHistory $balanceHistoryPolicy,
 		AnyMomentUserBalanceResolver $anyMomentUserBalance
 	)
 	{
-		$this->userMoneyFormatter = new UserMoneyFormatter();
+		$this->moneyFormatter = $moneyFormatter;
 		$this->userAccountRepository = $userAccountRepository;
 		$this->userAccountTransactionRepository = $userAccountTransactionRepository;
 		$this->profitabilityCalculator = $profitabilityCalculator;
@@ -138,7 +140,7 @@ class ProfileData
 			$return[] = [
 				'isOutcome' => $transaction->getMoney()->isNegative(),
 				'isIncome' => $transaction->getMoney()->isPositive(),
-				'amount' => $this->userMoneyFormatter->format($transaction->getMoney()),
+				'amount' => $this->moneyFormatter->format($transaction->getMoney()),
 				'date' => $transaction->getDt()->format('Y-m-d H:i:s'),
 				'currency' => $transaction->getCurrency()
 			];
@@ -245,6 +247,7 @@ class ProfileData
 			$toDt
 		);
 		return new PeriodChangeProfileDataAggregate(
+			$this->moneyFormatter,
 			$depositsMoney,
 			$cashoutsMoney,
 			$feesMoney,

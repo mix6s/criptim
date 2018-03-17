@@ -9,19 +9,24 @@ use Domain\ValueObject\UserId;
 use FintobitBundle\Policy\UserMoneyFormatter;
 use Money\Currency;
 use Money\Money;
+use Money\MoneyFormatter;
 
 class BalanceHistory
 {
 
 	private $managerRegistry;
-	private $userMoneyFormatter;
+	/**
+	 * @var MoneyFormatter
+	 */
+	private $moneyFormatter;
 
 	public function __construct(
-		ManagerRegistry $managerRegistry
+		ManagerRegistry $managerRegistry,
+		MoneyFormatter $moneyFormatter
 	)
 	{
 		$this->managerRegistry = $managerRegistry;
-		$this->userMoneyFormatter = new UserMoneyFormatter();
+		$this->moneyFormatter = $moneyFormatter;
 	}
 
 	public function fetchByUserIdCurrencyFromDtToDt(
@@ -72,7 +77,7 @@ QUERY;
 			$itemDt = new \DateTimeImmutable($item['date']);
 			$money = new Money($item['balance'], new Currency($currency));
 
-			$balance = $this->userMoneyFormatter->format($money);
+			$balance = $this->moneyFormatter->format($money);
 			if ($itemDt > $now) {
 				$balance = null;
 			}

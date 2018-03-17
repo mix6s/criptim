@@ -23,7 +23,7 @@
                 this.$input.prop('type', 'password');
             }
         }
-    }
+    };
 
     window.PasswordTypeSwitcher = PasswordTypeSwitcher;
 })();

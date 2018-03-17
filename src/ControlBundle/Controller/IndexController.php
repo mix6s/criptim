@@ -14,17 +14,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
- * Class DefaultController
+ * Class IndexController
  * @package ControlBundle\Controller
  * @Security("has_role('ROLE_CONTROL')")
  */
-class DefaultController extends Controller
+class IndexController extends Controller
 {
 	/**
-	 * @Route("", name="control.index")
+	 * @Route("/", name="control.index")
 	 */
 	public function indexAction()
 	{
-		return $this->render('@Control/Default/index.html.twig');
+		if ($this->getUser()) {
+			return $this->forward('ControlBundle:Users:list');
+		}
+		return $this->forward('ControlBundle:Auth:login');
 	}
 }

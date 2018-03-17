@@ -74,7 +74,9 @@ gulp.task('build-clean', function () {
 });
 
 gulp.task('web-clean', function () {
-    del('web/build/fintobit*');
+    del('web/build/fintobit/css/*');
+    del('web/build/fintobit/js/*');
+    del('web/build/fintobit/img/*');
 });
 
 gulp.task('web-copy-css', function () {

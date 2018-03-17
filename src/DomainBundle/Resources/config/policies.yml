@@ -4,20 +4,21 @@ services:
         arguments:
           - '@ORM\UserAccountTransactionRepository'
           - '@AnyMomentUserBalanceResolver'
-    ProfileData:
-        class: DomainBundle\Exchange\Policy\ProfileData
-        arguments:
-          - '@ORM\UserAccountRepository'
-          - '@ORM\UserAccountTransactionRepository'
-          - '@ProfitabilityCalculator'
-          - '@BalanceHistory'
-          - '@AnyMomentUserBalanceResolver'
     DomainCurrenciesPolicy:
         class: Domain\Policy\DomainCurrenciesPolicy
-    BalanceHistory:
+
+    AdminBalanceHistory:
         class: DomainBundle\Exchange\Policy\BalanceHistory
         arguments:
           - '@doctrine'
+          - '@AdminMoneyFormatter'
+
+    PublicBalanceHistory:
+        class: DomainBundle\Exchange\Policy\BalanceHistory
+        arguments:
+          - '@doctrine'
+          - '@PublicMoneyFormatter'
+
     AnyMomentUserBalanceResolver:
         class: DomainBundle\Exchange\Policy\AnyMomentUserBalanceResolver
         arguments:

@@ -10,10 +10,13 @@
             Bots</h1>
     </div>
 
-    <h2 class="bot-edit__subtitle">Creating a new bot</h2>
+    <h2 class="bot-edit__subtitle">Editing bot — id: {{ bot.id }}</h2>
 
     <div class="bot-edit__wrapper">
         {{ form_start(form) }}
+
+        <div class="bot-edit__select-title">Status</div>
+        {{ form_widget(form.status) }}
 
         <div class="bot-edit__select-title">Exchange</div>
         {{ form_widget(form.exchangeId) }}
@@ -23,11 +26,11 @@
 
         <div class="bot-edit__select-title">Strategy settings</div>
         {{ form_widget(form.tradingStrategySettings) }}
-
         <div class="bot-edit__select-title"></div>
         {#todo: user another method to margin button#}
         {{ form_widget(form.Save) }}
         {{ form_end(form) }}
+
     </div>
 
 {% endblock %}

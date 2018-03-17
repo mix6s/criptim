@@ -64,7 +64,7 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * @Route("restore", name="fintobit.auth.restore")
+	 * @Route("/restore", name="fintobit.auth.restore")
 	 * @param Request $request
 	 * @return Response
 	 */

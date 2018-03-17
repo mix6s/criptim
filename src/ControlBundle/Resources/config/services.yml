@@ -1,17 +1,49 @@
 services:
     Form\CreateBotRequestFormType:
         class: ControlBundle\Form\Type\CreateBotRequestFormType
-        arguments: ['@ExchangeRepository', '@TradingStrategyRepository']
+        arguments:
+          - '@ExchangeRepository'
+          - '@TradingStrategyRepository'
         tags:
             - { name: form.type, alias: ControlBundle\Form\Type\CreateBotRequestFormType }
 
     Form\EditBotRequestFormType:
-            class: ControlBundle\Form\Type\EditBotRequestFormType
-            arguments: ['@ExchangeRepository', '@TradingStrategyRepository']
-            tags:
-                - { name: form.type, alias: ControlBundle\Form\Type\EditBotRequestFormType }
+        class: ControlBundle\Form\Type\EditBotRequestFormType
+        arguments:
+          - '@ExchangeRepository'
+          - '@TradingStrategyRepository'
+        tags:
+            - { name: form.type, alias: ControlBundle\Form\Type\EditBotRequestFormType }
+
     Form\UserDepositMoneyRequestFormType:
-            class: ControlBundle\Form\Type\UserDepositMoneyRequestFormType
-            arguments: ['@ExchangeRepository']
-            tags:
-                - { name: form.type, alias: ControlBundle\Form\Type\UserDepositMoneyRequestFormType }
+        class: ControlBundle\Form\Type\UserDepositMoneyRequestFormType
+        arguments:
+          - '@ExchangeRepository'
+        tags:
+            - { name: form.type, alias: ControlBundle\Form\Type\UserDepositMoneyRequestFormType }
+
+    AdminMoneyFormatter:
+        class: DomainBundle\Exchange\Policy\CryptoMoneyFormatter
+
+    PublicMoneyFormatter:
+        class: FintobitBundle\Policy\UserMoneyFormatter
+
+    AdminProfileDataViewer:
+        class: DomainBundle\Exchange\Policy\ProfileData
+        arguments:
+          - '@ORM\UserAccountRepository'
+          - '@ORM\UserAccountTransactionRepository'
+          - '@ProfitabilityCalculator'
+          - '@AdminMoneyFormatter'
+          - '@AdminBalanceHistory'
+          - '@AnyMomentUserBalanceResolver'
+
+    PublicProfileDataViewer:
+        class: DomainBundle\Exchange\Policy\ProfileData
+        arguments:
+          - '@ORM\UserAccountRepository'
+          - '@ORM\UserAccountTransactionRepository'
+          - '@ProfitabilityCalculator'
+          - '@PublicMoneyFormatter'
+          - '@PublicBalanceHistory'
+          - '@AnyMomentUserBalanceResolver'

@@ -1,0 +1,159 @@
+{% extends "@Control/layout.html.twig" %}
+
+{% block content %}
+    {% set sessionBalances = bot|botSessionBalances('BTC') %}
+
+    <div class="bot-info">
+        <div class="bot-info__wrapper">
+            <div class="bot-profile">
+                <h1 class="bot-profile__title">
+                    <a href="{{ path('control.bots.list') }}" class="back-arrow">
+                        <div class="back-img"></div>
+                    </a>
+                    id: 5</h1>
+                <div class="bot-profile__subtitle">
+                    <span class="value">
+                        {{ bot|botBalance('BTC')|moneyFormat }}
+                    </span>
+                    <br> eth/btc
+                </div>
+            </div>
+            <div class="bot-statistic__wrapper">
+                <div class="bot-statistic__col">
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Strategy:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">{{ bot.tradingStrategyId }}</div>
+                    </div>
+                    <div class="bot-statistic__item">
+                        <button class="bot-statistic__settings-btn" id="js-toggle" onclick="showSettings()">Hide settings</button>
+                    </div>
+                </div>
+                <div class="bot-statistic__col">
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">All profitability:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value text-decoration--green">+2.83%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hidden-statistic hidden-statistic--show" id="js-container">
+            <div class="hidden-statistic__wrapper">
+                <div class="bot-statistic__col">
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Base currency:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">ETH</div>
+                    </div>
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Quote currency:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">BTC</div>
+                    </div>
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Profit Percent:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">0.1%</div>
+                    </div>
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Price decriment percent:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">0.1%</div>
+                    </div>
+                </div>
+                <div class="bot-statistic__col">
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Initial amount percent:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">1.2%</div>
+                    </div>
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Amount increment percent:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">0.2%</div>
+                    </div>
+                    <div class="bot-statistic__item">
+                        <div class="bot-statistic__item-title">Delay between buy orders:</div>
+                        <div class="bot-statistic__item-line"></div>
+                        <div class="bot-statistic__item-value">360s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="month-balance">
+        <div class="month-balance__title">
+            Balance change<br>during month
+        </div>
+        <div class="bot-statistic__col">
+            <div class="bot-statistic__item">
+                <div class="bot-statistic__item-title">Profitability:</div>
+                <div class="bot-statistic__item-line"></div>
+                <div class="bot-statistic__item-value text-decoration--red">+1.94%</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="schedule-info">
+        <div class="schedule-info__wrapper">
+            <div class="bot-statistic__col">
+                <div class="bot-statistic__item text-decoration--bold">
+                    <div class="bot-statistic__item-title">Period start balance:</div>
+                    <div class="bot-statistic__item-value">0.13298231 BTC</div>
+                </div>
+            </div>
+            <div class="bot-statistic__col">
+                <div class="bot-statistic__item text-decoration--bold">
+                    <div class="bot-statistic__item-title">Period end balance:</div>
+                    <div class="bot-statistic__item-value">0.23359321 BTC</div>
+                </div>
+                <div class="bot-statistic__period-select">
+                    <div class="bot-statistic__period-title text-decoration--bold">Choose period:</div>
+                    <select class="field-block__select">
+                        <option class="field-block__item">January</option>
+                        <option class="field-block__item">February</option>
+                        <option class="field-block__item">March</option>
+                        <option class="field-block__item">April</option>
+                        <option class="field-block__item">May</option>
+                        <option class="field-block__item">June</option>
+                        <option class="field-block__item">July</option>
+                        <option class="field-block__item">August</option>
+                        <option class="field-block__item">September</option>
+                        <option class="field-block__item">October</option>
+                        <option class="field-block__item">November</option>
+                        <option class="field-block__item">December</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="schedule-block">
+        <div class="schedule-block__wrapper">
+            <div class="schedule-block__axis-y">btc</div>
+            <div class="schedule"></div>
+        </div>
+        <div class="schedule-block__axis-x">Day</div>
+    </div>
+
+    <script>
+        function showSettings() {
+            var toggle = document.getElementById('js-toggle');
+            var container = document.getElementById('js-container');
+
+            if (container.classList.contains('hidden-statistic--hide')) {
+                container.classList.remove('hidden-statistic--hide');
+                container.classList.add('hidden-statistic--show');
+                toggle.childNodes[0].nodeValue = 'Hide settings';
+            } else {
+                container.classList.add('hidden-statistic--hide');
+                container.classList.remove('hidden-statistic--show');
+                toggle.childNodes[0].nodeValue = 'Show settings';
+            }
+        }
+    </script>
+{% endblock %}

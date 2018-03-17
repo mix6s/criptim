@@ -43,7 +43,13 @@ class EditBotRequestFormType extends CreateBotRequestFormType
 					'Active' => Bot::STATUS_ACTIVE,
 					'Inactive' => Bot::STATUS_INACTIVE,
 				],
-				'label' => 'Status'
+				'label' => 'Status',
+				'attr' => [
+					'class' => 'field-block__select'
+				],
+				'choice_attr' => function () {
+					return ['class' => 'field-block__item'];
+				}
 			]
 		);
 		parent::buildForm($builder, $options);

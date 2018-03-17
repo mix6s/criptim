@@ -43,12 +43,12 @@ class ProfileController extends Controller
 
 		$choosePeriodForm->handleRequest($request);
 		$context = [
-			'balance' => $this->get('ProfileData')->getBalanceMoneyByUserId($userId),
-			'deposits' => $this->get('ProfileData')->getDepositsMoneyByUserId($userId),
-			'cashouts' => $this->get('ProfileData')->getCashoutsMoneyByUserId($userId),
-			'fee' => $this->get('ProfileData')->getFeeMoneyByUserId($userId),
-			'profitability' => $this->get('ProfileData')->getProfitabilityByUserId($userId),
-			'transactions' => $this->get('ProfileData')->getTransactionHistory($userId),
+			'balance' => $this->get('PublicProfileDataViewer')->getBalanceMoneyByUserId($userId),
+			'deposits' => $this->get('PublicProfileDataViewer')->getDepositsMoneyByUserId($userId),
+			'cashouts' => $this->get('PublicProfileDataViewer')->getCashoutsMoneyByUserId($userId),
+			'fee' => $this->get('PublicProfileDataViewer')->getFeeMoneyByUserId($userId),
+			'profitability' => $this->get('PublicProfileDataViewer')->getProfitabilityByUserId($userId),
+			'transactions' => $this->get('PublicProfileDataViewer')->getTransactionHistory($userId),
 			'form' => $choosePeriodForm->createView(),
 			'currentPeriod' => $currentPeriod
 		];
@@ -72,7 +72,7 @@ class ProfileController extends Controller
 		$period = $request->query->get('period');
 		$periods = new Periods();
 		[$fromDt, $toDt] = $periods->resolveDateRangeForPeriod($period);
-		$balanceChangeDuringPeriodAggregate = $this->get('ProfileData')
+		$balanceChangeDuringPeriodAggregate = $this->get('PublicProfileDataViewer')
 			->getPeriodChangeProfileDataAggregateByUserIdFromDtToDt(
 				$userId,
 				$fromDt,

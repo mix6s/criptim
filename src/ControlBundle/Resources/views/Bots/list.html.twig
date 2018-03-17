@@ -1,68 +1,78 @@
 {% extends '@Control/layout.html.twig' %}
 
-{% block body %}
-    <div class="container">
-        <div class="row mb-10">
-            <div class="col-md-12">
-                <a href="{{ path('control.bots.create') }}" class="btn btn-primary">Create</a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Status</th>
-                        <th>BTC balance</th>
-                        <th>Session Balance</th>
-                        <th>In Orders Balance</th>
-                        <th>Available Balance</th>
-                        <th>Exchange</th>
-                        <th>Strategy</th>
-                        <th>Strategy settings</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for bot in bots %}
-                        {% set sessionBalances = bot|botSessionBalances('BTC') %}
-                    <tr>
-                        <td>
-                            {{ bot.id }}
-                        </td>
-                        <td>
-                            {{ bot.status }}
-                        </td>
-                        <td>
-                            {{ bot|botBalance('BTC')|moneyFormat }}
-                        </td>
-                        <td>
-                            {{ sessionBalances ? sessionBalances.accountBalance|moneyFormat : '' }}
-                        </td>
-                        <td>
-                            {{ sessionBalances ? sessionBalances.inOrdersBalance|moneyFormat : '' }}
-                        </td>
-                        <td>
-                            {{ sessionBalances ? sessionBalances.availableBalance|moneyFormat : ''}}
-                        </td>
-                        <td>
-                            {{ bot.exchangeId }}
-                        </td>
-                        <td>
-                            {{ bot.tradingStrategyId }}
-                        </td>
-                        <td>
-                            {{ bot.tradingStrategySettings }}
-                        </td>
-                        <td>
-                            <a class="btn btn-info" href="{{ path('control.bots.edit', {id: bot.id}) }}">Change</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+{% block content %}
+
+    <div class="admins-header">
+        <h1 class="admins-header__title">Bots</h1>
+        <a href="{{ path('control.bots.create') }}" class="admins-header__button button button--action">Create new bot</a>
     </div>
+
+    <h2 class="admins-header__subtitle">No bots has been created yet</h2>
+
+    <div class="table table--bot-info">
+        <div class="row row--heading row--bot-info">
+            <div class="cell cell--bot-info cell--id">ID</div>
+            <div class="cell cell--bot-info cell--status">Status</div>
+            <div class="cell cell--bot-info cell--btc-balance">BTC balance</div>
+            <div class="cell cell--bot-info cell--s-balance">Session balance</div>
+            <div class="cell cell--bot-info cell--o-balance">In orders balance</div>
+            <div class="cell cell--bot-info cell--a-balance">Available balance</div>
+            <div class="cell cell--bot-info cell--exchange">Exchange</div>
+            <div class="cell cell--bot-info cell--strategy">Strategy</div>
+            <div class="cell cell--bot-info cell--settings">Strategy settings</div>
+            <div class="cell cell--bot-info cell--edit"></div>
+        </div>
+        {% for bot in bots %}
+            {% set sessionBalances = bot|botSessionBalances('BTC') %}
+
+            <div class="row row--bot-info">
+                <div class="cell cell--bot-info cell--id">
+                    {{ bot.id }}
+                </div>
+                {% if bot.status == 'active' %}
+                    <div class="cell cell--bot-info cell--status text-decoration--green">
+                        {{ bot.status }}
+                    </div>
+                {% else %}
+                    <div class="cell cell--bot-info cell--status text-decoration--red">
+                        {{ bot.status }}
+                    </div>
+                {% endif %}
+                <div class="cell cell--bot-info cell--btc-balance">
+                    {{ bot|botBalance('BTC')|moneyFormat }}
+                </div>
+                <div class="cell cell--bot-info cell--s-balance">
+                    {{ sessionBalances ? sessionBalances.accountBalance|moneyFormat : '' }}
+                </div>
+                <div class="cell cell--bot-info cell--o-balance">
+                    {{ sessionBalances ? sessionBalances.inOrdersBalance|moneyFormat : '' }}
+                </div>
+                <div class="cell cell--bot-info cell--a-balance">
+                    {{ sessionBalances ? sessionBalances.availableBalance|moneyFormat : ''}}
+                </div>
+                <div class="cell cell--bot-info cell--exchange">
+                    {{ bot.exchangeId }}
+                </div>
+                <div class="cell cell--bot-info cell--strategy">
+                    {{ bot.tradingStrategyId }}
+                </div>
+                <div class="cell cell--bot-info cell--settings">
+                    {{ bot.tradingStrategySettings }}
+                </div>
+                <div class="cell cell--bot-info cell--edit">
+                    <a href="{{ path('control.bots.edit', {id: bot.id}) }}"
+                       class="bot-edit">
+                        <div class="edit-img"></div>
+                    </a>
+                    <a href="{{ path('control.bots.view', {id: bot.id}) }}"
+                       class="bot-edit">
+                        <div class="edit-img"></div>
+                    </a>
+                </div>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
 {% endblock %}
