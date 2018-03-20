@@ -27,7 +27,13 @@
             <div class="balance-block__info-item">
                 <div class="balance-block__info-item--title">All profitability:</div>
                 <div class="balance-block__info-item--dotted-line"></div>
-                <div class="balance-block__info-item--value text-decoration--green">{{ profitability|number_format(2) }}%</div>
+                {% if profitability > 0 %}
+                    <div class="balance-block__info-item--value text-decoration--green">{{ profitability|number_format(2) }}%</div>
+                {% elseif profitability < 0 %}
+                    <div class="balance-block__info-item--value text-decoration--red">{{ profitability|number_format(2) }}%</div>
+                {% else %}
+                    <div class="balance-block__info-item--value">{{ profitability|number_format(2) }}%</div>
+                {% endif %}
             </div>
         </div>
     </div>
