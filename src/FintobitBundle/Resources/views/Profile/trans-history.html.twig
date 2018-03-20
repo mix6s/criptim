@@ -6,7 +6,7 @@
             <div class="cell cell--deal-history cell--price text-transform__reset">Date</div>
             <div class="cell cell--deal-history cell--change text-transform__reset">Amount</div>
         </div>
-        {% if transactions %}
+        {#{% if transactions %}
             {% for transaction in transactions %}
                 {% if transaction.isOutcome %}
                     <div class="row row--deal-history row--outcome">
@@ -29,6 +29,6 @@
                 <div class="cell cell--deal-history cell--price">—</div>
                 <div class="cell cell--deal-history cell--change">—</div>
             </div>
-        {% endif %}
+        {% endif %}#}
     </div>
 </div>
