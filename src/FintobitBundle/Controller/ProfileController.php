@@ -51,7 +51,7 @@ class ProfileController extends Controller
 			'transactions' => $this->get('PublicProfileDataViewer')->getTransactionHistory($userId),
 			'form' => $choosePeriodForm->createView(),
 			'currentPeriod' => $currentPeriod,
-			'portfolio' => $this->get('PublicProfileDataViewer')->getPortfolio()
+			//'portfolio' => $this->get('PublicProfileDataViewer')->getPortfolio()
 		];
 		return $this->render('@Fintobit/Profile/index.html.twig', $context);
 	}
