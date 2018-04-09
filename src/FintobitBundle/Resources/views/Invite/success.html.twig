@@ -1,0 +1,17 @@
+{% extends '@Fintobit/layout-auth-desktop.html.twig' %}
+
+{% block content %}
+
+    <a class="logo" href="{{ path('fintobit.auth.login') }}">
+        <div class="main_logo"></div>
+    </a>
+    <div class="title title--main title--invite">
+        <span class="title--invite">Invite request was successfully send</span>
+    </div>
+    <div class="auth__link">
+        <a class="link__auth" href="{{ path('fintobit.index') }}">
+            <div class="back-s"></div>
+            Back to login
+        </a>
+    </div>
+{% endblock %}

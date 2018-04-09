@@ -12,11 +12,13 @@
         <span class="title--invite-desc">To participate in the auction you need to get<br>a private invitation, for this you need to enter<br>your valid emai laddress.</span>
     </div>
     <div class="desktop-wrapper">
-        <label class="field-block">
-            <span class="field-block__title">Email</span>
-            <input type="text" class="field-block__field" placeholder="Enter your email address">
-        </label>
-        <a href="#" class="button button--action">Send</a>
+        <form method="post" action="{{ path('fintobit.invite.submit') }}">
+            <label class="field-block">
+                <span class="field-block__title">Email</span>
+                <input type="email" class="field-block__field" name="email"  placeholder="Enter your email address">
+            </label>
+            <button style="width: 100%" type="submit" class="button button--action">Send</button>
+        </form>
     </div>
     <div class="auth__link">
         <a class="link__auth" href="{{ path('fintobit.index') }}">
